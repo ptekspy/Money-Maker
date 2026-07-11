@@ -1,0 +1,6 @@
+interface:
+  display_name: "Create App CSV"
+  short_description: "Build app-ready lead upload CSV"
+  default_prompt: "Use $create-app-csv to create an app-ready lead upload CSV for a client."
+policy:
+  allow_implicit_invocation: false

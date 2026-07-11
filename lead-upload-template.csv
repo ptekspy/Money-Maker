@@ -1,0 +1,4 @@
+name,phone,email,service,status,source,date,value,notes
+Example Customer,07700 900000,customer@example.com,Roof leak inspection,Quote sent,Website form,2026-07-01,1200,"Quote sent but no reply after first follow-up."
+Example Customer 2,07700 900001,customer2@example.com,Gutter repair,Missed enquiry,Google Business Profile,2026-07-05,450,"Called after heavy rain. No clear follow-up recorded."
+Example Customer 3,07700 900002,customer3@example.com,Full re-roof quote,Estimate requested,Checkatrade,2026-06-20,8500,"Asked for availability and price range. No booking confirmed."

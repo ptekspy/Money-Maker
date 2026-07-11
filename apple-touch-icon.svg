@@ -1,0 +1,8 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">QuoteWinBack app icon</title>
+  <desc id="desc">A quote bubble with a return arrow on a light background.</desc>
+  <rect width="180" height="180" rx="38" fill="#F5F7F8"/>
+  <path d="M121 34C137.569 34 151 47.4315 151 64V91C151 107.569 137.569 121 121 121H88L55 151V121H59C42.431 121 29 107.569 29 91V64C29 47.4315 42.431 34 59 34H121Z" fill="#102820"/>
+  <path d="M103 66H75C67.82 66 62 71.82 62 79C62 86.18 67.82 92 75 92H99" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round"/>
+  <path d="M92 120L124 92L92 64" stroke="#F2B84B" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

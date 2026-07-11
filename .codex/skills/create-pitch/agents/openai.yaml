@@ -1,0 +1,6 @@
+interface:
+  display_name: "Create Pitch"
+  short_description: "Draft tailored QuoteWinBack outreach"
+  default_prompt: "Use $create-pitch to create a personalised outreach pitch for a trade business prospect."
+policy:
+  allow_implicit_invocation: false

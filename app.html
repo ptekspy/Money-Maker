@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>QuoteWinBack - Missed Enquiry Recovery</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="apple-touch-icon.svg">
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Bradford trades pilot console</p>
+        <h1>QuoteWinBack</h1>
+      </div>
+      <div class="header-actions">
+        <label class="file-button">
+          <input id="csvInput" type="file" accept=".csv,text/csv">
+          Upload leads CSV
+        </label>
+        <button id="loadSampleButton" class="secondary-button">Load sample data</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="summary-grid" aria-label="Recovery summary">
+        <article>
+          <span>Total leads</span>
+          <strong id="totalLeads">0</strong>
+        </article>
+        <article>
+          <span>Recovery targets</span>
+          <strong id="targetLeads">0</strong>
+        </article>
+        <article>
+          <span>Estimated pipeline</span>
+          <strong id="pipelineValue">GBP 0</strong>
+        </article>
+        <article>
+          <span>Drafts ready</span>
+          <strong id="draftsReady">0</strong>
+        </article>
+      </section>
+
+      <section class="workspace">
+        <aside class="panel">
+          <div class="panel-header">
+            <h2>Filters</h2>
+            <button id="exportButton" class="text-button">Export CSV</button>
+          </div>
+          <label>
+            Search
+            <input id="searchInput" type="search" placeholder="Name, service, status">
+          </label>
+          <label>
+            Recovery priority
+            <select id="priorityFilter">
+              <option value="all">All leads</option>
+              <option value="hot">Hot</option>
+              <option value="warm">Warm</option>
+              <option value="review">Needs review</option>
+            </select>
+          </label>
+          <label>
+            Business name
+            <input id="businessName" type="text" value="Yorkshire Roofcare">
+          </label>
+          <label>
+            Booking link
+            <input id="bookingLink" type="url" value="https://example.co.uk/book">
+          </label>
+          <div class="hint">
+            CSV columns accepted: name, phone, email, service, status, source, date, value, notes.
+          </div>
+        </aside>
+
+        <section class="lead-board">
+          <div class="board-header">
+            <div>
+              <h2>Recovery Queue</h2>
+              <p>Rank stale leads, approve follow-ups, and track expected revenue.</p>
+            </div>
+            <button id="copyAllButton">Copy approved drafts</button>
+          </div>
+          <div id="leadList" class="lead-list"></div>
+        </section>
+
+        <aside class="panel script-panel">
+          <div class="panel-header">
+            <h2>Sales Script</h2>
+          </div>
+          <div class="script-block">
+            <h3>Cold email</h3>
+            <p id="coldEmail">
+              Quick one. Most roofing and home-service firms have old quotes, missed calls, and Checkatrade/MyBuilder/Bark enquiries that never got followed up with. I built a simple recovery system that finds those warm enquiries and follows up until they book or say no. If you send your last 60-90 days of unclosed enquiries, I will show the recoverable pipeline before you pay.
+            </p>
+            <button data-copy-target="coldEmail" class="secondary-button">Copy</button>
+          </div>
+          <div class="script-block">
+            <h3>Call opener</h3>
+            <p id="callScript">
+              I am not selling ads. I recover the enquiries you already paid for. Old quotes, missed calls, form fills, and Checkatrade/MyBuilder/Bark leads that went cold. If there is money sitting in the pipeline, I find it and help you follow up.
+            </p>
+            <button data-copy-target="callScript" class="secondary-button">Copy</button>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <template id="leadCardTemplate">
+      <article class="lead-card">
+        <div class="lead-topline">
+          <div>
+            <h3 class="lead-name"></h3>
+            <p class="lead-meta"></p>
+          </div>
+          <span class="priority-pill"></span>
+        </div>
+        <dl class="lead-stats">
+          <div>
+            <dt>Score</dt>
+            <dd class="lead-score"></dd>
+          </div>
+          <div>
+            <dt>Value</dt>
+            <dd class="lead-value"></dd>
+          </div>
+          <div>
+            <dt>Last touch</dt>
+            <dd class="lead-date"></dd>
+          </div>
+        </dl>
+        <p class="lead-notes"></p>
+        <label>
+          Draft follow-up
+          <textarea class="lead-draft" rows="5"></textarea>
+        </label>
+        <div class="card-actions">
+          <label class="approve-row">
+            <input class="lead-approved" type="checkbox">
+            Approved
+          </label>
+          <button class="secondary-button copy-draft-button">Copy draft</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>

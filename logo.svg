@@ -1,0 +1,12 @@
+<svg width="640" height="180" viewBox="0 0 640 180" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">QuoteWinBack logo</title>
+  <desc id="desc">A quote bubble with a returning arrow beside the QuoteWinBack wordmark.</desc>
+  <rect width="640" height="180" rx="24" fill="#F5F7F8"/>
+  <g transform="translate(34 38)">
+    <path d="M91 0C112.539 0 130 17.461 130 39V54C130 75.539 112.539 93 91 93H61L33 120V93H39C17.461 93 0 75.539 0 54V39C0 17.461 17.461 0 39 0H91Z" fill="#102820"/>
+    <path d="M79 29H51C43.82 29 38 34.82 38 42C38 49.18 43.82 55 51 55H74" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round"/>
+    <path d="M69 75L91 55L69 35" stroke="#F2B84B" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="190" y="86" fill="#102820" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="800">QuoteWinBack</text>
+  <text x="193" y="122" fill="#176B4F" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Recover old quotes before they go cold</text>
+</svg>

@@ -1,0 +1,38 @@
+# Environment files and local secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and package-manager caches
+node_modules/
+.npm/
+.yarn/
+.pnpm-store/
+
+# Runtime output
+*.log
+*.pid
+*.pid.lock
+
+# Generated client data (retain the directory placeholders)
+app-uploads/*
+!app-uploads/.gitkeep
+client-memory/*
+!client-memory/.gitkeep
+document-analysis/*
+!document-analysis/.gitkeep
+
+# Test, coverage, and build output
+coverage/
+dist/
+build/
+.cache/
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo

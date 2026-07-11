@@ -1,0 +1,6 @@
+interface:
+  display_name: "Analyse Documents"
+  short_description: "Analyse client files into CSV"
+  default_prompt: "Use $analyse-documents to analyse a client folder and output a CSV."
+policy:
+  allow_implicit_invocation: false
