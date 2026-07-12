@@ -21,6 +21,13 @@ export const genericSources = [
   "Facebook",
 ];
 
+export const emails = {
+  scan: "scan@quotewinback.co.uk",
+  privacy: "privacy@quotewinback.co.uk",
+  deleteData: "delete@quotewinback.co.uk",
+  support: "support@quotewinback.co.uk",
+} as const;
+
 export const landingPages: ProfessionLanding[] = [
   {
     area: "Bradford",
@@ -128,7 +135,7 @@ export function mailtoHref(subject = "QuoteWinBack recovery scan request") {
     "Thanks,",
   ].join("\n");
 
-  return `mailto:hello@quotewinback.co.uk?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  return `mailto:${emails.scan}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 export function deleteDataHref() {
@@ -148,5 +155,5 @@ export function deleteDataHref() {
     "Thanks,",
   ].join("\n");
 
-  return `mailto:hello@quotewinback.co.uk?subject=${encodeURIComponent("Delete data request")}&body=${encodeURIComponent(body)}`;
+  return `mailto:${emails.deleteData}?subject=${encodeURIComponent("Delete data request")}&body=${encodeURIComponent(body)}`;
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { deleteDataHref } from "@/lib/landing-data";
+import { deleteDataHref, emails } from "@/lib/landing-data";
 
 export const metadata: Metadata = {
   title: "Privacy Notice",
@@ -14,7 +14,7 @@ const sections = [
     title: "Who we are",
     body: [
       "QuoteWinBack helps UK trade and local service businesses review old quotes, missed enquiries, paid leads, and related follow-up records.",
-      "For privacy questions, contact hello@quotewinback.co.uk.",
+      `For privacy questions, contact ${emails.privacy}.`,
     ],
   },
   {
@@ -66,7 +66,7 @@ const sections = [
   {
     title: "Your choices and rights",
     body: [
-      "You can ask us to delete pilot files earlier than 14 days by using the delete data request link below or emailing hello@quotewinback.co.uk.",
+      `You can ask us to delete pilot files earlier than 14 days by using the delete data request link below or emailing ${emails.deleteData}.`,
       "Individuals may have rights under UK data protection law, including access, correction, deletion, restriction, objection, and complaint rights. If a request relates to data supplied by one of our clients, we may direct the request to that client where they are the relevant controller.",
       "You also have the right to complain to the Information Commissioner's Office if you are unhappy with how personal data is handled.",
     ],

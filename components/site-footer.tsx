@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { deleteDataHref } from "@/lib/landing-data";
+import { deleteDataHref, emails } from "@/lib/landing-data";
 
 export function SiteFooter() {
   return (
@@ -9,7 +9,7 @@ export function SiteFooter() {
         <Link href="/privacy">Privacy</Link>
         <Link href="/terms">Terms</Link>
         <a href={deleteDataHref()}>Delete data</a>
-        <a href="mailto:hello@quotewinback.co.uk">hello@quotewinback.co.uk</a>
+        <a href={`mailto:${emails.support}`}>{emails.support}</a>
       </div>
     </footer>
   );
