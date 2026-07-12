@@ -27,6 +27,8 @@ coverage/
 dist/
 build/
 .next/
+.out/
+out/
 .vercel/
 .cache/
 
