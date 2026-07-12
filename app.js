@@ -8,7 +8,8 @@ const sampleLeads = [
     source: "Website form",
     date: "2026-06-19",
     value: "1800",
-    notes: "Asked about a leak near the upstairs bedroom after heavy rain. Quote sent, no reply after first follow-up."
+    notes:
+      "Asked about a leak near the upstairs bedroom after heavy rain. Quote sent, no reply after first follow-up.",
   },
   {
     name: "Mike Alvarez",
@@ -19,7 +20,7 @@ const sampleLeads = [
     source: "Google Business Profile",
     date: "2026-07-04",
     value: "650",
-    notes: "Called twice after heavy rain. No voicemail left."
+    notes: "Called twice after heavy rain. No voicemail left.",
   },
   {
     name: "Priya Shah",
@@ -30,7 +31,8 @@ const sampleLeads = [
     source: "Checkatrade",
     date: "2026-05-28",
     value: "8500",
-    notes: "Wanted a quote before deciding between repair and full replacement."
+    notes:
+      "Wanted a quote before deciding between repair and full replacement.",
   },
   {
     name: "Daniel Brooks",
@@ -41,7 +43,7 @@ const sampleLeads = [
     source: "Phone",
     date: "2026-07-08",
     value: "900",
-    notes: "Already booked for Friday."
+    notes: "Already booked for Friday.",
   },
   {
     name: "Angela Martin",
@@ -52,8 +54,9 @@ const sampleLeads = [
     source: "MyBuilder",
     date: "2026-06-02",
     value: "2200",
-    notes: "Mentioned damp patches on bedroom ceiling and wanted a second opinion."
-  }
+    notes:
+      "Mentioned damp patches on bedroom ceiling and wanted a second opinion.",
+  },
 ];
 
 let leads = [];
@@ -72,7 +75,7 @@ const elements = {
   pipelineValue: document.querySelector("#pipelineValue"),
   draftsReady: document.querySelector("#draftsReady"),
   copyAllButton: document.querySelector("#copyAllButton"),
-  exportButton: document.querySelector("#exportButton")
+  exportButton: document.querySelector("#exportButton"),
 };
 
 function parseCsv(text) {
@@ -136,7 +139,12 @@ function scoreLead(lead) {
   if (status.includes("missed")) score += 25;
   if (status.includes("estimate")) score += 22;
   if (status.includes("booked") || status.includes("lost")) score -= 60;
-  if (notes.includes("leak") || notes.includes("storm") || notes.includes("insurance")) score += 12;
+  if (
+    notes.includes("leak") ||
+    notes.includes("storm") ||
+    notes.includes("insurance")
+  )
+    score += 12;
   if (value >= 8000) score += 18;
   if (value >= 3000) score += 10;
   if (age <= 14) score += 14;
@@ -155,7 +163,7 @@ function formatMoney(value) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "GBP",
-    maximumFractionDigits: 0
+    maximumFractionDigits: 0,
   }).format(Number.parseFloat(value || 0) || 0);
 }
 
@@ -186,7 +194,7 @@ function hydrateLeads(rawLeads) {
       score,
       priority: getPriority(score),
       draft: makeDraft(lead),
-      approved: false
+      approved: false,
     };
   });
   render();
@@ -195,7 +203,7 @@ function hydrateLeads(rawLeads) {
 function refreshDrafts() {
   leads = leads.map((lead) => ({
     ...lead,
-    draft: makeDraft(lead)
+    draft: makeDraft(lead),
   }));
   render();
 }
@@ -205,7 +213,15 @@ function getFilteredLeads() {
   const priority = elements.priorityFilter.value;
 
   return leads.filter((lead) => {
-    const haystack = [lead.name, lead.service, lead.status, lead.source, lead.notes].join(" ").toLowerCase();
+    const haystack = [
+      lead.name,
+      lead.service,
+      lead.status,
+      lead.source,
+      lead.notes,
+    ]
+      .join(" ")
+      .toLowerCase();
     const matchesSearch = !search || haystack.includes(search);
     const matchesPriority = priority === "all" || lead.priority === priority;
     return matchesSearch && matchesPriority;
@@ -214,7 +230,10 @@ function getFilteredLeads() {
 
 function updateSummary() {
   const targets = leads.filter((lead) => lead.score >= 45);
-  const pipeline = targets.reduce((sum, lead) => sum + (Number.parseFloat(lead.value || 0) || 0), 0);
+  const pipeline = targets.reduce(
+    (sum, lead) => sum + (Number.parseFloat(lead.value || 0) || 0),
+    0,
+  );
   const approved = leads.filter((lead) => lead.approved).length;
 
   elements.totalLeads.textContent = leads.length;
@@ -229,7 +248,8 @@ function render() {
 
   const filtered = getFilteredLeads();
   if (!filtered.length) {
-    elements.leadList.innerHTML = '<div class="hint">No leads match this view. Upload a CSV or load the sample data.</div>';
+    elements.leadList.innerHTML =
+      '<div class="hint">No leads match this view. Upload a CSV or load the sample data.</div>';
     return;
   }
 
@@ -239,14 +259,19 @@ function render() {
       const card = elements.template.content.cloneNode(true);
       const priority = lead.priority;
 
-      card.querySelector(".lead-name").textContent = lead.name || "Unnamed lead";
-      card.querySelector(".lead-meta").textContent = `${lead.service || "Unknown service"} · ${lead.status || "No status"} · ${lead.source || "Unknown source"}`;
+      card.querySelector(".lead-name").textContent =
+        lead.name || "Unnamed lead";
+      card.querySelector(".lead-meta").textContent =
+        `${lead.service || "Unknown service"} · ${lead.status || "No status"} · ${lead.source || "Unknown source"}`;
       card.querySelector(".priority-pill").textContent = priority;
-      card.querySelector(".priority-pill").classList.add(`priority-${priority}`);
+      card
+        .querySelector(".priority-pill")
+        .classList.add(`priority-${priority}`);
       card.querySelector(".lead-score").textContent = `${lead.score}/100`;
       card.querySelector(".lead-value").textContent = formatMoney(lead.value);
       card.querySelector(".lead-date").textContent = lead.date || "Unknown";
-      card.querySelector(".lead-notes").textContent = lead.notes || "No notes included.";
+      card.querySelector(".lead-notes").textContent =
+        lead.notes || "No notes included.";
 
       const textarea = card.querySelector(".lead-draft");
       textarea.value = lead.draft;
@@ -261,7 +286,9 @@ function render() {
         updateSummary();
       });
 
-      card.querySelector(".copy-draft-button").addEventListener("click", () => copyText(lead.draft));
+      card
+        .querySelector(".copy-draft-button")
+        .addEventListener("click", () => copyText(lead.draft));
       elements.leadList.appendChild(card);
     });
 }
@@ -284,11 +311,28 @@ async function copyText(text) {
 }
 
 function exportCsv() {
-  const headers = ["name", "phone", "email", "service", "status", "source", "date", "value", "score", "priority", "approved", "draft"];
+  const headers = [
+    "name",
+    "phone",
+    "email",
+    "service",
+    "status",
+    "source",
+    "date",
+    "value",
+    "score",
+    "priority",
+    "approved",
+    "draft",
+  ];
   const rows = leads.map((lead) =>
-    headers.map((header) => `"${String(lead[header] || "").replaceAll('"', '""')}"`).join(",")
+    headers
+      .map((header) => `"${String(lead[header] || "").replaceAll('"', '""')}"`)
+      .join(","),
   );
-  const blob = new Blob([[headers.join(","), ...rows].join("\n")], { type: "text/csv" });
+  const blob = new Blob([[headers.join(","), ...rows].join("\n")], {
+    type: "text/csv",
+  });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
@@ -297,7 +341,9 @@ function exportCsv() {
   URL.revokeObjectURL(url);
 }
 
-elements.loadSampleButton.addEventListener("click", () => hydrateLeads(sampleLeads));
+elements.loadSampleButton.addEventListener("click", () =>
+  hydrateLeads(sampleLeads),
+);
 elements.csvInput.addEventListener("change", async (event) => {
   const [file] = event.target.files;
   if (!file) return;

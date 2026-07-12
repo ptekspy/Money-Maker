@@ -20,7 +20,7 @@
           <input id="csvInput" type="file" accept=".csv,text/csv">
           Upload leads CSV
         </label>
-        <button id="loadSampleButton" class="secondary-button">Load sample data</button>
+        <button id="loadSampleButton" class="secondary-button" type="button">Load sample data</button>
       </div>
     </header>
 
@@ -48,7 +48,7 @@
         <aside class="panel">
           <div class="panel-header">
             <h2>Filters</h2>
-            <button id="exportButton" class="text-button">Export CSV</button>
+            <button id="exportButton" class="text-button" type="button">Export CSV</button>
           </div>
           <label>
             Search
@@ -82,7 +82,7 @@
               <h2>Recovery Queue</h2>
               <p>Rank stale leads, approve follow-ups, and track expected revenue.</p>
             </div>
-            <button id="copyAllButton">Copy approved drafts</button>
+            <button id="copyAllButton" type="button">Copy approved drafts</button>
           </div>
           <div id="leadList" class="lead-list"></div>
         </section>
@@ -96,14 +96,14 @@
             <p id="coldEmail">
               Quick one. Most roofing and home-service firms have old quotes, missed calls, and Checkatrade/MyBuilder/Bark enquiries that never got followed up with. I built a simple recovery system that finds those warm enquiries and follows up until they book or say no. If you send your last 60-90 days of unclosed enquiries, I will show the recoverable pipeline before you pay.
             </p>
-            <button data-copy-target="coldEmail" class="secondary-button">Copy</button>
+            <button data-copy-target="coldEmail" class="secondary-button" type="button">Copy</button>
           </div>
           <div class="script-block">
             <h3>Call opener</h3>
             <p id="callScript">
               I am not selling ads. I recover the enquiries you already paid for. Old quotes, missed calls, form fills, and Checkatrade/MyBuilder/Bark leads that went cold. If there is money sitting in the pipeline, I find it and help you follow up.
             </p>
-            <button data-copy-target="callScript" class="secondary-button">Copy</button>
+            <button data-copy-target="callScript" class="secondary-button" type="button">Copy</button>
           </div>
         </aside>
       </section>
@@ -113,7 +113,7 @@
       <article class="lead-card">
         <div class="lead-topline">
           <div>
-            <h3 class="lead-name"></h3>
+            <h3 class="lead-name">Lead</h3>
             <p class="lead-meta"></p>
           </div>
           <span class="priority-pill"></span>
@@ -142,7 +142,7 @@
             <input class="lead-approved" type="checkbox">
             Approved
           </label>
-          <button class="secondary-button copy-draft-button">Copy draft</button>
+          <button class="secondary-button copy-draft-button" type="button">Copy draft</button>
         </div>
       </article>
     </template>

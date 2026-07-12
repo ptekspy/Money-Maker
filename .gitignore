@@ -26,6 +26,8 @@ document-analysis/*
 coverage/
 dist/
 build/
+.next/
+.vercel/
 .cache/
 
 # Editor and operating-system files

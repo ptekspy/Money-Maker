@@ -1,6 +1,6 @@
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
+const http = require("node:http");
+const fs = require("node:fs");
+const path = require("node:path");
 
 const root = __dirname;
 const port = Number(process.env.PORT || 4173);
@@ -12,7 +12,7 @@ const types = {
   ".js": "text/javascript; charset=utf-8",
   ".svg": "image/svg+xml; charset=utf-8",
   ".csv": "text/csv; charset=utf-8",
-  ".md": "text/markdown; charset=utf-8"
+  ".md": "text/markdown; charset=utf-8",
 };
 
 function resolveFile(urlPath) {
@@ -39,8 +39,9 @@ const server = http.createServer((request, response) => {
     }
 
     response.writeHead(200, {
-      "Content-Type": types[path.extname(filePath)] || "application/octet-stream",
-      "Cache-Control": "no-store"
+      "Content-Type":
+        types[path.extname(filePath)] || "application/octet-stream",
+      "Cache-Control": "no-store",
     });
     response.end(data);
   });
