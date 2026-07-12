@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { deleteDataHref } from "@/lib/landing-data";
 
 export const metadata: Metadata = {
   title: "Privacy Notice",
@@ -31,6 +32,15 @@ const sections = [
     ],
   },
   {
+    title: "UK GDPR position",
+    body: [
+      "For pilot scans and recovery work, QuoteWinBack usually acts as a processor for client-supplied customer records because the client decides what data is supplied and why it is used.",
+      "For our own business records, website enquiries, emails, invoices, and service administration, QuoteWinBack acts as a controller.",
+      "Our usual lawful bases are legitimate interests for business-to-business enquiries, service delivery, and pipeline recovery analysis; contract where we are preparing or performing an agreement; and legal obligation where records must be kept for accounting, tax, or compliance reasons.",
+      "If personal data is transferred or processed outside the UK, we aim to use suppliers and safeguards that support UK GDPR compliance.",
+    ],
+  },
+  {
     title: "Retention",
     body: [
       "Pilot files, enquiry exports, quote records, and analysis outputs are deleted within 14 days of receipt unless we enter into a contracted agreement with you.",
@@ -56,8 +66,9 @@ const sections = [
   {
     title: "Your choices and rights",
     body: [
-      "You can ask us to delete pilot files earlier than 14 days by emailing hello@quotewinback.co.uk.",
+      "You can ask us to delete pilot files earlier than 14 days by using the delete data request link below or emailing hello@quotewinback.co.uk.",
       "Individuals may have rights under UK data protection law, including access, correction, deletion, restriction, objection, and complaint rights. If a request relates to data supplied by one of our clients, we may direct the request to that client where they are the relevant controller.",
+      "You also have the right to complain to the Information Commissioner's Office if you are unhappy with how personal data is handled.",
     ],
   },
 ];
@@ -77,6 +88,21 @@ export default function PrivacyPage() {
           Last updated 12 July 2026. This page explains how QuoteWinBack handles
           data sent for recovery scans and paid services.
         </p>
+        <section className="mb-6 rounded-lg border border-[#d8e2de] bg-[#102820] p-6 text-white">
+          <h2 className="mb-3 font-extrabold text-2xl">
+            Need your pilot data deleted?
+          </h2>
+          <p className="mb-5 text-[#eaf1ee] leading-7">
+            Pilot files are deleted within 14 days unless we enter into a
+            contracted agreement. You can request earlier deletion at any time.
+          </p>
+          <a
+            className="inline-flex min-h-11 items-center justify-center rounded-md bg-white px-4 font-extrabold text-[#102820]"
+            href={deleteDataHref()}
+          >
+            Request data deletion
+          </a>
+        </section>
         <div className="grid gap-4">
           {sections.map((section) => (
             <section

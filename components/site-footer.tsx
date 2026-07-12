@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { deleteDataHref } from "@/lib/landing-data";
 
 export function SiteFooter() {
   return (
@@ -7,6 +8,7 @@ export function SiteFooter() {
       <div className="flex flex-wrap gap-x-5 gap-y-3">
         <Link href="/privacy">Privacy</Link>
         <Link href="/terms">Terms</Link>
+        <a href={deleteDataHref()}>Delete data</a>
         <a href="mailto:hello@quotewinback.co.uk">hello@quotewinback.co.uk</a>
       </div>
     </footer>

@@ -130,3 +130,23 @@ export function mailtoHref(subject = "QuoteWinBack recovery scan request") {
 
   return `mailto:hello@quotewinback.co.uk?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
+
+export function deleteDataHref() {
+  const body = [
+    "Hi QuoteWinBack,",
+    "",
+    "Please delete the data/files you hold for the following business or recovery scan.",
+    "",
+    "Company name:",
+    "Contact name:",
+    "Email address used:",
+    "Approximate date files were sent:",
+    "Anything else that will help identify the data:",
+    "",
+    "Please confirm when deletion has been completed.",
+    "",
+    "Thanks,",
+  ].join("\n");
+
+  return `mailto:hello@quotewinback.co.uk?subject=${encodeURIComponent("Delete data request")}&body=${encodeURIComponent(body)}`;
+}
