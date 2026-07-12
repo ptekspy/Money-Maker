@@ -29,6 +29,7 @@ export function SiteHeader() {
         <Link href="/#proof">What you get</Link>
         <Link href="/#pilot">Pilot</Link>
         <Link href="/bradford/roofers">Bradford roofers</Link>
+        <Link href="/privacy">Privacy</Link>
       </nav>
       <a
         className="inline-flex min-h-10 items-center justify-center whitespace-nowrap rounded-md bg-[#102820] px-3 font-extrabold text-white md:min-h-11 md:px-4"

@@ -5,6 +5,7 @@ import {
   mailtoHref,
   type ProfessionLanding,
 } from "@/lib/landing-data";
+import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 
 type MarketingPageProps = {
@@ -256,10 +257,7 @@ export function MarketingPage({ landing }: MarketingPageProps) {
           </div>
         </section>
       </main>
-      <footer className="flex flex-col justify-between gap-4 border-[#d8e2de] border-t bg-white px-4 py-7 font-bold text-[#5d6c67] md:flex-row md:px-8">
-        <span className="text-[#102820]">QuoteWinBack</span>
-        <a href="mailto:hello@quotewinback.co.uk">hello@quotewinback.co.uk</a>
-      </footer>
+      <SiteFooter />
     </>
   );
 }
