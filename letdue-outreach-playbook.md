@@ -1,5 +1,17 @@
 # LetDue first-customer outreach
 
+## Live campaign state — 15 July 2026
+
+- Live pilot invitations: Ixana Property, Nest Property Network and Josh at Casa Property Partners.
+- Live partner proposals: Dwell Leeds, SPC Property Compliance and York RLA.
+- SPC acknowledged automatically; its new service bookings are temporarily paused while its team completes a large contract.
+- M&G Properties was removed after its published mailbox bounced and its website TLS certificate proved invalid.
+- Casa's generic `.com` address bounced; the public director address on the active `.co.uk` domain delivered.
+- No human reply has arrived yet.
+- Batch two is staged in `letdue-first-customers.csv` and must not be sent before the first follow-up review on 19 July 2026.
+
+The live product now supports the promised 14-day, no-card pilot. A prospect runs the free audit at `https://letdue.com`, clicks **Start free 14-day pilot — no card**, and is taken straight to the private dashboard. They should bookmark it immediately and may add two more properties there.
+
 ## The objective
 
 The first campaign is designed to produce:
@@ -142,6 +154,12 @@ Hi {{name}}, I’ll close the loop after this. If you would like to test LetDue 
 
 **Interested:** propose two specific 15-minute slots, ask whether they are testing as a landlord or referring clients, and send only the normal LetDue URL.
 
+Use this response:
+
+> Brilliant — thank you. You can start without a card at https://letdue.com. Run the free audit with one real property, then choose **Start free 14-day pilot**. Bookmark the private dashboard it creates; you can add two more properties from there. If you prefer, send me two suitable 15-minute times and I will stay available while you set up the first one.
+
+After activation, record the email, organisation, pilot start date, pilot end date, number of properties added, documents uploaded, first useful outcome and any obstacle. Never ask the prospect to email certificate files; they should upload them through the private dashboard.
+
 **What does it cost?:** “The founding plan is £29 a year for up to three properties. The pre-launch pilot is free because I need honest product feedback before asking you to pay.”
 
 **We already use property software:** “That makes sense. LetDue is intentionally much smaller: a certificate-specific tool for landlords who do not need—or do not consistently use—a full management suite. I would still value your view on whether it fills that gap.”
@@ -149,6 +167,8 @@ Hi {{name}}, I’ll close the loop after this. If you would like to test LetDue 
 **Is this legal advice / a compliance guarantee?:** “No. LetDue organises documents and reminders; it does not certify a property, guarantee compliance or replace professional advice.”
 
 **Not interested:** thank them once, record the opt-out and never follow up.
+
+**Automatic reply:** record it but do not count it as a positive response. Follow the stated response window unless the auto-response says the team is unavailable; never use an urgent phone or WhatsApp route for a non-urgent partnership pitch.
 
 ## Campaign controls
 
