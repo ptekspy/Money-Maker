@@ -2,25 +2,45 @@
   "name": "quotewinback",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@11.12.1",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "check": "biome check .",
+    "dev": "turbo dev",
+    "dev:web": "turbo dev --filter=@quotewinback/web",
+    "dev:admin": "turbo dev --filter=@quotewinback/admin",
+    "dev:certcue": "turbo dev --filter=@certcue/web",
+    "build": "turbo build",
+    "build:web": "turbo build --filter=@quotewinback/web",
+    "build:admin": "turbo build --filter=@quotewinback/admin",
+    "build:certcue": "turbo build --filter=@certcue/web",
+    "deploy:aws": "sst deploy",
+    "remove:aws": "sst remove",
+    "start": "turbo start",
+    "check": "turbo check",
     "format": "biome format --write ."
   },
   "dependencies": {
+    "@neondatabase/serverless": "1.0.2",
+    "lucide-react": "0.562.0",
     "next": "16.2.10",
+    "nodemailer": "^9.0.3",
     "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react-dom": "19.2.7",
+    "zod": "4.2.1"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.3",
     "@tailwindcss/postcss": "4.3.2",
     "@types/node": "26.1.1",
+    "@types/nodemailer": "7.0.4",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
+    "sst": "^4.17.1",
     "tailwindcss": "4.3.2",
+    "turbo": "^2.10.5",
     "typescript": "5.9.3"
   }
 }

@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { mailtoHref } from "@/lib/landing-data";
 
 export function SiteHeader() {
   return (
@@ -27,16 +26,17 @@ export function SiteHeader() {
       >
         <Link href="/#how">How it works</Link>
         <Link href="/#proof">What you get</Link>
+        <Link href="/scan">Free scan</Link>
         <Link href="/#pilot">Pilot</Link>
         <Link href="/bradford/roofers">Bradford roofers</Link>
         <Link href="/privacy">Privacy</Link>
       </nav>
-      <a
+      <Link
         className="inline-flex min-h-10 items-center justify-center whitespace-nowrap rounded-md bg-[#102820] px-3 font-extrabold text-white md:min-h-11 md:px-4"
-        href={mailtoHref()}
+        href="/scan"
       >
-        Start scan
-      </a>
+        Scan old quotes
+      </Link>
     </header>
   );
 }

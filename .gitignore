@@ -31,6 +31,8 @@ build/
 out/
 .vercel/
 .cache/
+.turbo/
+.sst/
 
 # Editor and operating-system files
 .DS_Store
@@ -40,3 +42,4 @@ Desktop.ini
 .vscode/
 *.swp
 *.swo
+*.tsbuildinfo

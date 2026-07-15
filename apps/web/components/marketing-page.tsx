@@ -1,10 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  genericSources,
-  mailtoHref,
-  type ProfessionLanding,
-} from "@/lib/landing-data";
+import { genericSources, type ProfessionLanding } from "@/lib/landing-data";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 
@@ -37,10 +33,6 @@ export function MarketingPage({ landing }: MarketingPageProps) {
   const rows = localLanding?.exampleRows ?? defaultRows;
   const sources = localLanding?.enquirySources ?? genericSources;
   const pipeline = localLanding?.pipelineValue ?? "GBP 18,650";
-  const subject = localLanding
-    ? `${localLanding.area} ${localLanding.profession} recovery scan request`
-    : "QuoteWinBack recovery scan request";
-
   return (
     <>
       <a
@@ -70,9 +62,9 @@ export function MarketingPage({ landing }: MarketingPageProps) {
             <div className="mt-8 flex flex-wrap gap-3">
               <a
                 className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-white px-4 font-extrabold text-[#102820] md:w-auto"
-                href={mailtoHref(subject)}
+                href="/scan"
               >
-                Start a recovery scan
+                Scan your old quotes free
               </a>
               <Link
                 className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-[#d8e2de] bg-white px-4 font-extrabold text-[#102820] md:w-auto"
@@ -238,6 +230,11 @@ export function MarketingPage({ landing }: MarketingPageProps) {
               If there are not at least 5 warm opportunities, there is no
               charge.
             </h2>
+            <p className="mb-4 font-extrabold text-[#102820] text-xl leading-8 md:text-2xl">
+              Pilot recovery scan: £300, covering up to 3 months of old quotes,
+              missed enquiries, and paid leads. Ongoing follow-up support starts
+              from £250/month.
+            </p>
             <p className="text-[#5d6c67] leading-7">
               Send the last 60-90 days of unclosed quotes, missed enquiries, and
               paid leads. We show what is worth following up before you pay for
@@ -247,9 +244,9 @@ export function MarketingPage({ landing }: MarketingPageProps) {
           <div className="grid justify-items-start gap-3">
             <a
               className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#102820] px-4 font-extrabold text-white"
-              href={mailtoHref(subject)}
+              href="/scan"
             >
-              Start a scan
+              Run the free scan
             </a>
             <p className="font-bold text-[#5d6c67]">
               {localLanding?.area ?? "Built from Bradford, West Yorkshire"}
