@@ -4,7 +4,12 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { redirect } from "next/navigation";
 import { PDFParse } from "pdf-parse";
 import { z } from "zod";
-import { getProperty, getUserByToken, saveCertificate } from "@/lib/data";
+import {
+  addProperty,
+  getProperty,
+  getUserByToken,
+  saveCertificate,
+} from "@/lib/data";
 import { extractCertificateDetails } from "@/lib/extract-certificate";
 import { getStripe } from "@/lib/stripe";
 
@@ -48,6 +53,26 @@ export async function openBillingPortal(formData: FormData) {
     return_url: `${appUrl}/dashboard/${token.data}`,
   });
   redirect(session.url);
+}
+
+export async function addPortfolioProperty(formData: FormData) {
+  const token = z.uuid().safeParse(formData.get("token"));
+  const address = z
+    .string()
+    .trim()
+    .min(5)
+    .max(200)
+    .safeParse(formData.get("address"));
+  if (!token.success || !address.success) return;
+  const user = await getUserByToken(token.data);
+  if (user?.subscriptionStatus !== "active") return;
+  const property = await addProperty({
+    userId: user.id,
+    address: address.data,
+    hasGas: formData.get("hasGas") === "on",
+    isHmo: formData.get("isHmo") === "on",
+  });
+  redirect(`/dashboard/${token.data}?property=${property ? "added" : "limit"}`);
 }
 
 export async function uploadCertificate(formData: FormData) {

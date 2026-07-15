@@ -17,8 +17,10 @@ export type LetDueUser = {
   id: string;
   email: string;
   accessToken: string;
-  stripeCustomerId: string;
+  stripeCustomerId?: string;
   subscriptionStatus: "active" | "cancelled" | "past_due";
+  plan?: "pilot" | "paid";
+  pilotEndsAt?: string;
 };
 
 export type LetDueProperty = {
@@ -104,6 +106,7 @@ export async function activateCustomer(input: {
     accessToken: currentUser?.accessToken ?? crypto.randomUUID(),
     stripeCustomerId: input.stripeCustomerId,
     subscriptionStatus: "active",
+    plan: "paid",
   };
   const property: LetDueProperty = {
     id: crypto.randomUUID(),
@@ -187,6 +190,110 @@ export async function activateCustomer(input: {
       ),
   );
   return { user, property };
+}
+
+export async function activatePilot(input: {
+  email: string;
+  address: string;
+  hasGas: boolean;
+  isHmo: boolean;
+  dates: Record<string, string>;
+}) {
+  const normalizedEmail = input.email.trim().toLowerCase();
+  if (await lookupUserId("EMAIL", normalizedEmail)) return null;
+
+  const userId = crypto.randomUUID();
+  const user: LetDueUser = {
+    id: userId,
+    email: normalizedEmail,
+    accessToken: crypto.randomUUID(),
+    subscriptionStatus: "active",
+    plan: "pilot",
+    pilotEndsAt: new Date(Date.now() + 14 * 86_400_000).toISOString(),
+  };
+  const property: LetDueProperty = {
+    id: crypto.randomUUID(),
+    userId,
+    address: input.address,
+    hasGas: input.hasGas,
+    isHmo: input.isHmo,
+    createdAt: new Date().toISOString(),
+  };
+
+  await Promise.all([
+    client.send(
+      new PutCommand({
+        TableName: tableName,
+        Item: { pk: `USER#${userId}`, sk: "PROFILE", ...user },
+      }),
+    ),
+    client.send(
+      new PutCommand({
+        TableName: tableName,
+        Item: { pk: `EMAIL#${normalizedEmail}`, sk: "LOOKUP", userId },
+      }),
+    ),
+    client.send(
+      new PutCommand({
+        TableName: tableName,
+        Item: { pk: `TOKEN#${user.accessToken}`, sk: "LOOKUP", userId },
+      }),
+    ),
+    client.send(
+      new PutCommand({
+        TableName: tableName,
+        Item: {
+          pk: `USER#${userId}`,
+          sk: `PROPERTY#${property.id}`,
+          ...property,
+        },
+      }),
+    ),
+  ]);
+
+  await Promise.all(
+    Object.entries(input.dates)
+      .filter(([, expiryDate]) => Boolean(expiryDate))
+      .map(([kind, expiryDate]) =>
+        saveCertificate({
+          userId,
+          propertyId: property.id,
+          kind,
+          expiryDate,
+        }),
+      ),
+  );
+
+  return { user, property };
+}
+
+export async function addProperty(input: {
+  userId: string;
+  address: string;
+  hasGas: boolean;
+  isHmo: boolean;
+}) {
+  const existing = await listPortfolio(input.userId);
+  if (existing.length >= 3) return null;
+  const property: LetDueProperty = {
+    id: crypto.randomUUID(),
+    userId: input.userId,
+    address: input.address,
+    hasGas: input.hasGas,
+    isHmo: input.isHmo,
+    createdAt: new Date().toISOString(),
+  };
+  await client.send(
+    new PutCommand({
+      TableName: tableName,
+      Item: {
+        pk: `USER#${input.userId}`,
+        sk: `PROPERTY#${property.id}`,
+        ...property,
+      },
+    }),
+  );
+  return property;
 }
 
 export async function setSubscriptionStatus(

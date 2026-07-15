@@ -28,6 +28,12 @@ export async function runReminders(now = new Date()) {
       certificate.propertyId,
     );
     if (!user || !property || user.subscriptionStatus !== "active") continue;
+    if (
+      user.plan === "pilot" &&
+      user.pilotEndsAt &&
+      new Date(user.pilotEndsAt) <= now
+    )
+      continue;
     const reminderDate = isoDate(now);
     if (!(await claimReminder(certificate.id, reminderDate))) continue;
     const timing =

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { assessCertificate, recommendedCertificates } from "@/lib/compliance";
 import { getUserByToken, listPortfolio } from "@/lib/data";
 import {
+  addPortfolioProperty,
   openBillingPortal,
   updateCertificate,
   uploadCertificate,
@@ -21,14 +22,24 @@ export default async function DashboardPage({
   searchParams,
 }: {
   params: Promise<{ token: string }>;
-  searchParams: Promise<{ saved?: string; upload?: string }>;
+  searchParams: Promise<{
+    saved?: string;
+    upload?: string;
+    pilot?: string;
+    property?: string;
+  }>;
 }) {
   const { token } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(token)) notFound();
   const user = await getUserByToken(token);
   if (!user) notFound();
   const properties = await listPortfolio(user.id);
-  const { saved, upload } = await searchParams;
+  const { saved, upload, pilot, property: propertyResult } = await searchParams;
+  const pilotEnds = user.pilotEndsAt
+    ? new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(
+        new Date(user.pilotEndsAt),
+      )
+    : null;
 
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-4 py-10 md:px-8">
@@ -57,17 +68,30 @@ export default async function DashboardPage({
           >
             {user.subscriptionStatus.replace("_", " ")}
           </span>
-          <form action={openBillingPortal}>
-            <input name="token" type="hidden" value={token} />
-            <button
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[#bcc7ae] bg-white px-4 font-black"
-              type="submit"
-            >
-              <CreditCard size={17} /> Billing
-            </button>
-          </form>
+          {user.plan !== "pilot" ? (
+            <form action={openBillingPortal}>
+              <input name="token" type="hidden" value={token} />
+              <button
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[#bcc7ae] bg-white px-4 font-black"
+                type="submit"
+              >
+                <CreditCard size={17} /> Billing
+              </button>
+            </form>
+          ) : null}
         </div>
       </div>
+
+      {pilot === "started" ? (
+        <div className="mt-6 rounded-xl bg-[#dff5d8] p-5 text-[#26531b]">
+          <p className="font-black">Your free pilot is active.</p>
+          <p className="mt-1 text-sm leading-6">
+            Bookmark this private page now. Your pilot runs until {pilotEnds}.
+            Add up to two more properties below and upload the certificates you
+            already have.
+          </p>
+        </div>
+      ) : null}
 
       {saved ? (
         <p className="mt-6 flex items-center gap-2 rounded-xl bg-[#dff5d8] p-4 font-bold text-[#26531b]">
@@ -90,6 +114,56 @@ export default async function DashboardPage({
               ? "We could not confidently read that PDF. Add its date manually below."
               : "Please upload a PDF smaller than 10 MB."}
         </p>
+      ) : null}
+
+      {propertyResult ? (
+        <p
+          className={`mt-6 rounded-xl p-4 font-bold ${
+            propertyResult === "added"
+              ? "bg-[#dff5d8] text-[#26531b]"
+              : "bg-[#fff0bd] text-[#684c00]"
+          }`}
+        >
+          {propertyResult === "added"
+            ? "Property added. Add its dates or upload a certificate below."
+            : "This plan monitors up to three properties."}
+        </p>
+      ) : null}
+
+      {properties.length < 3 ? (
+        <section className="mt-8 rounded-2xl border border-[#d5dbc9] bg-[#f7f8f3] p-5">
+          <p className="font-black text-[#52720d] text-xs uppercase">
+            Portfolio setup
+          </p>
+          <h2 className="mt-1 text-2xl">Add another property</h2>
+          <form
+            action={addPortfolioProperty}
+            className="mt-4 grid gap-3 md:grid-cols-[minmax(240px,1fr)_auto_auto_auto] md:items-end"
+          >
+            <input name="token" type="hidden" value={token} />
+            <label className="grid gap-1 font-bold text-sm">
+              Property address
+              <input
+                className="min-h-11 rounded-lg border border-[#bcc7ae] bg-white px-3 font-normal"
+                name="address"
+                placeholder="e.g. 22 Park Road, Leeds"
+                required
+              />
+            </label>
+            <label className="flex min-h-11 items-center gap-2 rounded-lg border border-[#d5dbc9] bg-white px-3 font-bold text-sm">
+              <input defaultChecked name="hasGas" type="checkbox" /> Gas
+            </label>
+            <label className="flex min-h-11 items-center gap-2 rounded-lg border border-[#d5dbc9] bg-white px-3 font-bold text-sm">
+              <input name="isHmo" type="checkbox" /> HMO
+            </label>
+            <button
+              className="min-h-11 rounded-lg bg-[#18220d] px-4 font-black text-white"
+              type="submit"
+            >
+              Add property
+            </button>
+          </form>
+        </section>
       ) : null}
 
       <div className="mt-8 grid gap-6">

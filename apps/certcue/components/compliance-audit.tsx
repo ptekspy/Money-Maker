@@ -9,7 +9,7 @@ import {
   Upload,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { startCheckout } from "@/app/actions/checkout";
+import { startPilot } from "@/app/actions/pilot";
 import {
   assessCertificate,
   type CertificateKind,
@@ -311,7 +311,7 @@ export function ComplianceAudit() {
                     </p>
                   </div>
                 </div>
-                <form action={startCheckout} className="mt-5 grid gap-3">
+                <form action={startPilot} className="mt-5 grid gap-3">
                   <label className="grid gap-1 font-bold text-sm">
                     Reminder email
                     <input
@@ -322,6 +322,13 @@ export function ComplianceAudit() {
                     />
                   </label>
                   <input name="address" type="hidden" value={address} />
+                  <input
+                    aria-hidden="true"
+                    className="hidden"
+                    name="companyWebsite"
+                    tabIndex={-1}
+                    type="text"
+                  />
                   <input name="hasGas" type="hidden" value={String(hasGas)} />
                   <input name="isHmo" type="hidden" value={String(isHmo)} />
                   <input
@@ -345,8 +352,24 @@ export function ComplianceAudit() {
                     className="min-h-12 rounded-lg bg-[#d9ff73] px-5 font-black text-[#18220d]"
                     type="submit"
                   >
-                    Monitor this property — £29/year
+                    Start free 14-day pilot — no card
                   </button>
+                  <p className="text-center text-[#65715d] text-xs">
+                    One property now; add up to two more in your private
+                    dashboard. The founding plan will be £29/year after the
+                    pilot.
+                  </p>
+                  <p className="text-center text-[#65715d] text-xs leading-5">
+                    By starting the pilot, you agree to the{" "}
+                    <a className="underline" href="/terms">
+                      terms
+                    </a>{" "}
+                    and acknowledge the{" "}
+                    <a className="underline" href="/privacy">
+                      privacy notice
+                    </a>
+                    .
+                  </p>
                 </form>
               </div>
             </>
