@@ -33,15 +33,6 @@ export default $config({
 
     const landlordDocuments = new sst.aws.Bucket("LetDueDocuments", {
       versioning: true,
-      lifecycle: [
-        {
-          id: "archive-old-versions",
-          noncurrentVersionTransitions: [
-            { days: 30, storageClass: "GLACIER_IR" },
-          ],
-          noncurrentVersionExpiration: { days: 365 },
-        },
-      ],
     });
 
     const quoteWinBack = new sst.aws.StaticSite("QuoteWinBack", {
