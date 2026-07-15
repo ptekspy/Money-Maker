@@ -30,7 +30,7 @@ export default function HomePage() {
     <>
       <header className="flex min-h-18 items-center justify-between border-[#d5dbc9] border-b bg-[#f4f5ef]/95 px-4 backdrop-blur md:px-8">
         <a className="font-black text-xl tracking-tight" href="#top">
-          Cert<span className="text-[#52720d]">Cue</span>
+          Let<span className="text-[#52720d]">Due</span>
         </a>
         <nav className="hidden gap-6 font-bold text-[#5e6b55] text-sm md:flex">
           <a href="#how">How it works</a>
