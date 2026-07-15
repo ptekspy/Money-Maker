@@ -7,9 +7,9 @@ const sans = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
 export const metadata: Metadata = {
-  title: "CertCue — Property compliance, before it becomes urgent",
+  title: "LetDue — Every property deadline, handled",
   description:
-    "CertCue reads UK rental-property certificates, builds a compliance calendar, and reminds landlords before important dates expire.",
+    "LetDue reads UK rental-property certificates, builds a compliance calendar, and reminds landlords before important dates expire.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

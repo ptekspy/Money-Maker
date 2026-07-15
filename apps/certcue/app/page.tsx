@@ -11,7 +11,7 @@ const benefits = [
   {
     icon: ScanLine,
     title: "Drop in certificates",
-    text: "Upload gas safety, EICR, EPC, insurance and licence documents. CertCue reads the dates for you.",
+    text: "Upload gas safety, EICR, EPC, insurance and licence documents. LetDue reads the dates for you.",
   },
   {
     icon: FileCheck2,
@@ -55,7 +55,7 @@ export default function HomePage() {
                 Know what expires next.
               </h1>
               <p className="mt-6 max-w-2xl text-[#526047] text-xl leading-8">
-                CertCue reads your rental-property certificates, builds the
+                LetDue reads your rental-property certificates, builds the
                 compliance calendar, and reminds you before an important date
                 becomes an expensive problem.
               </p>
@@ -172,9 +172,9 @@ export default function HomePage() {
         </section>
       </main>
       <footer className="flex flex-wrap justify-between gap-4 border-[#d5dbc9] border-t px-4 py-7 font-bold text-[#687260] text-sm md:px-8">
-        <span className="text-[#18220d]">CertCue</span>
+        <span className="text-[#18220d]">LetDue</span>
         <span>Compliance information, not legal advice · England beta</span>
-        <a href="mailto:hello@certcue.co.uk">hello@certcue.co.uk</a>
+        <a href="mailto:hello@letdue.co.uk">hello@letdue.co.uk</a>
       </footer>
     </>
   );

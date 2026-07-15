@@ -54,8 +54,8 @@ async function activateCheckout(session: Stripe.Checkout.Session) {
   const dashboardUrl = `${process.env.NEXT_PUBLIC_CERTCUE_URL}/dashboard/${user.access_token}`;
   await sendEmail({
     to: email,
-    subject: "Your CertCue property is now monitored",
-    text: `Your CertCue monitoring is active for ${onboarding.address}.\n\nOpen your private dashboard: ${dashboardUrl}\n\nKeep this link private.`,
+    subject: "Your LetDue property is now monitored",
+    text: `Your LetDue monitoring is active for ${onboarding.address}.\n\nOpen your private dashboard: ${dashboardUrl}\n\nKeep this link private.`,
   });
 }
 

@@ -135,7 +135,7 @@ export function ComplianceAudit() {
           Find the deadline most likely to catch you out.
         </h2>
         <p className="mt-4 text-[#526047] text-lg leading-8">
-          No account needed. Enter the dates you know; CertCue turns them into a
+          No account needed. Enter the dates you know; LetDue turns them into a
           clear action list. Document reading is included in monitored plans.
         </p>
       </div>
@@ -305,7 +305,7 @@ export function ComplianceAudit() {
                       Put this property on autopilot
                     </h4>
                     <p className="mt-1 text-[#65715d] leading-7">
-                      Upload certificates instead of typing dates. CertCue reads
+                      Upload certificates instead of typing dates. LetDue reads
                       them, stores the evidence, and reminds you at 90, 30, 14
                       and 7 days.
                     </p>

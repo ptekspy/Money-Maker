@@ -50,7 +50,7 @@ export async function GET(request: Request) {
     await sendEmail({
       to: reminder.email,
       subject: `${reminder.kind} ${timing} — ${reminder.address}`,
-      text: `${reminder.kind} for ${reminder.address} ${timing} (${reminder.expiry_date}).\n\nOpen CertCue to update the certificate after renewal.`,
+      text: `${reminder.kind} for ${reminder.address} ${timing} (${reminder.expiry_date}).\n\nOpen LetDue to update the certificate after renewal.`,
     });
     await sql`
       insert into certcue_reminder_sends (certificate_id, reminder_days)

@@ -41,7 +41,7 @@ export default async function DashboardPage({
         Private portfolio
       </p>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-        <h1 className="text-4xl md:text-6xl">Your CertCue dashboard</h1>
+        <h1 className="text-4xl md:text-6xl">Your LetDue dashboard</h1>
         <span className="rounded-full bg-[#dff5d8] px-3 py-1 font-black text-[#26531b] text-sm">
           {rows[0].subscription_status}
         </span>
