@@ -15,7 +15,7 @@ export default function SetupRequiredPage() {
         </p>
         <a
           className="mt-6 inline-flex min-h-12 items-center rounded-lg bg-[#18220d] px-5 font-black text-white"
-          href="mailto:hello@letdue.co.uk?subject=LetDue early access"
+          href="mailto:hello@letdue.com?subject=LetDue early access"
         >
           Request early access
         </a>

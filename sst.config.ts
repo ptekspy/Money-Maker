@@ -77,6 +77,12 @@ export default $config({
           })()
         : new sst.aws.Nextjs("LandlordSaas", {
             path: "apps/certcue",
+            domain: {
+              name: "letdue.com",
+              redirects: ["www.letdue.com"],
+              dns: false,
+              cert: "arn:aws:acm:us-east-1:077101397910:certificate/64c3a5f9-d692-4f77-b568-b16d44304e68",
+            },
           });
 
     return {

@@ -174,7 +174,7 @@ export default function HomePage() {
       <footer className="flex flex-wrap justify-between gap-4 border-[#d5dbc9] border-t px-4 py-7 font-bold text-[#687260] text-sm md:px-8">
         <span className="text-[#18220d]">LetDue</span>
         <span>Compliance information, not legal advice · England beta</span>
-        <a href="mailto:hello@letdue.co.uk">hello@letdue.co.uk</a>
+        <a href="mailto:hello@letdue.com">hello@letdue.com</a>
       </footer>
     </>
   );

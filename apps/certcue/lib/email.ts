@@ -24,7 +24,7 @@ export async function sendEmail(options: {
   text: string;
 }) {
   await getTransporter().sendMail({
-    from: process.env.EMAIL_FROM ?? "LetDue <reminders@letdue.co.uk>",
+    from: process.env.EMAIL_FROM ?? "LetDue <reminders@letdue.com>",
     ...options,
   });
 }
