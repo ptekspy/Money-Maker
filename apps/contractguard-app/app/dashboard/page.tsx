@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentSession } from "@/lib/auth";
-import { getInstallation, listRecentChecks } from "@/lib/data";
+import {
+  getInstallation,
+  listRecentChecks,
+  saveInstallation,
+} from "@/lib/data";
 import { githubAppSlug } from "@/lib/env";
 import { userInstallations } from "@/lib/github";
 
@@ -22,6 +26,16 @@ export default async function Dashboard() {
   const github = await userInstallations(session.accessToken);
   const installations = await Promise.all(
     github.installations.map(async (item) => {
+      // Installations created before a webhook was configured will not have a
+      // profile yet. Provision it here so the dashboard always reflects the
+      // current GitHub App installation instead of remaining in "Connecting".
+      await saveInstallation({
+        installationId: item.id,
+        accountId: item.account.id,
+        accountLogin: item.account.login,
+        accountType: item.account.type,
+        repositorySelection: item.repository_selection,
+      });
       const profile = await getInstallation(item.id);
       const checks = profile ? await listRecentChecks(item.id) : [];
       return { item, profile, checks };
