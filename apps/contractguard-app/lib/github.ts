@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, createPrivateKey, timingSafeEqual } from "node:crypto";
 import { importPKCS8, SignJWT } from "jose";
 import { requiredEnv } from "@/lib/env";
 
@@ -33,7 +33,12 @@ export async function appJwt(): Promise<string> {
     "\\n",
     "\n",
   );
-  const key = await importPKCS8(pem, "RS256");
+  // GitHub App keys are commonly issued in PKCS#1 form; jose expects PKCS#8.
+  // Normalizing through Node's key parser also accepts an already-PKCS#8 key.
+  const pkcs8 = createPrivateKey(pem)
+    .export({ type: "pkcs8", format: "pem" })
+    .toString();
+  const key = await importPKCS8(pkcs8, "RS256");
   const now = Math.floor(Date.now() / 1000);
   return new SignJWT({})
     .setProtectedHeader({ alg: "RS256" })
