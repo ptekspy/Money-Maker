@@ -52,7 +52,9 @@ export function oauthValues() {
 
 export const secureCookie = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
+  // The app is always served over HTTPS in AWS. Requiring Secure ensures the
+  // short-lived OAuth state and verifier survive the GitHub redirect safely.
+  secure: true,
   sameSite: "lax" as const,
   path: "/",
 };
