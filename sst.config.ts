@@ -95,6 +95,11 @@ export default $config({
     const contractGuardApp = new sst.aws.Nextjs("ContractGuardApp", {
       path: "apps/contractguard-app",
       link: [contractGuardData, contractGuardChecks],
+      domain: {
+        name: "app.apicontractguard.com",
+        dns: false,
+        cert: "arn:aws:acm:us-east-1:077101397910:certificate/0abacd95-112a-4630-8165-9e92e4024b24",
+      },
       environment: {
         CONTRACTGUARD_TABLE_NAME: contractGuardData.name,
         CONTRACTGUARD_QUEUE_URL: contractGuardChecks.url,
@@ -113,7 +118,8 @@ export default $config({
         CONTRACTGUARD_SESSION_SECRET:
           process.env.CONTRACTGUARD_SESSION_SECRET ??
           "preview-development-only",
-        CONTRACTGUARD_APP_URL: process.env.CONTRACTGUARD_APP_URL ?? "",
+        CONTRACTGUARD_APP_URL:
+          process.env.CONTRACTGUARD_APP_URL ?? "https://app.apicontractguard.com",
         STRIPE_SECRET_KEY: process.env.CONTRACTGUARD_STRIPE_SECRET_KEY ?? "",
         STRIPE_WEBHOOK_SECRET:
           process.env.CONTRACTGUARD_STRIPE_WEBHOOK_SECRET ?? "",

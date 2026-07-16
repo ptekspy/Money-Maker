@@ -89,7 +89,7 @@ async function createCheck(
       head_sha: job.headSha,
       status: "completed",
       conclusion: input.conclusion,
-      details_url: `${appUrl("https://apicontractguard.com")}/dashboard`,
+      details_url: `${appUrl("https://app.apicontractguard.com")}/dashboard`,
       output: {
         title: input.title,
         summary: input.summary,
