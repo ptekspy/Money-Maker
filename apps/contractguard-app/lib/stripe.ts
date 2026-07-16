@@ -3,10 +3,22 @@ import { env, requiredEnv } from "@/lib/env";
 
 let client: Stripe | undefined;
 
+export function stripeConfig() {
+  return {
+    secretKey: Boolean(env("STRIPE_SECRET_KEY")),
+    webhookSecret: Boolean(env("STRIPE_WEBHOOK_SECRET")),
+    priceId: Boolean(env("STRIPE_CONTRACTGUARD_PRICE_ID")),
+  };
+}
+
 export function stripeConfigured() {
-  return Boolean(
-    env("STRIPE_SECRET_KEY") && env("STRIPE_CONTRACTGUARD_PRICE_ID"),
-  );
+  const config = stripeConfig();
+  return config.secretKey && config.priceId;
+}
+
+export function stripeWebhookConfigured() {
+  const config = stripeConfig();
+  return config.secretKey && config.webhookSecret;
 }
 
 export function stripe() {

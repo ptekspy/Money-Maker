@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { currentSession } from "@/lib/auth";
+import { getInstallation } from "@/lib/data";
 import { appUrl, requiredEnv } from "@/lib/env";
 import { installationRepositories, userInstallations } from "@/lib/github";
 import { stripe, stripeConfigured } from "@/lib/stripe";
@@ -27,6 +28,7 @@ export async function POST(request: NextRequest) {
       { error: "Installation not available" },
       { status: 403 },
     );
+  const installation = await getInstallation(installationId);
   const repositories = await installationRepositories(installationId);
   const quantity = Math.max(
     1,
@@ -36,6 +38,8 @@ export async function POST(request: NextRequest) {
   const checkout = await stripe().checkout.sessions.create({
     mode: "subscription",
     customer_email: undefined,
+    client_reference_id: String(installationId),
+    billing_address_collection: "auto",
     line_items: [
       { price: requiredEnv("STRIPE_CONTRACTGUARD_PRICE_ID"), quantity },
     ],
@@ -46,6 +50,8 @@ export async function POST(request: NextRequest) {
     metadata: {
       installationId: String(installationId),
       githubLogin: session.login,
+      accountLogin: installation?.accountLogin ?? "",
+      privateRepositories: String(quantity),
     },
   });
   return NextResponse.redirect(checkout.url ?? `${origin}/dashboard`, 303);

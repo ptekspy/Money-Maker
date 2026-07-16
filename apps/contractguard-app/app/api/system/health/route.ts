@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { listRecentOperationalEvents } from "@/lib/data";
 import { env } from "@/lib/env";
+import { stripeConfig } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 
@@ -14,6 +15,7 @@ export async function GET() {
       webhookSecretConfigured: Boolean(
         env("CONTRACTGUARD_GITHUB_WEBHOOK_SECRET"),
       ),
+      stripe: stripeConfig(),
       recentOperationalEvents: recentEvents.length,
     });
   } catch (error) {

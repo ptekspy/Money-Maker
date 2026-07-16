@@ -146,7 +146,11 @@ export default function Home() {
 
       <footer className="shell footer">
         <span>Copyright 2026 API Contract Guard</span>
-        <span>OpenAPI is a trademark of the Linux Foundation.</span>
+        <div>
+          <a href="/terms">Terms</a>
+          <a href="/privacy">Privacy</a>
+          <a href="/support">Support</a>
+        </div>
       </footer>
     </main>
   );

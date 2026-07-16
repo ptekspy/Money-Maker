@@ -98,6 +98,14 @@ export default async function Home() {
           <span>Teams that want PR checks before paid procurement</span>
         </div>
       </section>
+      <footer className="shell footer">
+        <span>Copyright 2026 API Contract Guard</span>
+        <div>
+          <a href="https://apicontractguard.com/terms">Terms</a>
+          <a href="https://apicontractguard.com/privacy">Privacy</a>
+          <a href="https://apicontractguard.com/support">Support</a>
+        </div>
+      </footer>
     </main>
   );
 }

@@ -461,6 +461,78 @@ h1 em {
   color: var(--muted);
   font-size: 12px;
 }
+.footer div {
+  display: flex;
+  gap: 16px;
+}
+.footer a {
+  color: var(--green-dark);
+  font-weight: 700;
+}
+.legal {
+  padding: 84px 0 110px;
+}
+.legal h1 {
+  max-width: 760px;
+  margin-bottom: 22px;
+}
+.legalIntro {
+  max-width: 760px;
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1.55;
+}
+.legalGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-top: 42px;
+}
+.legalGrid article {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.48);
+  padding: 26px;
+}
+.legalGrid h2 {
+  margin: 0 0 10px;
+  font-size: 22px;
+}
+.legalGrid p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.marketplacePanels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 42px;
+}
+.marketplacePanels article {
+  min-height: 260px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  padding: 28px;
+}
+.marketplacePanels span {
+  color: var(--green);
+  font:
+    800 11px var(--font-mono),
+    monospace;
+  text-transform: uppercase;
+}
+.marketplacePanels h2 {
+  margin: 52px 0 12px;
+  font-size: 26px;
+  letter-spacing: -0.03em;
+}
+.marketplacePanels p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
 @media (max-width: 800px) {
   .hero {
     padding: 68px 0;
@@ -471,7 +543,9 @@ h1 em {
   }
   .editor-grid,
   .feature-grid,
-  .proof-strip {
+  .proof-strip,
+  .legalGrid,
+  .marketplacePanels {
     grid-template-columns: 1fr;
   }
   .pricing-card {

@@ -6,13 +6,14 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "API Contract Guard — Catch breaking OpenAPI changes",
+  title: "API Contract Guard - Block breaking OpenAPI changes",
   description:
-    "Compare OpenAPI specifications in seconds. Find removed endpoints, required parameters and incompatible schema changes before they reach production.",
+    "Automated GitHub pull-request checks that block breaking OpenAPI changes before merge.",
   metadataBase: new URL("https://apicontractguard.com"),
   openGraph: {
     title: "API Contract Guard",
-    description: "Catch breaking OpenAPI changes before your customers do.",
+    description:
+      "Block breaking OpenAPI changes before merge with automated GitHub PR checks.",
     url: "https://apicontractguard.com",
     siteName: "API Contract Guard",
     type: "website",

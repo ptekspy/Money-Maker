@@ -12,6 +12,14 @@ import { userInstallations } from "@/lib/github";
 
 export const dynamic = "force-dynamic";
 
+const billingMessages = {
+  cancelled: "Checkout was cancelled. Protection stays on trial until it ends.",
+  "not-ready":
+    "Stripe billing is not configured yet. Send live keys when you are ready to test activation.",
+  success:
+    "Checkout completed. Stripe will update protection as soon as the billing webhook arrives.",
+} as const;
+
 function daysLeft(trialEndsAt?: string) {
   if (!trialEndsAt) return 0;
   return Math.max(
@@ -30,9 +38,17 @@ function shortDate(value?: string) {
   }).format(new Date(value));
 }
 
-export default async function Dashboard() {
+export default async function Dashboard({
+  searchParams,
+}: {
+  searchParams?: Promise<{ billing?: string }>;
+}) {
   const session = await currentSession();
   if (!session) redirect("/api/auth/github/start?returnTo=/dashboard");
+  const params = await searchParams;
+  const billingMessage =
+    params?.billing &&
+    billingMessages[params.billing as keyof typeof billingMessages];
 
   const github = await userInstallations(session.accessToken);
   const installations = await Promise.all(
@@ -93,6 +109,7 @@ export default async function Dashboard() {
             Add repositories
           </a>
         </header>
+        {billingMessage ? <div className="notice">{billingMessage}</div> : null}
         <section className="quickStart">
           <article>
             <span>1</span>
