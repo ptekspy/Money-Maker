@@ -43,6 +43,14 @@ export default $config({
       },
     });
 
+    const contractGuard = new sst.aws.StaticSite("ContractGuard", {
+      path: "apps/contractguard",
+      build: {
+        command: "npm run build",
+        output: "out",
+      },
+    });
+
     const landlordSaas =
       $app.stage === "production"
         ? (() => {
@@ -118,6 +126,7 @@ export default $config({
 
     return {
       quoteWinBackUrl: quoteWinBack.url,
+      contractGuardUrl: contractGuard.url,
       landlordSaasUrl: landlordSaas.url,
       landlordDataTable: landlordData.name,
       landlordDocumentsBucket: landlordDocuments.name,
