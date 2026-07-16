@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { EncryptJWT, jwtDecrypt } from "jose";
 import { cookies } from "next/headers";
-import { requiredEnv } from "@/lib/env";
+import { env, requiredEnv } from "@/lib/env";
 
 export const SESSION_COOKIE = "contractguard_session";
 export const STATE_COOKIE = "contractguard_oauth_state";
@@ -41,6 +41,15 @@ export async function openSession(value?: string): Promise<Session | null> {
 export async function currentSession(): Promise<Session | null> {
   const cookieStore = await cookies();
   return openSession(cookieStore.get(SESSION_COOKIE)?.value);
+}
+
+export function isAdminLogin(login: string) {
+  const configured = env("CONTRACTGUARD_ADMIN_LOGINS") || "ptekspy";
+  return configured
+    .split(",")
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean)
+    .includes(login.toLowerCase());
 }
 
 export function oauthValues() {

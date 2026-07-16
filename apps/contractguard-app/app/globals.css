@@ -316,6 +316,9 @@ h1 em {
 .metricGrid {
   grid-template-columns: repeat(3, minmax(0, 1fr)) 180px;
 }
+.adminMetrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
 .metricGrid strong {
   display: block;
   margin-top: 10px;
@@ -366,6 +369,30 @@ h1 em {
 .installationTop p {
   margin: 0;
   color: var(--muted);
+}
+.journeyCard {
+  margin-top: 18px;
+  border: 1px solid #d7e7dc;
+  border-radius: 14px;
+  background: #f0faf3;
+  padding: 18px;
+}
+.journeyCard span {
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.journeyCard strong {
+  display: block;
+  margin: 8px 0 4px;
+  font-size: 18px;
+}
+.journeyCard p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
 }
 .status {
   padding: 8px 11px;
@@ -455,16 +482,85 @@ h1 em {
 .opsRow small {
   color: var(--muted);
 }
+.adminGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 16px 0;
+}
+.adminPanel {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  padding: 24px;
+}
+.adminPanel h2 {
+  margin: 0 0 16px;
+  font-size: 22px;
+}
+.stateList {
+  display: grid;
+  gap: 10px;
+}
+.stateList span {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  border-top: 1px solid #eceeea;
+  padding-top: 10px;
+  color: var(--muted);
+}
+.stateList strong {
+  color: var(--ink);
+}
+.adminInstall {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 16px 0;
+  border-top: 1px solid #eceeea;
+}
+.adminInstall > div:first-child {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+.adminInstall small {
+  color: var(--muted);
+}
+.adminInstallMeta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: end;
+}
+.adminInstallMeta span {
+  height: max-content;
+  border-radius: 999px;
+  background: #e9f7ef;
+  color: var(--green-dark);
+  padding: 6px 9px;
+  font:
+    700 11px ui-monospace,
+    monospace;
+}
+.adminInstall > p {
+  grid-column: 1 / -1;
+}
 @media (max-width: 760px) {
   .steps,
   .demoProof,
   .distributionGrid,
   .quickStart,
-  .metricGrid {
+  .metricGrid,
+  .adminMetrics,
+  .adminGrid {
     grid-template-columns: 1fr;
   }
   .dashboardHeader,
-  .installationTop {
+  .installationTop,
+  .adminInstall {
     align-items: start;
     flex-direction: column;
   }

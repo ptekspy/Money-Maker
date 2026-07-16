@@ -119,7 +119,10 @@ export default $config({
           process.env.CONTRACTGUARD_SESSION_SECRET ??
           "preview-development-only",
         CONTRACTGUARD_APP_URL:
-          process.env.CONTRACTGUARD_APP_URL ?? "https://app.apicontractguard.com",
+          process.env.CONTRACTGUARD_APP_URL ??
+          "https://app.apicontractguard.com",
+        CONTRACTGUARD_ADMIN_LOGINS:
+          process.env.CONTRACTGUARD_ADMIN_LOGINS ?? "ptekspy",
         STRIPE_SECRET_KEY: process.env.CONTRACTGUARD_STRIPE_SECRET_KEY ?? "",
         STRIPE_WEBHOOK_SECRET:
           process.env.CONTRACTGUARD_STRIPE_WEBHOOK_SECRET ?? "",

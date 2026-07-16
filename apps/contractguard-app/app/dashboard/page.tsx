@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { currentSession } from "@/lib/auth";
+import { currentSession, isAdminLogin } from "@/lib/auth";
 import {
+  type CheckRecord,
   getInstallation,
   listRecentChecks,
   listRecentOperationalEvents,
@@ -38,6 +39,75 @@ function shortDate(value?: string) {
   }).format(new Date(value));
 }
 
+function journeyMessage(input: {
+  checks: CheckRecord[];
+  profile: Awaited<ReturnType<typeof getInstallation>>;
+}) {
+  const { checks, profile } = input;
+  if (!profile) {
+    return {
+      action: "Refresh dashboard",
+      message:
+        "GitHub reports the installation, but the local profile is still being created.",
+      title: "Connecting installation",
+    };
+  }
+  if (profile.billingStatus === "active") {
+    return {
+      action: "Keep shipping",
+      message:
+        "Paid protection is active. Pull requests will continue to receive Contract Guard checks.",
+      title: "Paid protection active",
+    };
+  }
+  if (profile.billingStatus === "past_due") {
+    return {
+      action: "Update payment",
+      message:
+        "Stripe has reported a payment issue. Protection should be treated as at risk until billing is fixed.",
+      title: "Payment needs attention",
+    };
+  }
+  if (profile.billingStatus === "cancelled" || profile.suspendedAt) {
+    return {
+      action: "Reactivate",
+      message:
+        "This installation is cancelled or suspended. Reactivate billing before relying on PR protection.",
+      title: "Protection paused",
+    };
+  }
+  if (daysLeft(profile.trialEndsAt) === 0) {
+    return {
+      action: "Activate protection",
+      message:
+        "The trial has ended. GitHub checks will ask for activation until billing is connected.",
+      title: "Trial ended",
+    };
+  }
+  if (!checks.length) {
+    return {
+      action: "Open a pull request",
+      message:
+        "The installation is connected. Change an OpenAPI file on a branch to trigger the first check.",
+      title: "Ready for first check",
+    };
+  }
+  if (checks.some((check) => check.conclusion === "failure")) {
+    return {
+      action: "Review failed PR",
+      message:
+        "Contract Guard has caught at least one breaking API change on this installation.",
+      title: "Breaking change caught",
+    };
+  }
+  return {
+    action: "Keep protected",
+    message:
+      "Checks are running. Passing and neutral checks will appear here as repositories change.",
+    title: "Checks are active",
+  };
+}
+
 export default async function Dashboard({
   searchParams,
 }: {
@@ -45,6 +115,7 @@ export default async function Dashboard({
 }) {
   const session = await currentSession();
   if (!session) redirect("/api/auth/github/start?returnTo=/dashboard");
+  const admin = isAdminLogin(session.login);
   const params = await searchParams;
   const billingMessage =
     params?.billing &&
@@ -53,9 +124,6 @@ export default async function Dashboard({
   const github = await userInstallations(session.accessToken);
   const installations = await Promise.all(
     github.installations.map(async (item) => {
-      // Installations created before a webhook was configured will not have a
-      // profile yet. Provision it here so the dashboard always reflects the
-      // current GitHub App installation instead of remaining in "Connecting".
       await saveInstallation({
         installationId: item.id,
         accountId: item.account.id,
@@ -65,7 +133,7 @@ export default async function Dashboard({
       });
       const profile = await getInstallation(item.id);
       const checks = profile ? await listRecentChecks(item.id) : [];
-      return { item, profile, checks };
+      return { checks, item, profile };
     }),
   );
   const operationalEvents = await listRecentOperationalEvents(8);
@@ -91,6 +159,7 @@ export default async function Dashboard({
         <div className="account">
           <img src={session.avatarUrl} alt="" />
           {session.login}
+          {admin ? <Link href="/admin">Admin</Link> : null}
           <a href="/api/auth/logout">Sign out</a>
         </div>
       </nav>
@@ -160,67 +229,79 @@ export default async function Dashboard({
             </a>
           </div>
         ) : (
-          installations.map(({ item, profile, checks }) => (
-            <section className="installation" key={item.id}>
-              <div className="installationTop">
-                <div>
-                  <h2>{item.account.login}</h2>
-                  <p>
-                    {item.repository_selection === "all"
-                      ? "All repositories"
-                      : "Selected repositories"}
-                  </p>
+          installations.map(({ checks, item, profile }) => {
+            const journey = journeyMessage({ checks, profile });
+            return (
+              <section className="installation" key={item.id}>
+                <div className="installationTop">
+                  <div>
+                    <h2>{item.account.login}</h2>
+                    <p>
+                      {item.repository_selection === "all"
+                        ? "All repositories"
+                        : "Selected repositories"}
+                    </p>
+                  </div>
+                  <div
+                    className={`status ${profile?.billingStatus ?? "pending"}`}
+                  >
+                    {profile?.billingStatus === "active"
+                      ? "Active"
+                      : profile
+                        ? `${daysLeft(profile.trialEndsAt)} trial days left`
+                        : "Connecting"}
+                  </div>
                 </div>
-                <div
-                  className={`status ${profile?.billingStatus ?? "pending"}`}
-                >
-                  {profile?.billingStatus === "active"
-                    ? "Active"
-                    : profile
-                      ? `${daysLeft(profile.trialEndsAt)} trial days left`
-                      : "Connecting"}
+                <div className="journeyCard">
+                  <span>{journey.action}</span>
+                  <strong>{journey.title}</strong>
+                  <p>{journey.message}</p>
                 </div>
-              </div>
-              {profile &&
-              daysLeft(profile.trialEndsAt) === 0 &&
-              profile.billingStatus !== "active" ? (
-                <form action="/api/billing/checkout" method="post">
-                  <input type="hidden" name="installationId" value={item.id} />
-                  <button className="button primary" type="submit">
-                    Activate protection
-                  </button>
-                </form>
-              ) : null}
-              <div className="checks">
-                <h3>Recent checks</h3>
-                {!checks.length ? (
-                  <p className="muted">
-                    Open a pull request that changes an OpenAPI file. The first
-                    check will appear here and on the GitHub PR.
-                  </p>
-                ) : (
-                  checks.map((check) => (
-                    <div className="checkRow" key={String(check.sk)}>
-                      <span className={`dot ${String(check.conclusion)}`} />
-                      <div>
-                        <strong>
-                          {String(check.fullName)} #
-                          {String(check.pullRequestNumber)}
-                        </strong>
-                        <small>
-                          {String(check.specPath ?? "No contract found")}
-                        </small>
+                {profile &&
+                daysLeft(profile.trialEndsAt) === 0 &&
+                profile.billingStatus !== "active" ? (
+                  <form action="/api/billing/checkout" method="post">
+                    <input
+                      type="hidden"
+                      name="installationId"
+                      value={item.id}
+                    />
+                    <button className="button primary" type="submit">
+                      Activate protection
+                    </button>
+                  </form>
+                ) : null}
+                <div className="checks">
+                  <h3>Recent checks</h3>
+                  {!checks.length ? (
+                    <p className="muted">
+                      Open a pull request that changes an OpenAPI file. The
+                      first check will appear here and on the GitHub PR.
+                    </p>
+                  ) : (
+                    checks.map((check) => (
+                      <div className="checkRow" key={String(check.sk)}>
+                        <span className={`dot ${String(check.conclusion)}`} />
+                        <div>
+                          <strong>
+                            {String(check.fullName)} #
+                            {String(check.pullRequestNumber)}
+                          </strong>
+                          <small>
+                            {String(check.specPath ?? "No contract found")}
+                          </small>
+                        </div>
+                        <span>
+                          {String(check.breakingChanges)} breaking -{" "}
+                          {shortDate(String(check.createdAt ?? ""))}
+                        </span>
                       </div>
-                      <span>
-                        {String(check.breakingChanges)} breaking ·{" "}
-                        {shortDate(String(check.createdAt ?? ""))}
-                      </span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </section>
-          ))
+                    ))
+                  )}
+                </div>
+              </section>
+            );
+          })
         )}
         <section className="opsPanel">
           <div>
@@ -236,8 +317,8 @@ export default async function Dashboard({
                 <div>
                   <strong>{event.message}</strong>
                   <small>
-                    {event.fullName ? `${event.fullName} · ` : ""}
-                    {event.detail ?? "No details"} ·{" "}
+                    {event.fullName ? `${event.fullName} - ` : ""}
+                    {event.detail ?? "No details"} -{" "}
                     {shortDate(event.createdAt)}
                   </small>
                 </div>

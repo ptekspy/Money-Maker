@@ -5,6 +5,7 @@ import {
   GetCommand,
   PutCommand,
   QueryCommand,
+  ScanCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { requiredEnv } from "@/lib/env";
@@ -29,6 +30,31 @@ export type Installation = {
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
   suspendedAt?: string;
+};
+
+export type RepositoryRecord = {
+  pk: string;
+  sk: string;
+  installationId: number;
+  repositoryId: number;
+  fullName: string;
+  private: boolean;
+  removed?: boolean;
+  updatedAt: string;
+};
+
+export type CheckRecord = {
+  pk: string;
+  sk: string;
+  installationId: number;
+  repositoryId: number;
+  fullName: string;
+  pullRequestNumber: number;
+  headSha: string;
+  conclusion: string;
+  breakingChanges: number;
+  specPath?: string;
+  createdAt: string;
 };
 
 export type OperationalEvent = {
@@ -108,6 +134,18 @@ export async function getInstallationsForAccount(
   return (result.Items ?? []) as Installation[];
 }
 
+export async function listAllInstallations(limit = 100) {
+  const result = await db.send(
+    new ScanCommand({
+      TableName: tableName(),
+      FilterExpression: "sk = :profile",
+      ExpressionAttributeValues: { ":profile": "PROFILE" },
+      Limit: limit,
+    }),
+  );
+  return (result.Items ?? []) as Installation[];
+}
+
 export async function setInstallationSuspended(
   installationId: number,
   suspended: boolean,
@@ -156,6 +194,22 @@ export async function saveRepository(input: {
       },
     }),
   );
+}
+
+export async function listRepositories(installationId: number) {
+  const result = await db.send(
+    new QueryCommand({
+      TableName: tableName(),
+      KeyConditionExpression: "pk = :pk AND begins_with(sk, :prefix)",
+      ExpressionAttributeValues: {
+        ":pk": `INSTALLATION#${installationId}`,
+        ":prefix": "REPOSITORY#",
+      },
+      ScanIndexForward: false,
+      Limit: 100,
+    }),
+  );
+  return (result.Items ?? []) as RepositoryRecord[];
 }
 
 export async function recordCheck(input: {
@@ -235,7 +289,7 @@ export async function listRecentChecks(installationId: number) {
       Limit: 20,
     }),
   );
-  return result.Items ?? [];
+  return (result.Items ?? []) as CheckRecord[];
 }
 
 export async function claimWebhook(deliveryId: string): Promise<boolean> {
