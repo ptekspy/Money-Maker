@@ -15,6 +15,13 @@ export async function GET(request: NextRequest) {
   const expectedState = request.cookies.get(STATE_COOKIE)?.value;
   const verifier = request.cookies.get(VERIFIER_COOKIE)?.value;
   if (!code || !state || state !== expectedState || !verifier) {
+    console.warn("GitHub OAuth callback rejected", {
+      hasCode: Boolean(code),
+      hasState: Boolean(state),
+      hasExpectedState: Boolean(expectedState),
+      stateMatches: Boolean(state && expectedState && state === expectedState),
+      hasVerifier: Boolean(verifier),
+    });
     return NextResponse.redirect(new URL("/?auth=failed", request.url));
   }
 
@@ -36,9 +43,17 @@ export async function GET(request: NextRequest) {
       }),
     },
   );
-  const token = (await tokenResponse.json()) as { access_token?: string };
-  if (!token.access_token)
+  const token = (await tokenResponse.json()) as {
+    access_token?: string;
+    error?: string;
+  };
+  if (!token.access_token) {
+    console.warn("GitHub OAuth token exchange rejected", {
+      status: tokenResponse.status,
+      error: token.error ?? "unknown",
+    });
     return NextResponse.redirect(new URL("/?auth=failed", request.url));
+  }
   const user = await githubFetch<{
     id: number;
     login: string;
