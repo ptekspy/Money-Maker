@@ -57,6 +57,71 @@ export default $config({
       },
     });
 
+    const contractGuardData = new sst.aws.Dynamo("ContractGuardData", {
+      fields: {
+        pk: "string",
+        sk: "string",
+        gsi1pk: "string",
+        gsi1sk: "string",
+      },
+      primaryIndex: { hashKey: "pk", rangeKey: "sk" },
+      globalIndexes: {
+        LookupIndex: { hashKey: "gsi1pk", rangeKey: "gsi1sk" },
+      },
+      ttl: "expiresAt",
+    });
+
+    const contractGuardChecks = new sst.aws.Queue("ContractGuardChecks", {
+      visibilityTimeout: "5 minutes",
+    });
+
+    contractGuardChecks.subscribe(
+      {
+        handler: "infra/contractguard-check.handler",
+        timeout: "2 minutes",
+        link: [contractGuardData],
+        environment: {
+          CONTRACTGUARD_TABLE_NAME: contractGuardData.name,
+          CONTRACTGUARD_GITHUB_APP_ID:
+            process.env.CONTRACTGUARD_GITHUB_APP_ID ?? "",
+          CONTRACTGUARD_GITHUB_PRIVATE_KEY:
+            process.env.CONTRACTGUARD_GITHUB_PRIVATE_KEY ?? "",
+          CONTRACTGUARD_APP_URL: process.env.CONTRACTGUARD_APP_URL ?? "",
+        },
+      },
+      { batch: { size: 5, partialResponses: true } },
+    );
+
+    const contractGuardApp = new sst.aws.Nextjs("ContractGuardApp", {
+      path: "apps/contractguard-app",
+      link: [contractGuardData, contractGuardChecks],
+      environment: {
+        CONTRACTGUARD_TABLE_NAME: contractGuardData.name,
+        CONTRACTGUARD_QUEUE_URL: contractGuardChecks.url,
+        CONTRACTGUARD_GITHUB_APP_ID:
+          process.env.CONTRACTGUARD_GITHUB_APP_ID ?? "",
+        CONTRACTGUARD_GITHUB_CLIENT_ID:
+          process.env.CONTRACTGUARD_GITHUB_CLIENT_ID ?? "",
+        CONTRACTGUARD_GITHUB_CLIENT_SECRET:
+          process.env.CONTRACTGUARD_GITHUB_CLIENT_SECRET ?? "",
+        CONTRACTGUARD_GITHUB_PRIVATE_KEY:
+          process.env.CONTRACTGUARD_GITHUB_PRIVATE_KEY ?? "",
+        CONTRACTGUARD_GITHUB_WEBHOOK_SECRET:
+          process.env.CONTRACTGUARD_GITHUB_WEBHOOK_SECRET ?? "",
+        CONTRACTGUARD_GITHUB_APP_SLUG:
+          process.env.CONTRACTGUARD_GITHUB_APP_SLUG ?? "api-contract-guard",
+        CONTRACTGUARD_SESSION_SECRET:
+          process.env.CONTRACTGUARD_SESSION_SECRET ??
+          "preview-development-only",
+        CONTRACTGUARD_APP_URL: process.env.CONTRACTGUARD_APP_URL ?? "",
+        STRIPE_SECRET_KEY: process.env.CONTRACTGUARD_STRIPE_SECRET_KEY ?? "",
+        STRIPE_WEBHOOK_SECRET:
+          process.env.CONTRACTGUARD_STRIPE_WEBHOOK_SECRET ?? "",
+        STRIPE_CONTRACTGUARD_PRICE_ID:
+          process.env.CONTRACTGUARD_STRIPE_PRICE_ID ?? "",
+      },
+    });
+
     const landlordSaas =
       $app.stage === "production"
         ? (() => {
@@ -133,6 +198,8 @@ export default $config({
     return {
       quoteWinBackUrl: quoteWinBack.url,
       contractGuardUrl: contractGuard.url,
+      contractGuardAppUrl: contractGuardApp.url,
+      contractGuardDataTable: contractGuardData.name,
       landlordSaasUrl: landlordSaas.url,
       landlordDataTable: landlordData.name,
       landlordDocumentsBucket: landlordDocuments.name,

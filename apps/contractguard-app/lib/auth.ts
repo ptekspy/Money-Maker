@@ -1,0 +1,58 @@
+import { createHash, randomBytes } from "node:crypto";
+import { EncryptJWT, jwtDecrypt } from "jose";
+import { cookies } from "next/headers";
+import { requiredEnv } from "@/lib/env";
+
+export const SESSION_COOKIE = "contractguard_session";
+export const STATE_COOKIE = "contractguard_oauth_state";
+export const VERIFIER_COOKIE = "contractguard_pkce_verifier";
+
+export type Session = {
+  userId: number;
+  login: string;
+  avatarUrl: string;
+  accessToken: string;
+};
+
+function sessionKey() {
+  return createHash("sha256")
+    .update(requiredEnv("CONTRACTGUARD_SESSION_SECRET"))
+    .digest();
+}
+
+export async function sealSession(session: Session): Promise<string> {
+  return new EncryptJWT(session)
+    .setProtectedHeader({ alg: "dir", enc: "A256GCM" })
+    .setIssuedAt()
+    .setExpirationTime("8h")
+    .encrypt(sessionKey());
+}
+
+export async function openSession(value?: string): Promise<Session | null> {
+  if (!value) return null;
+  try {
+    const { payload } = await jwtDecrypt(value, sessionKey());
+    return payload as unknown as Session;
+  } catch {
+    return null;
+  }
+}
+
+export async function currentSession(): Promise<Session | null> {
+  const cookieStore = await cookies();
+  return openSession(cookieStore.get(SESSION_COOKIE)?.value);
+}
+
+export function oauthValues() {
+  const state = randomBytes(24).toString("base64url");
+  const verifier = randomBytes(48).toString("base64url");
+  const challenge = createHash("sha256").update(verifier).digest("base64url");
+  return { state, verifier, challenge };
+}
+
+export const secureCookie = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  path: "/",
+};

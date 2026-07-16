@@ -1,0 +1,292 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #10211b;
+  --muted: #607068;
+  --paper: #f4f1e9;
+  --card: #fffdf8;
+  --line: #d8ddd7;
+  --green: #1b6b4a;
+  --green-dark: #0d4932;
+  --lime: #c9f66c;
+  --red: #c3483d;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+.shell {
+  width: min(1120px, calc(100% - 40px));
+  margin-inline: auto;
+}
+.nav {
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(16, 33, 27, 0.14);
+}
+.brand {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.brandMark {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #fff;
+  background: var(--green);
+  font:
+    700 12px ui-monospace,
+    monospace;
+}
+.textLink {
+  color: var(--green-dark);
+  font-weight: 700;
+  font-size: 14px;
+}
+.hero {
+  padding: 100px 0 76px;
+}
+.eyebrow {
+  color: var(--green);
+  font:
+    700 12px ui-monospace,
+    monospace;
+  letter-spacing: 0.1em;
+}
+h1 {
+  max-width: 900px;
+  margin: 23px 0 28px;
+  font-size: clamp(48px, 7vw, 84px);
+  line-height: 0.99;
+  letter-spacing: -0.06em;
+}
+h1 em {
+  color: var(--green);
+  font-style: normal;
+}
+.lede {
+  max-width: 700px;
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1.55;
+}
+.actions {
+  margin-top: 34px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.button {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  padding: 0 19px;
+  border: 1px solid transparent;
+  font-weight: 750;
+  cursor: pointer;
+}
+.primary {
+  background: var(--green);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(13, 73, 50, 0.18);
+}
+.primary:hover {
+  background: var(--green-dark);
+}
+.secondary {
+  border-color: var(--line);
+}
+.proof {
+  margin-top: 56px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  color: #45564e;
+  font:
+    600 13px ui-monospace,
+    monospace;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  padding-bottom: 90px;
+}
+.steps article {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  padding: 28px;
+}
+.steps b {
+  color: var(--green);
+  font:
+    700 12px ui-monospace,
+    monospace;
+}
+.steps h2 {
+  margin: 24px 0 8px;
+  font-size: 23px;
+}
+.steps p,
+.muted {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+.account img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+.account a {
+  margin-left: 8px;
+  color: var(--muted);
+}
+.dashboard {
+  padding: 58px 0 90px;
+}
+.dashboardHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+.dashboardHeader h1 {
+  font-size: 48px;
+  margin: 10px 0 0;
+}
+.emptyState,
+.installation {
+  padding: 32px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+}
+.emptyState p {
+  color: var(--muted);
+  margin-bottom: 22px;
+}
+.installation {
+  margin-top: 16px;
+}
+.installationTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: start;
+}
+.installation h2 {
+  margin: 0 0 6px;
+}
+.installationTop p {
+  margin: 0;
+  color: var(--muted);
+}
+.status {
+  padding: 8px 11px;
+  border-radius: 99px;
+  background: #e9f7ef;
+  color: var(--green);
+  font:
+    700 11px ui-monospace,
+    monospace;
+}
+.status.past_due,
+.status.cancelled {
+  background: #fff0ee;
+  color: var(--red);
+}
+.checks {
+  margin-top: 28px;
+  border-top: 1px solid var(--line);
+  padding-top: 22px;
+}
+.checks h3 {
+  margin: 0 0 16px;
+}
+.checkRow {
+  display: grid;
+  grid-template-columns: 12px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-top: 1px solid #eceeea;
+  font-size: 13px;
+}
+.checkRow div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.checkRow small,
+.checkRow > span:last-child {
+  color: var(--muted);
+}
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #999;
+}
+.dot.success {
+  background: var(--green);
+}
+.dot.failure {
+  background: var(--red);
+}
+@media (max-width: 760px) {
+  .steps {
+    grid-template-columns: 1fr;
+  }
+  .dashboardHeader,
+  .installationTop {
+    align-items: start;
+    flex-direction: column;
+  }
+  .account {
+    font-size: 0;
+  }
+  .account a {
+    font-size: 13px;
+  }
+  .dashboardHeader h1 {
+    font-size: 38px;
+  }
+  .hero {
+    padding-top: 70px;
+  }
+  .checkRow {
+    grid-template-columns: 12px 1fr;
+  }
+  .checkRow > span:last-child {
+    grid-column: 2;
+  }
+}
