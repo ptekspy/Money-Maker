@@ -49,6 +49,12 @@ export default $config({
         command: "npm run build",
         output: "out",
       },
+      domain: {
+        name: "apicontractguard.com",
+        redirects: ["www.apicontractguard.com"],
+        dns: false,
+        cert: "arn:aws:acm:us-east-1:077101397910:certificate/64d719d7-304c-4356-af31-eea11a30e4ee",
+      },
     });
 
     const landlordSaas =
