@@ -88,6 +88,22 @@ export async function POST(request: NextRequest) {
     ) &&
     !payload.pull_request.draft
   ) {
+    // Provision defensively here too. This covers installations that existed
+    // before a webhook secret was configured or whose installation event was
+    // otherwise missed, without delaying the PR check.
+    await saveInstallation({
+      installationId: payload.installation.id,
+      accountId: payload.installation.account.id,
+      accountLogin: payload.installation.account.login,
+      accountType: payload.installation.account.type,
+      repositorySelection: payload.installation.repository_selection,
+    });
+    await saveRepository({
+      installationId: payload.installation.id,
+      repositoryId: payload.repository.id,
+      fullName: payload.repository.full_name,
+      private: payload.repository.private,
+    });
     await sqs.send(
       new SendMessageCommand({
         QueueUrl: requiredEnv("CONTRACTGUARD_QUEUE_URL"),
