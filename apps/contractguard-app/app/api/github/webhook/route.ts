@@ -15,6 +15,20 @@ const sqs = new SQSClient({});
 
 type Payload = Record<string, any>;
 
+async function saveInstallationFromPayload(payload: Payload) {
+  const installation = payload.installation;
+  const account = installation?.account ?? payload.repository?.owner;
+  if (!installation?.id || !account?.id || !account?.login) return;
+
+  await saveInstallation({
+    installationId: installation.id,
+    accountId: account.id,
+    accountLogin: account.login,
+    accountType: account.type ?? "User",
+    repositorySelection: installation.repository_selection ?? "selected",
+  });
+}
+
 export async function POST(request: NextRequest) {
   const deliveryId = request.headers.get("x-github-delivery");
   const event = request.headers.get("x-github-event");
@@ -34,13 +48,7 @@ export async function POST(request: NextRequest) {
     const payload = JSON.parse(body) as Payload;
     if (event === "installation") {
       if (payload.action === "created") {
-        await saveInstallation({
-          installationId: payload.installation.id,
-          accountId: payload.installation.account.id,
-          accountLogin: payload.installation.account.login,
-          accountType: payload.installation.account.type,
-          repositorySelection: payload.installation.repository_selection,
-        });
+        await saveInstallationFromPayload(payload);
         await Promise.all(
           (payload.repositories ?? []).map((repo: Payload) =>
             saveRepository({
@@ -96,13 +104,7 @@ export async function POST(request: NextRequest) {
       // Provision defensively here too. This covers installations that existed
       // before a webhook secret was configured or whose installation event was
       // otherwise missed, without delaying the PR check.
-      await saveInstallation({
-        installationId: payload.installation.id,
-        accountId: payload.installation.account.id,
-        accountLogin: payload.installation.account.login,
-        accountType: payload.installation.account.type,
-        repositorySelection: payload.installation.repository_selection,
-      });
+      await saveInstallationFromPayload(payload);
       await saveRepository({
         installationId: payload.installation.id,
         repositoryId: payload.repository.id,
