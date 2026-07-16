@@ -1,0 +1,29 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "globalDependencies": [".env", ".env.local"],
+  "globalEnv": [
+    "DATABASE_URL",
+    "ADMIN_PASSWORD",
+    "OLLAMA_BASE_URL",
+    "OLLAMA_MODEL",
+    "GMAIL_USER",
+    "GMAIL_APP_PASSWORD"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "out/**"]
+    },
+    "check": {
+      "dependsOn": ["^check"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
