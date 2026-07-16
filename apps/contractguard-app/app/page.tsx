@@ -5,6 +5,7 @@ import { githubAppSlug } from "@/lib/env";
 export default async function Home() {
   const session = await currentSession();
   const installUrl = `https://github.com/apps/${githubAppSlug()}/installations/new`;
+
   return (
     <main>
       <nav className="nav shell">
@@ -35,12 +36,37 @@ export default async function Home() {
           <a className="button secondary" href="https://apicontractguard.com">
             Try the free checker
           </a>
+          <a
+            className="button secondary"
+            href="https://github.com/ptekspy/contract-guard-live-demo/pull/1/checks"
+          >
+            View live proof
+          </a>
         </div>
         <div className="proof">
           <span>14-day free trial</span>
           <span>No card required</span>
-          <span>£9 / private repo / month</span>
+          <span>GBP 9 / private repo / month</span>
         </div>
+      </section>
+      <section className="demoProof shell">
+        <div>
+          <p className="eyebrow">WORKING GITHUB CHECK</p>
+          <h2>Proven on a real pull request.</h2>
+          <p>
+            The demo repository removes the <code>GET /health</code>{" "}
+            <code>200</code> response. Contract Guard catches it and fails the
+            PR with a precise breaking-change message.
+          </p>
+        </div>
+        <a
+          className="proofCard"
+          href="https://github.com/ptekspy/contract-guard-live-demo/pull/1/checks"
+        >
+          <span>API Contract Guard</span>
+          <strong>1 breaking API change</strong>
+          <small>GET /health - 200 response was removed</small>
+        </a>
       </section>
       <section className="steps shell">
         <article>
@@ -61,6 +87,16 @@ export default async function Home() {
             check.
           </p>
         </article>
+      </section>
+      <section className="distribution shell">
+        <p className="eyebrow">READY FOR EARLY USERS</p>
+        <h2>Best fit right now</h2>
+        <div className="distributionGrid">
+          <span>Small SaaS teams with OpenAPI specs</span>
+          <span>Platform teams reviewing public API changes</span>
+          <span>Agencies maintaining client integrations</span>
+          <span>Teams that want PR checks before paid procurement</span>
+        </div>
       </section>
     </main>
   );

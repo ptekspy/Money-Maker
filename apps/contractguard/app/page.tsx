@@ -1,5 +1,9 @@
 import { ContractChecker } from "@/components/contract-checker";
 
+const appUrl = "https://app.apicontractguard.com";
+const demoUrl =
+  "https://github.com/ptekspy/contract-guard-live-demo/pull/1/checks";
+
 export default function Home() {
   return (
     <main>
@@ -8,47 +12,74 @@ export default function Home() {
           <span className="brand-mark">CG</span>
           <span>API Contract Guard</span>
         </a>
-        <a className="nav-link" href="#checker">
-          Run a free check
-        </a>
+        <div className="nav-actions">
+          <a className="nav-link" href="#checker">
+            Free checker
+          </a>
+          <a className="nav-link" href={`${appUrl}/api/auth/github/start`}>
+            Sign in
+          </a>
+        </div>
       </nav>
 
       <section className="hero shell" id="top">
         <div className="eyebrow">
-          <span /> OpenAPI 3.x contract checks
+          <span /> GitHub checks for OpenAPI teams
         </div>
         <h1>
-          Catch breaking API changes <em>before your customers do.</em>
+          Block breaking API changes <em>before merge.</em>
         </h1>
         <p className="hero-copy">
-          Compare two OpenAPI specifications in your browser. Get a clear,
-          downloadable report of removed endpoints, new required inputs and
-          incompatible schemas.
+          API Contract Guard installs as a GitHub App, compares OpenAPI specs on
+          every pull request, and fails the check when an endpoint, response,
+          parameter or schema breaks compatibility.
         </p>
         <div className="hero-actions">
-          <a className="button primary" href="#checker">
-            Check my API — free
+          <a className="button primary" href={`${appUrl}/`}>
+            Install the GitHub App
           </a>
-          <span>No account. No upload. Your specs stay in your browser.</span>
+          <a className="button secondary" href={demoUrl}>
+            View live proof
+          </a>
+          <span>No card required for the 14-day trial.</span>
         </div>
         <div className="trust-row">
-          <span>✓ JSON & YAML</span>
-          <span>✓ Runs locally</span>
-          <span>✓ Downloadable report</span>
-          <span>✓ No signup</span>
+          <span>GitHub App</span>
+          <span>OpenAPI JSON & YAML</span>
+          <span>PR checks</span>
+          <span>Real demo repo</span>
         </div>
+      </section>
+
+      <section className="proof-strip shell">
+        <article>
+          <span>Live proof</span>
+          <strong>1 breaking API change</strong>
+          <p>GET /health - 200 response was removed.</p>
+        </article>
+        <article>
+          <span>Setup path</span>
+          <strong>Install, PR, check</strong>
+          <p>A new repository can be protected without a sales call.</p>
+        </article>
+        <article>
+          <span>Pilot offer</span>
+          <strong>14 days, no card</strong>
+          <p>Stripe can activate billing after the trial.</p>
+        </article>
       </section>
 
       <section className="checker-section" id="checker">
         <div className="shell">
           <div className="section-heading">
             <div>
-              <span className="step">01</span>
+              <span className="step">FREE TOOL</span>
               <h2>Compare your contracts</h2>
             </div>
             <p>
               Use a production specification as the baseline and the proposed
-              version as the candidate.
+              version as the candidate. The automated GitHub App uses the same
+              comparison engine.
             </p>
           </div>
           <ContractChecker />
@@ -58,37 +89,37 @@ export default function Home() {
       <section className="how shell">
         <div className="section-heading">
           <div>
-            <span className="step">02</span>
+            <span className="step">AUTOPILOT FLOW</span>
             <h2>Built for the pull-request loop</h2>
           </div>
           <p>
-            The web checker is free. Automated repository checks are the paid
-            product.
+            The free checker builds trust. The paid product runs continuously in
+            GitHub with no manual review queue.
           </p>
         </div>
         <div className="feature-grid">
           <article>
             <span>1</span>
-            <h3>Compare</h3>
+            <h3>Install</h3>
             <p>
-              Parse OpenAPI JSON or YAML and map endpoints, parameters, request
-              bodies, responses and schemas.
+              A GitHub admin grants repository access through the GitHub App
+              installation flow.
             </p>
           </article>
           <article>
             <span>2</span>
-            <h3>Explain</h3>
+            <h3>Detect</h3>
             <p>
-              Turn a noisy structural diff into a prioritised list your team can
-              act on immediately.
+              Pull request events are queued and compared against the base
+              branch OpenAPI contract.
             </p>
           </article>
           <article>
             <span>3</span>
             <h3>Block</h3>
             <p>
-              Pro will run on every pull request and fail the check when a
-              breaking change is introduced.
+              Breaking endpoints, required inputs, removed responses and schema
+              changes fail the PR check.
             </p>
           </article>
         </div>
@@ -97,27 +128,24 @@ export default function Home() {
       <section className="pricing shell">
         <div className="pricing-card">
           <div>
-            <span className="step">COMING NEXT</span>
+            <span className="step">AVAILABLE NOW</span>
             <h2>Contract Guard Pro</h2>
             <p>
-              Automatic GitHub pull-request checks for private repositories.
+              Automatic GitHub pull-request checks for OpenAPI repositories.
             </p>
           </div>
           <div className="price">
-            <strong>£9</strong>
-            <span>/ repository / month</span>
+            <strong>GBP 9</strong>
+            <span>/ private repo / month</span>
           </div>
-          <a
-            className="button secondary"
-            href="mailto:hello@apicontractguard.com?subject=Contract%20Guard%20Pro%20early%20access"
-          >
-            Join early access
+          <a className="button secondary" href={`${appUrl}/`}>
+            Start trial
           </a>
         </div>
       </section>
 
       <footer className="shell footer">
-        <span>© 2026 API Contract Guard</span>
+        <span>Copyright 2026 API Contract Guard</span>
         <span>OpenAPI is a trademark of the Linux Foundation.</span>
       </footer>
     </main>

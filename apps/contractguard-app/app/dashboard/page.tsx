@@ -4,6 +4,7 @@ import { currentSession } from "@/lib/auth";
 import {
   getInstallation,
   listRecentChecks,
+  listRecentOperationalEvents,
   saveInstallation,
 } from "@/lib/data";
 import { githubAppSlug } from "@/lib/env";
@@ -17,6 +18,16 @@ function daysLeft(trialEndsAt?: string) {
     0,
     Math.ceil((Date.parse(trialEndsAt) - Date.now()) / 86400000),
   );
+}
+
+function shortDate(value?: string) {
+  if (!value) return "Just now";
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    month: "short",
+  }).format(new Date(value));
 }
 
 export default async function Dashboard() {
@@ -41,6 +52,18 @@ export default async function Dashboard() {
       return { item, profile, checks };
     }),
   );
+  const operationalEvents = await listRecentOperationalEvents(8);
+  const totalChecks = installations.reduce(
+    (count, installation) => count + installation.checks.length,
+    0,
+  );
+  const failingChecks = installations.reduce(
+    (count, installation) =>
+      count +
+      installation.checks.filter((check) => check.conclusion === "failure")
+        .length,
+    0,
+  );
   const installUrl = `https://github.com/apps/${githubAppSlug()}/installations/new`;
 
   return (
@@ -60,11 +83,57 @@ export default async function Dashboard() {
           <div>
             <p className="eyebrow">YOUR PROTECTION</p>
             <h1>Repository checks</h1>
+            <p className="dashboardIntro">
+              Install the GitHub App, open a pull request that changes
+              <code> openapi.yaml</code>, and Contract Guard posts a required
+              check back into GitHub.
+            </p>
           </div>
           <a className="button primary" href={installUrl}>
             Add repositories
           </a>
         </header>
+        <section className="quickStart">
+          <article>
+            <span>1</span>
+            <h2>Install</h2>
+            <p>Grant access to all repositories or only the ones to protect.</p>
+          </article>
+          <article>
+            <span>2</span>
+            <h2>Open a PR</h2>
+            <p>
+              Change an OpenAPI file on a branch and GitHub sends the event.
+            </p>
+          </article>
+          <article>
+            <span>3</span>
+            <h2>Read the check</h2>
+            <p>
+              Breaking endpoints, responses and required inputs fail the PR.
+            </p>
+          </article>
+        </section>
+        <section className="metricGrid">
+          <div>
+            <span>Connected installs</span>
+            <strong>{installations.length}</strong>
+          </div>
+          <div>
+            <span>Checks recorded</span>
+            <strong>{totalChecks}</strong>
+          </div>
+          <div>
+            <span>Breaking checks</span>
+            <strong>{failingChecks}</strong>
+          </div>
+          <a
+            href="https://github.com/ptekspy/contract-guard-live-demo/pull/1/checks"
+            className="metricLink"
+          >
+            Live proof PR
+          </a>
+        </section>
         {!installations.length ? (
           <div className="emptyState">
             <h2>No repositories connected yet</h2>
@@ -109,8 +178,8 @@ export default async function Dashboard() {
                 <h3>Recent checks</h3>
                 {!checks.length ? (
                   <p className="muted">
-                    Open a pull request that changes an OpenAPI file to run the
-                    first check.
+                    Open a pull request that changes an OpenAPI file. The first
+                    check will appear here and on the GitHub PR.
                   </p>
                 ) : (
                   checks.map((check) => (
@@ -125,7 +194,10 @@ export default async function Dashboard() {
                           {String(check.specPath ?? "No contract found")}
                         </small>
                       </div>
-                      <span>{String(check.breakingChanges)} breaking</span>
+                      <span>
+                        {String(check.breakingChanges)} breaking ·{" "}
+                        {shortDate(String(check.createdAt ?? ""))}
+                      </span>
                     </div>
                   ))
                 )}
@@ -133,6 +205,29 @@ export default async function Dashboard() {
             </section>
           ))
         )}
+        <section className="opsPanel">
+          <div>
+            <p className="eyebrow">OPERATIONS</p>
+            <h2>Recent system events</h2>
+          </div>
+          {!operationalEvents.length ? (
+            <p className="muted">No webhook or worker failures recorded.</p>
+          ) : (
+            operationalEvents.map((event) => (
+              <div className="opsRow" key={event.sk}>
+                <span className={`dot ${event.severity}`} />
+                <div>
+                  <strong>{event.message}</strong>
+                  <small>
+                    {event.fullName ? `${event.fullName} · ` : ""}
+                    {event.detail ?? "No details"} ·{" "}
+                    {shortDate(event.createdAt)}
+                  </small>
+                </div>
+              </div>
+            ))
+          )}
+        </section>
       </section>
     </main>
   );

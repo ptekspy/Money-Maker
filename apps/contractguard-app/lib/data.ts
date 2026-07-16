@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
@@ -28,6 +29,20 @@ export type Installation = {
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
   suspendedAt?: string;
+};
+
+export type OperationalEvent = {
+  pk: "OPS";
+  sk: string;
+  severity: "info" | "warning" | "error";
+  source: "webhook" | "worker" | "billing";
+  message: string;
+  detail?: string;
+  installationId?: number;
+  repositoryId?: number;
+  fullName?: string;
+  pullRequestNumber?: number;
+  createdAt: string;
 };
 
 function tableName() {
@@ -165,6 +180,46 @@ export async function recordCheck(input: {
       },
     }),
   );
+}
+
+export async function recordOperationalEvent(input: {
+  severity: OperationalEvent["severity"];
+  source: OperationalEvent["source"];
+  message: string;
+  detail?: string;
+  installationId?: number;
+  repositoryId?: number;
+  fullName?: string;
+  pullRequestNumber?: number;
+}) {
+  const now = new Date().toISOString();
+  await db.send(
+    new PutCommand({
+      TableName: tableName(),
+      Item: {
+        pk: "OPS",
+        sk: `EVENT#${now}#${randomUUID()}`,
+        ...input,
+        createdAt: now,
+      } satisfies OperationalEvent,
+    }),
+  );
+}
+
+export async function listRecentOperationalEvents(limit = 10) {
+  const result = await db.send(
+    new QueryCommand({
+      TableName: tableName(),
+      KeyConditionExpression: "pk = :pk AND begins_with(sk, :prefix)",
+      ExpressionAttributeValues: {
+        ":pk": "OPS",
+        ":prefix": "EVENT#",
+      },
+      ScanIndexForward: false,
+      Limit: limit,
+    }),
+  );
+  return (result.Items ?? []) as OperationalEvent[];
 }
 
 export async function listRecentChecks(installationId: number) {

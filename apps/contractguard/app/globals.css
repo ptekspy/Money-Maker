@@ -67,6 +67,11 @@ a {
   color: var(--green-dark);
   font-weight: 650;
 }
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
 .hero {
   padding: 94px 0 82px;
 }
@@ -157,6 +162,36 @@ h1 em {
   font:
     600 13px var(--font-mono),
     monospace;
+}
+.proof-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  padding: 0 0 78px;
+}
+.proof-strip article {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.46);
+  padding: 24px;
+}
+.proof-strip span {
+  color: var(--green);
+  font:
+    800 11px var(--font-mono),
+    monospace;
+  text-transform: uppercase;
+}
+.proof-strip strong {
+  display: block;
+  margin: 16px 0 8px;
+  font-size: 24px;
+  letter-spacing: -0.03em;
+}
+.proof-strip p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
 }
 .checker-section {
   padding: 78px 0;
@@ -407,7 +442,7 @@ h1 em {
   flex-direction: column;
 }
 .price strong {
-  font-size: 44px;
+  font-size: 38px;
   letter-spacing: -0.05em;
 }
 .price span {
@@ -435,7 +470,8 @@ h1 em {
     flex-direction: column;
   }
   .editor-grid,
-  .feature-grid {
+  .feature-grid,
+  .proof-strip {
     grid-template-columns: 1fr;
   }
   .pricing-card {
