@@ -47,12 +47,22 @@ export async function POST(request: NextRequest) {
       const subscription = event.data.object as Stripe.Subscription;
       const installationId = Number(subscription.metadata.installationId);
       if (installationId) {
-        await updateBilling({
+        const updated = await updateBilling({
           installationId,
           billingStatus: status(subscription),
           stripeCustomerId: String(subscription.customer),
           stripeSubscriptionId: subscription.id,
         });
+        if (!updated) {
+          await recordOperationalEvent({
+            severity: "warning",
+            source: "billing",
+            message: "Ignored Stripe event for an unknown installation",
+            detail: `${event.type} - ${event.id}`,
+            installationId,
+          });
+          return NextResponse.json({ received: true });
+        }
         if (subscription.status === "active") {
           await recordFunnelEvent({
             type: "subscription_activated",
@@ -60,6 +70,14 @@ export async function POST(request: NextRequest) {
             dedupeId: `stripe-${event.id}`,
           });
         }
+      } else {
+        await recordOperationalEvent({
+          severity: "warning",
+          source: "billing",
+          message: "Ignored Stripe subscription without installation metadata",
+          detail: `${event.type} - ${event.id}`,
+        });
+        return NextResponse.json({ received: true });
       }
       await recordOperationalEvent({
         severity: "info",

@@ -316,7 +316,8 @@ export async function listAllInstallations(limit = 100) {
   const result = await db.send(
     new ScanCommand({
       TableName: tableName(),
-      FilterExpression: "sk = :profile",
+      FilterExpression:
+        "sk = :profile AND attribute_exists(installationId) AND attribute_exists(accountLogin)",
       ExpressionAttributeValues: { ":profile": "PROFILE" },
       Limit: limit,
     }),
@@ -505,19 +506,27 @@ export async function updateBilling(input: {
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
 }) {
-  await db.send(
-    new UpdateCommand({
-      TableName: tableName(),
-      Key: { pk: `INSTALLATION#${input.installationId}`, sk: "PROFILE" },
-      UpdateExpression:
-        "SET billingStatus = :status, stripeCustomerId = :customer, stripeSubscriptionId = :subscription",
-      ExpressionAttributeValues: {
-        ":status": input.billingStatus,
-        ":customer": input.stripeCustomerId ?? "",
-        ":subscription": input.stripeSubscriptionId ?? "",
-      },
-    }),
-  );
+  try {
+    await db.send(
+      new UpdateCommand({
+        TableName: tableName(),
+        Key: { pk: `INSTALLATION#${input.installationId}`, sk: "PROFILE" },
+        ConditionExpression: "attribute_exists(pk)",
+        UpdateExpression:
+          "SET billingStatus = :status, stripeCustomerId = :customer, stripeSubscriptionId = :subscription",
+        ExpressionAttributeValues: {
+          ":status": input.billingStatus,
+          ":customer": input.stripeCustomerId ?? "",
+          ":subscription": input.stripeSubscriptionId ?? "",
+        },
+      }),
+    );
+    return true;
+  } catch (error) {
+    if ((error as { name?: string }).name === "ConditionalCheckFailedException")
+      return false;
+    throw error;
+  }
 }
 
 export function hasEntitlement(installation: Installation | null): boolean {

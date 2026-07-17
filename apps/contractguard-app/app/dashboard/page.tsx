@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentSession, isAdminLogin } from "@/lib/auth";
@@ -157,7 +158,7 @@ export default async function Dashboard({
           <span className="brandMark">CG</span>API Contract Guard
         </Link>
         <div className="account">
-          <img src={session.avatarUrl} alt="" />
+          <Image src={session.avatarUrl} alt="" width={30} height={30} />
           {session.login}
           {admin ? <Link href="/admin">Admin</Link> : null}
           <a href="/api/auth/logout">Sign out</a>
@@ -268,6 +269,20 @@ export default async function Dashboard({
                     />
                     <button className="button primary" type="submit">
                       Activate protection
+                    </button>
+                  </form>
+                ) : null}
+                {profile?.stripeCustomerId &&
+                (profile.billingStatus === "active" ||
+                  profile.billingStatus === "past_due") ? (
+                  <form action="/api/billing/portal" method="post">
+                    <input
+                      type="hidden"
+                      name="installationId"
+                      value={item.id}
+                    />
+                    <button className="button secondary" type="submit">
+                      Manage billing
                     </button>
                   </form>
                 ) : null}
