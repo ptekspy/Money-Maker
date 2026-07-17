@@ -95,6 +95,12 @@ export default $config({
     const contractGuardApp = new sst.aws.Nextjs("ContractGuardApp", {
       path: "apps/contractguard-app",
       link: [contractGuardData, contractGuardChecks],
+      permissions: [
+        {
+          actions: ["ses:SendEmail", "ses:SendRawEmail"],
+          resources: ["*"],
+        },
+      ],
       domain: {
         name: "app.apicontractguard.com",
         dns: false,
@@ -128,6 +134,58 @@ export default $config({
           process.env.CONTRACTGUARD_STRIPE_WEBHOOK_SECRET ?? "",
         STRIPE_CONTRACTGUARD_PRICE_ID:
           process.env.CONTRACTGUARD_STRIPE_PRICE_ID ?? "",
+        CONTRACTGUARD_EMAIL_FROM:
+          process.env.CONTRACTGUARD_EMAIL_FROM ??
+          "API Contract Guard <admin@apicontractguard.com>",
+      },
+    });
+
+    new sst.aws.CronV2("ContractGuardLifecycle", {
+      schedule: "cron(0 9 * * ? *)",
+      timezone: "Europe/London",
+      retries: 2,
+      function: {
+        handler: "infra/contractguard-lifecycle.daily",
+        timeout: "2 minutes",
+        link: [contractGuardData],
+        permissions: [
+          {
+            actions: ["ses:SendEmail", "ses:SendRawEmail"],
+            resources: ["*"],
+          },
+        ],
+        environment: {
+          CONTRACTGUARD_TABLE_NAME: contractGuardData.name,
+          CONTRACTGUARD_EMAIL_FROM:
+            process.env.CONTRACTGUARD_EMAIL_FROM ??
+            "API Contract Guard <admin@apicontractguard.com>",
+        },
+      },
+    });
+
+    new sst.aws.CronV2("ContractGuardWeeklyReport", {
+      schedule: "cron(0 8 ? * MON *)",
+      timezone: "Europe/London",
+      retries: 2,
+      function: {
+        handler: "infra/contractguard-lifecycle.weekly",
+        timeout: "2 minutes",
+        link: [contractGuardData],
+        permissions: [
+          {
+            actions: ["ses:SendEmail", "ses:SendRawEmail"],
+            resources: ["*"],
+          },
+        ],
+        environment: {
+          CONTRACTGUARD_TABLE_NAME: contractGuardData.name,
+          CONTRACTGUARD_EMAIL_FROM:
+            process.env.CONTRACTGUARD_EMAIL_FROM ??
+            "API Contract Guard <admin@apicontractguard.com>",
+          CONTRACTGUARD_REPORT_EMAIL:
+            process.env.CONTRACTGUARD_REPORT_EMAIL ??
+            "admin@apicontractguard.com",
+        },
       },
     });
 

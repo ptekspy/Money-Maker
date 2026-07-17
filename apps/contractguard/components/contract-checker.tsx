@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { parse } from "yaml";
+import { trackEvent } from "@/lib/analytics";
 import { type ContractChange, compareContracts } from "@/lib/contract-diff";
 
 const baselineExample = `openapi: 3.0.3
@@ -83,7 +84,18 @@ export function ContractChecker() {
   function runCheck() {
     try {
       setError("");
-      setChanges(compareContracts(parseSpec(baseline), parseSpec(candidate)));
+      const result = compareContracts(
+        parseSpec(baseline),
+        parseSpec(candidate),
+      );
+      setChanges(result);
+      trackEvent("checker_run", {
+        breaking_changes: result.filter(
+          (change) => change.severity === "breaking",
+        ).length,
+        campaign: "free_checker",
+        total_changes: result.length,
+      });
     } catch (reason) {
       setChanges(null);
       setError(

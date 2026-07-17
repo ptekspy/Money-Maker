@@ -1,11 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
 import {
+  ATTRIBUTION_COOKIE,
   SESSION_COOKIE,
   STATE_COOKIE,
   sealSession,
   secureCookie,
   VERIFIER_COOKIE,
 } from "@/lib/auth";
+import { recordFunnelEvent, saveUserProfile } from "@/lib/data";
+import { sendEmailOnce } from "@/lib/email";
 import { requiredEnv } from "@/lib/env";
 import { githubFetch } from "@/lib/github";
 
@@ -59,6 +62,50 @@ export async function GET(request: NextRequest) {
     login: string;
     avatar_url: string;
   }>("/user", token.access_token);
+  const emails = await githubFetch<
+    Array<{ email: string; primary: boolean; verified: boolean }>
+  >("/user/emails", token.access_token).catch(() => []);
+  const email =
+    emails.find((item) => item.primary && item.verified)?.email ??
+    emails.find((item) => item.verified)?.email;
+  let attribution: { source?: string; campaign?: string } = {};
+  const encodedAttribution = request.cookies.get(ATTRIBUTION_COOKIE)?.value;
+  if (encodedAttribution) {
+    try {
+      attribution = JSON.parse(
+        Buffer.from(encodedAttribution, "base64url").toString("utf8"),
+      ) as { source?: string; campaign?: string };
+    } catch {
+      attribution = {};
+    }
+  }
+  await Promise.all([
+    saveUserProfile({
+      userId: user.id,
+      login: user.login,
+      email,
+      source: attribution.source,
+      campaign: attribution.campaign,
+    }),
+    recordFunnelEvent({
+      type: "github_sign_in",
+      source: attribution.source ?? "direct",
+      campaign: attribution.campaign,
+      userId: user.id,
+      login: user.login,
+    }),
+  ]);
+  if (email) {
+    await sendEmailOnce({
+      ownerKey: `USER#${user.id}`,
+      kind: "signed_in_welcome",
+      to: email,
+      subject: "Finish connecting API Contract Guard",
+      text: `Hi ${user.login},\n\nYou are signed in to API Contract Guard. The next step is to install the GitHub App on the repositories you want protected.\n\nContinue setup: https://app.apicontractguard.com/dashboard\n\nNo card is required for the 14-day trial.\n\nAPI Contract Guard`,
+    }).catch((error) => {
+      console.error("Could not send Contract Guard welcome email", { error });
+    });
+  }
   const session = await sealSession({
     userId: user.id,
     login: user.login,
@@ -72,5 +119,6 @@ export async function GET(request: NextRequest) {
   });
   response.cookies.delete(STATE_COOKIE);
   response.cookies.delete(VERIFIER_COOKIE);
+  response.cookies.delete(ATTRIBUTION_COOKIE);
   return response;
 }

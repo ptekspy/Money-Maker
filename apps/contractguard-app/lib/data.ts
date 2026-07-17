@@ -23,6 +23,7 @@ export type Installation = {
   accountId: number;
   accountLogin: string;
   accountType: string;
+  installerUserId?: number;
   repositorySelection: string;
   createdAt: string;
   trialEndsAt: string;
@@ -30,6 +31,40 @@ export type Installation = {
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
   suspendedAt?: string;
+};
+
+export type UserProfile = {
+  pk: string;
+  sk: "PROFILE";
+  userId: number;
+  login: string;
+  email?: string;
+  source?: string;
+  campaign?: string;
+  createdAt: string;
+  lastSignedInAt: string;
+};
+
+export type FunnelEventType =
+  | "checker_run"
+  | "install_cta_clicked"
+  | "github_sign_in"
+  | "installation_created"
+  | "check_completed"
+  | "checkout_started"
+  | "subscription_activated";
+
+export type FunnelEvent = {
+  pk: string;
+  sk: string;
+  type: FunnelEventType;
+  createdAt: string;
+  source?: string;
+  campaign?: string;
+  userId?: number;
+  login?: string;
+  installationId?: number;
+  repositoryId?: number;
 };
 
 export type RepositoryRecord = {
@@ -81,6 +116,7 @@ export async function saveInstallation(input: {
   accountLogin: string;
   accountType: string;
   repositorySelection: string;
+  installerUserId?: number;
 }) {
   const now = new Date();
   const trialEnds = new Date(now);
@@ -103,9 +139,151 @@ export async function saveInstallation(input: {
         ConditionExpression: "attribute_not_exists(pk)",
       }),
     )
+    .catch(async (error: { name?: string }) => {
+      if (error.name !== "ConditionalCheckFailedException") throw error;
+      if (input.installerUserId) {
+        await db.send(
+          new UpdateCommand({
+            TableName: tableName(),
+            Key: {
+              pk: `INSTALLATION#${input.installationId}`,
+              sk: "PROFILE",
+            },
+            UpdateExpression:
+              "SET installerUserId = if_not_exists(installerUserId, :userId)",
+            ExpressionAttributeValues: {
+              ":userId": input.installerUserId,
+            },
+          }),
+        );
+      }
+    });
+}
+
+export async function saveUserProfile(input: {
+  userId: number;
+  login: string;
+  email?: string;
+  source?: string;
+  campaign?: string;
+}) {
+  const now = new Date().toISOString();
+  await db.send(
+    new UpdateCommand({
+      TableName: tableName(),
+      Key: { pk: `USER#${input.userId}`, sk: "PROFILE" },
+      UpdateExpression:
+        "SET userId = :userId, login = :login, email = :email, #source = if_not_exists(#source, :source), campaign = if_not_exists(campaign, :campaign), createdAt = if_not_exists(createdAt, :now), lastSignedInAt = :now",
+      ExpressionAttributeNames: { "#source": "source" },
+      ExpressionAttributeValues: {
+        ":userId": input.userId,
+        ":login": input.login,
+        ":email": input.email ?? "",
+        ":source": input.source ?? "direct",
+        ":campaign": input.campaign ?? "",
+        ":now": now,
+      },
+    }),
+  );
+}
+
+export async function getUserProfile(
+  userId: number,
+): Promise<UserProfile | null> {
+  const result = await db.send(
+    new GetCommand({
+      TableName: tableName(),
+      Key: { pk: `USER#${userId}`, sk: "PROFILE" },
+    }),
+  );
+  return (result.Item as UserProfile | undefined) ?? null;
+}
+
+function funnelPartition(date: Date) {
+  return `FUNNEL#${date.toISOString().slice(0, 7)}`;
+}
+
+export async function recordFunnelEvent(input: {
+  type: FunnelEventType;
+  source?: string;
+  campaign?: string;
+  userId?: number;
+  login?: string;
+  installationId?: number;
+  repositoryId?: number;
+  dedupeId?: string;
+}) {
+  const now = new Date();
+  await db
+    .send(
+      new PutCommand({
+        TableName: tableName(),
+        Item: {
+          pk: funnelPartition(now),
+          sk: input.dedupeId
+            ? `EVENT#DEDUPE#${input.dedupeId}`
+            : `EVENT#${now.toISOString()}#${randomUUID()}`,
+          ...input,
+          createdAt: now.toISOString(),
+        } satisfies FunnelEvent & { dedupeId?: string },
+        ConditionExpression: "attribute_not_exists(pk)",
+      }),
+    )
     .catch((error: { name?: string }) => {
       if (error.name !== "ConditionalCheckFailedException") throw error;
     });
+}
+
+export async function listFunnelEventsSince(since: Date) {
+  const now = new Date();
+  const partitions: string[] = [];
+  const cursor = new Date(
+    Date.UTC(since.getUTCFullYear(), since.getUTCMonth(), 1),
+  );
+  while (cursor <= now) {
+    partitions.push(funnelPartition(cursor));
+    cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+  }
+  const results = await Promise.all(
+    partitions.map((pk) =>
+      db.send(
+        new QueryCommand({
+          TableName: tableName(),
+          KeyConditionExpression: "pk = :pk AND begins_with(sk, :prefix)",
+          ExpressionAttributeValues: { ":pk": pk, ":prefix": "EVENT#" },
+          ScanIndexForward: false,
+          Limit: 1000,
+        }),
+      ),
+    ),
+  );
+  return results
+    .flatMap((result) => (result.Items ?? []) as FunnelEvent[])
+    .filter((event) => Date.parse(event.createdAt) >= since.getTime())
+    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+}
+
+export async function emailWasSent(ownerKey: string, kind: string) {
+  const result = await db.send(
+    new GetCommand({
+      TableName: tableName(),
+      Key: { pk: ownerKey, sk: `EMAIL#${kind}` },
+    }),
+  );
+  return Boolean(result.Item);
+}
+
+export async function markEmailSent(ownerKey: string, kind: string) {
+  await db.send(
+    new PutCommand({
+      TableName: tableName(),
+      Item: {
+        pk: ownerKey,
+        sk: `EMAIL#${kind}`,
+        sentAt: new Date().toISOString(),
+      },
+    }),
+  );
 }
 
 export async function getInstallation(
@@ -234,6 +412,12 @@ export async function recordCheck(input: {
       },
     }),
   );
+  await recordFunnelEvent({
+    type: "check_completed",
+    installationId: input.installationId,
+    repositoryId: input.repositoryId,
+    dedupeId: `check-${input.headSha}`,
+  });
 }
 
 export async function recordOperationalEvent(input: {

@@ -2,6 +2,7 @@ import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 import { type NextRequest, NextResponse } from "next/server";
 import {
   claimWebhook,
+  recordFunnelEvent,
   recordOperationalEvent,
   removeInstallation,
   saveInstallation,
@@ -44,6 +45,7 @@ async function saveInstallationFromPayload(payload: Payload) {
   const installation = asPayload(payload.installation);
   const repository = asPayload(payload.repository);
   const account = asPayload(installation.account ?? repository.owner);
+  const sender = asPayload(payload.sender);
   const installationId = asNumber(installation.id);
   const accountId = asNumber(account.id);
   const accountLogin = asString(account.login);
@@ -56,6 +58,7 @@ async function saveInstallationFromPayload(payload: Payload) {
     accountType: asString(account.type) ?? "User",
     repositorySelection:
       asString(installation.repository_selection) ?? "selected",
+    installerUserId: asNumber(sender.id),
   });
 }
 
@@ -84,6 +87,13 @@ export async function POST(request: NextRequest) {
       if (parsedPayload.action === "created") {
         await saveInstallationFromPayload(parsedPayload);
         if (installationId) {
+          await recordFunnelEvent({
+            type: "installation_created",
+            installationId,
+            userId: asNumber(asPayload(parsedPayload.sender).id),
+            login: asString(asPayload(parsedPayload.sender).login),
+            dedupeId: `github-${deliveryId}`,
+          });
           await Promise.all(
             asPayloadArray(parsedPayload.repositories).map((repo) =>
               saveRepository({

@@ -1,6 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
-import { recordOperationalEvent, updateBilling } from "@/lib/data";
+import {
+  recordFunnelEvent,
+  recordOperationalEvent,
+  updateBilling,
+} from "@/lib/data";
 import { requiredEnv } from "@/lib/env";
 import { stripe, stripeWebhookConfigured } from "@/lib/stripe";
 
@@ -49,6 +53,13 @@ export async function POST(request: NextRequest) {
           stripeCustomerId: String(subscription.customer),
           stripeSubscriptionId: subscription.id,
         });
+        if (subscription.status === "active") {
+          await recordFunnelEvent({
+            type: "subscription_activated",
+            installationId,
+            dedupeId: `stripe-${event.id}`,
+          });
+        }
       }
       await recordOperationalEvent({
         severity: "info",

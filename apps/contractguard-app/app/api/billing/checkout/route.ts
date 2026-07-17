@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { currentSession } from "@/lib/auth";
-import { getInstallation } from "@/lib/data";
+import { getInstallation, recordFunnelEvent } from "@/lib/data";
 import { appUrl, requiredEnv } from "@/lib/env";
 import { installationRepositories, userInstallations } from "@/lib/github";
 import { stripe, stripeConfigured } from "@/lib/stripe";
@@ -53,6 +53,13 @@ export async function POST(request: NextRequest) {
       accountLogin: installation?.accountLogin ?? "",
       privateRepositories: String(quantity),
     },
+  });
+  await recordFunnelEvent({
+    type: "checkout_started",
+    userId: session.userId,
+    login: session.login,
+    installationId,
+    dedupeId: `checkout-${checkout.id}`,
   });
   return NextResponse.redirect(checkout.url ?? `${origin}/dashboard`, 303);
 }

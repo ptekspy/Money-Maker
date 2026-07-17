@@ -6,6 +6,7 @@ import { env, requiredEnv } from "@/lib/env";
 export const SESSION_COOKIE = "contractguard_session";
 export const STATE_COOKIE = "contractguard_oauth_state";
 export const VERIFIER_COOKIE = "contractguard_pkce_verifier";
+export const ATTRIBUTION_COOKIE = "contractguard_attribution";
 
 export type Session = {
   userId: number;

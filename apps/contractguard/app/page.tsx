@@ -1,8 +1,10 @@
 import { ContractChecker } from "@/components/contract-checker";
+import { TrackedLink } from "@/components/tracked-link";
 
 const appUrl = "https://app.apicontractguard.com";
 const demoUrl =
   "https://github.com/ptekspy/contract-guard-live-demo/pull/1/checks";
+const authUrl = `${appUrl}/api/auth/github/start?source=website`;
 
 export default function Home() {
   return (
@@ -16,9 +18,14 @@ export default function Home() {
           <a className="nav-link" href="#checker">
             Free checker
           </a>
-          <a className="nav-link" href={`${appUrl}/api/auth/github/start`}>
+          <TrackedLink
+            className="nav-link"
+            href={`${authUrl}&campaign=nav_signin`}
+            event="install_cta_clicked"
+            campaign="nav_signin"
+          >
             Sign in
-          </a>
+          </TrackedLink>
         </div>
       </nav>
 
@@ -35,9 +42,14 @@ export default function Home() {
           parameter or schema breaks compatibility.
         </p>
         <div className="hero-actions">
-          <a className="button primary" href={`${appUrl}/`}>
+          <TrackedLink
+            className="button primary"
+            href={`${authUrl}&campaign=homepage_install`}
+            event="install_cta_clicked"
+            campaign="homepage_install"
+          >
             Install the GitHub App
-          </a>
+          </TrackedLink>
           <a className="button secondary" href={demoUrl}>
             View live proof
           </a>
@@ -138,9 +150,14 @@ export default function Home() {
             <strong>GBP 9</strong>
             <span>/ private repo / month</span>
           </div>
-          <a className="button secondary" href={`${appUrl}/`}>
+          <TrackedLink
+            className="button secondary"
+            href={`${authUrl}&campaign=pricing_trial`}
+            event="install_cta_clicked"
+            campaign="pricing_trial"
+          >
             Start trial
-          </a>
+          </TrackedLink>
         </div>
       </section>
 

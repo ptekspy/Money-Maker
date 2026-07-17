@@ -2,6 +2,7 @@
 
 import Script from "next/script";
 import { useEffect, useState } from "react";
+import { type MarketingEvent, trackEvent } from "@/lib/analytics";
 
 const measurementId = "G-25LT97E203";
 const storageKey = "contractguard-analytics-consent";
@@ -16,6 +17,25 @@ export function AnalyticsConsent() {
     if (saved === "accepted" || saved === "declined") {
       setConsent(saved);
     }
+  }, []);
+
+  useEffect(() => {
+    function trackLinkClick(event: MouseEvent) {
+      if (!(event.target instanceof Element)) return;
+      const link = event.target.closest<HTMLAnchorElement>(
+        "a[data-track-event]",
+      );
+      if (!link) return;
+      const trackedEvent = link.dataset.trackEvent as
+        | MarketingEvent
+        | undefined;
+      if (!trackedEvent) return;
+      trackEvent(trackedEvent, {
+        campaign: link.dataset.trackCampaign ?? "unspecified",
+      });
+    }
+    document.addEventListener("click", trackLinkClick, { capture: true });
+    return () => document.removeEventListener("click", trackLinkClick, true);
   }, []);
 
   function choose(value: Exclude<Consent, "pending">) {

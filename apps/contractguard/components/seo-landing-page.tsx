@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TrackedLink } from "@/components/tracked-link";
 
 const appUrl = "https://app.apicontractguard.com";
 const demoUrl =
@@ -42,9 +43,14 @@ export function SeoLandingPage({
           <Link className="nav-link" href="/#checker">
             Free checker
           </Link>
-          <a className="nav-link" href={`${appUrl}/api/auth/github/start`}>
+          <TrackedLink
+            className="nav-link"
+            href={`${appUrl}/api/auth/github/start?source=website&campaign=seo_signin`}
+            event="install_cta_clicked"
+            campaign="seo_signin"
+          >
             Sign in
-          </a>
+          </TrackedLink>
         </div>
       </nav>
 
@@ -84,9 +90,14 @@ export function SeoLandingPage({
               or fail status whenever its OpenAPI contract changes.
             </p>
           </div>
-          <a className="button secondary" href={appUrl}>
+          <TrackedLink
+            className="button secondary"
+            href={`${appUrl}/api/auth/github/start?source=website&campaign=seo_trial`}
+            event="install_cta_clicked"
+            campaign="seo_trial"
+          >
             Start 14-day trial
-          </a>
+          </TrackedLink>
         </section>
 
         <section className="faq">

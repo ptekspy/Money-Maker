@@ -13,7 +13,7 @@ export default function PrivacyPage() {
         },
         {
           title: "What we store",
-          body: "We store installation metadata, recent check summaries, billing status, and operational events. OpenAPI file contents are fetched for analysis and are not stored as long-term product records.",
+          body: "We store installation metadata, recent check summaries, billing status, operational events, and account journey events such as sign-in, installation, check and checkout milestones. OpenAPI file contents are fetched for analysis and are not stored as long-term product records.",
         },
         {
           title: "Third parties",
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
         },
         {
           title: "Contact",
-          body: "For privacy, support, or deletion requests, contact support@apicontractguard.com and include the GitHub organization or username connected to the installation.",
+          body: "We use the verified email supplied by GitHub for essential setup and trial messages. For privacy, support, deletion, or email preference requests, contact support@apicontractguard.com and include the GitHub organization or username connected to the installation.",
         },
       ]}
     />

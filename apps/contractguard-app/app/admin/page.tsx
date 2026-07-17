@@ -6,6 +6,7 @@ import {
   type CheckRecord,
   type Installation,
   listAllInstallations,
+  listFunnelEventsSince,
   listRecentChecks,
   listRecentOperationalEvents,
   listRepositories,
@@ -78,6 +79,23 @@ export default async function AdminPage() {
   const billing = statusCounts(installations);
   const checks = checkCounts(allChecks);
   const stripe = stripeConfig();
+  const funnelEvents = await listFunnelEventsSince(
+    new Date(Date.now() - 7 * 86400000),
+  );
+  const funnel = Object.fromEntries(
+    [
+      "checker_run",
+      "install_cta_clicked",
+      "github_sign_in",
+      "installation_created",
+      "check_completed",
+      "checkout_started",
+      "subscription_activated",
+    ].map((type) => [
+      type,
+      funnelEvents.filter((event) => event.type === type).length,
+    ]),
+  );
 
   return (
     <main>
@@ -124,6 +142,47 @@ export default async function AdminPage() {
               {ops.filter((event) => event.severity === "error").length}
             </strong>
           </div>
+        </section>
+
+        <section className="opsPanel">
+          <div>
+            <p className="eyebrow">LAST 7 DAYS</p>
+            <h2>Acquisition funnel</h2>
+          </div>
+          <div className="metricGrid adminMetrics">
+            <div>
+              <span>Checker runs</span>
+              <strong>{funnel.checker_run}</strong>
+            </div>
+            <div>
+              <span>CTA clicks</span>
+              <strong>{funnel.install_cta_clicked}</strong>
+            </div>
+            <div>
+              <span>GitHub sign-ins</span>
+              <strong>{funnel.github_sign_in}</strong>
+            </div>
+            <div>
+              <span>Installs</span>
+              <strong>{funnel.installation_created}</strong>
+            </div>
+            <div>
+              <span>Checks run</span>
+              <strong>{funnel.check_completed}</strong>
+            </div>
+            <div>
+              <span>Checkouts</span>
+              <strong>{funnel.checkout_started}</strong>
+            </div>
+            <div>
+              <span>Paid</span>
+              <strong>{funnel.subscription_activated}</strong>
+            </div>
+          </div>
+          <p className="muted">
+            A summary is emailed to admin@apicontractguard.com every Monday at
+            08:00 Europe/London.
+          </p>
         </section>
 
         <section className="adminGrid">
