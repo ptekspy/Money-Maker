@@ -49,6 +49,15 @@ export default $config({
         command: "npm run build",
         output: "out",
       },
+      assets: {
+        fileOptions: [
+          {
+            files: ["icon", "opengraph-image"],
+            contentType: "image/png",
+            cacheControl: "max-age=31536000,public,immutable",
+          },
+        ],
+      },
       domain: {
         name: "apicontractguard.com",
         redirects: ["www.apicontractguard.com"],
