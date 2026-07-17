@@ -2,7 +2,6 @@
 
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { redirect } from "next/navigation";
-import { PDFParse } from "pdf-parse";
 import { z } from "zod";
 import {
   addProperty,
@@ -97,6 +96,7 @@ export async function uploadCertificate(formData: FormData) {
   }
 
   const bytes = new Uint8Array(await file.arrayBuffer());
+  const { PDFParse } = await import("pdf-parse");
   const parser = new PDFParse({ data: bytes });
   let details: ReturnType<typeof extractCertificateDetails>;
   try {
