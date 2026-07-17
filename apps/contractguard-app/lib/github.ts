@@ -58,6 +58,7 @@ export async function installationToken(installationId: number) {
 }
 
 export function verifyWebhookSignature(body: string, signature: string | null) {
+  if (!signature?.startsWith("sha256=")) return false;
   return verifySignature(
     body,
     signature,
@@ -69,6 +70,7 @@ export function verifyMarketplaceWebhookSignature(
   body: string,
   signature: string | null,
 ) {
+  if (!signature?.startsWith("sha256=")) return false;
   return verifySignature(
     body,
     signature,
@@ -76,12 +78,7 @@ export function verifyMarketplaceWebhookSignature(
   );
 }
 
-function verifySignature(
-  body: string,
-  signature: string | null,
-  secret: string,
-) {
-  if (!signature?.startsWith("sha256=")) return false;
+function verifySignature(body: string, signature: string, secret: string) {
   const expected = `sha256=${createHmac("sha256", secret)
     .update(body)
     .digest("hex")}`;
