@@ -132,8 +132,10 @@ export default $config({
         STRIPE_SECRET_KEY: process.env.CONTRACTGUARD_STRIPE_SECRET_KEY ?? "",
         STRIPE_WEBHOOK_SECRET:
           process.env.CONTRACTGUARD_STRIPE_WEBHOOK_SECRET ?? "",
-        STRIPE_CONTRACTGUARD_PRICE_ID:
-          process.env.CONTRACTGUARD_STRIPE_PRICE_ID ?? "",
+        STRIPE_CONTRACTGUARD_STARTER_PRICE_ID:
+          process.env.CONTRACTGUARD_STRIPE_STARTER_PRICE_ID ?? "",
+        STRIPE_CONTRACTGUARD_PRO_PRICE_ID:
+          process.env.CONTRACTGUARD_STRIPE_PRO_PRICE_ID ?? "",
         CONTRACTGUARD_EMAIL_FROM:
           process.env.CONTRACTGUARD_EMAIL_FROM ??
           "API Contract Guard <admin@apicontractguard.com>",

@@ -4,10 +4,14 @@ import { env, requiredEnv } from "@/lib/env";
 let client: Stripe | undefined;
 
 export function stripeConfig() {
+  const starterPriceId = Boolean(env("STRIPE_CONTRACTGUARD_STARTER_PRICE_ID"));
+  const proPriceId = Boolean(env("STRIPE_CONTRACTGUARD_PRO_PRICE_ID"));
   return {
     secretKey: Boolean(env("STRIPE_SECRET_KEY")),
     webhookSecret: Boolean(env("STRIPE_WEBHOOK_SECRET")),
-    priceId: Boolean(env("STRIPE_CONTRACTGUARD_PRICE_ID")),
+    starterPriceId,
+    proPriceId,
+    priceId: starterPriceId && proPriceId,
   };
 }
 

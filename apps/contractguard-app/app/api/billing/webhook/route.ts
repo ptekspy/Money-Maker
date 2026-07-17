@@ -6,6 +6,7 @@ import {
   updateBilling,
 } from "@/lib/data";
 import { requiredEnv } from "@/lib/env";
+import { billingPlan } from "@/lib/plans";
 import { stripe, stripeWebhookConfigured } from "@/lib/stripe";
 
 export const runtime = "nodejs";
@@ -46,12 +47,18 @@ export async function POST(request: NextRequest) {
     ) {
       const subscription = event.data.object as Stripe.Subscription;
       const installationId = Number(subscription.metadata.installationId);
+      const plan = billingPlan(subscription.metadata.plan);
       if (installationId) {
         const updated = await updateBilling({
           installationId,
           billingStatus: status(subscription),
+          billingPlan: plan,
           stripeCustomerId: String(subscription.customer),
           stripeSubscriptionId: subscription.id,
+          planTrialEndsAt: subscription.trial_end
+            ? new Date(subscription.trial_end * 1000).toISOString()
+            : undefined,
+          proTrialStarted: plan === "pro" && subscription.status === "trialing",
         });
         if (!updated) {
           await recordOperationalEvent({

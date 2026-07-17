@@ -7,15 +7,19 @@ import {
   getInstallation,
   listRecentChecks,
   listRecentOperationalEvents,
+  listRepositories,
   saveInstallation,
 } from "@/lib/data";
 import { githubAppSlug } from "@/lib/env";
 import { userInstallations } from "@/lib/github";
+import { billingPlan, PLANS } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 
 const billingMessages = {
   cancelled: "Checkout was cancelled. Protection stays on trial until it ends.",
+  "manage-existing":
+    "This installation already has a subscription. Use Manage billing to change it.",
   "not-ready":
     "Stripe billing is not configured yet. Send live keys when you are ready to test activation.",
   success:
@@ -54,11 +58,18 @@ function journeyMessage(input: {
     };
   }
   if (profile.billingStatus === "active") {
+    const plan = billingPlan(profile.billingPlan);
+    const planTrialDays = daysLeft(profile.planTrialEndsAt);
     return {
       action: "Keep shipping",
       message:
-        "Paid protection is active. Pull requests will continue to receive Contract Guard checks.",
-      title: "Paid protection active",
+        plan === "pro" && planTrialDays > 0
+          ? `Your card is verified. Pro billing starts after the remaining ${planTrialDays}-day trial.`
+          : `${PLANS[plan].name} protection is active. Pull requests will continue to receive Contract Guard checks.`,
+      title:
+        plan === "pro" && planTrialDays > 0
+          ? "Pro trial active"
+          : `${PLANS[plan].name} protection active`,
     };
   }
   if (profile.billingStatus === "past_due") {
@@ -133,8 +144,13 @@ export default async function Dashboard({
         repositorySelection: item.repository_selection,
       });
       const profile = await getInstallation(item.id);
-      const checks = profile ? await listRecentChecks(item.id) : [];
-      return { checks, item, profile };
+      const [checks, repositories] = profile
+        ? await Promise.all([
+            listRecentChecks(item.id),
+            listRepositories(item.id),
+          ])
+        : [[], []];
+      return { checks, item, profile, repositories };
     }),
   );
   const operationalEvents = await listRecentOperationalEvents(8);
@@ -230,8 +246,21 @@ export default async function Dashboard({
             </a>
           </div>
         ) : (
-          installations.map(({ checks, item, profile }) => {
+          installations.map(({ checks, item, profile, repositories }) => {
             const journey = journeyMessage({ checks, profile });
+            const plan = billingPlan(profile?.billingPlan);
+            const activeRepositories = repositories.filter(
+              (repository) => !repository.removed,
+            ).length;
+            const atStarterLimit =
+              plan === "starter" &&
+              activeRepositories >= PLANS.starter.repositoryLimit;
+            const originalTrialEnded =
+              profile && daysLeft(profile.trialEndsAt) === 0;
+            const showPlanChoices =
+              profile &&
+              profile.billingStatus !== "active" &&
+              (atStarterLimit || originalTrialEnded);
             return (
               <section className="installation" key={item.id}>
                 <div className="installationTop">
@@ -240,16 +269,25 @@ export default async function Dashboard({
                     <p>
                       {item.repository_selection === "all"
                         ? "All repositories"
-                        : "Selected repositories"}
+                        : "Selected repositories"}{" "}
+                      ·{" "}
+                      {Math.min(
+                        activeRepositories,
+                        PLANS[plan].repositoryLimit,
+                      )}
+                      /{PLANS[plan].repositoryLimit} protected
                     </p>
                   </div>
                   <div
                     className={`status ${profile?.billingStatus ?? "pending"}`}
                   >
                     {profile?.billingStatus === "active"
-                      ? "Active"
+                      ? profile.planTrialEndsAt &&
+                        daysLeft(profile.planTrialEndsAt) > 0
+                        ? `${PLANS[plan].name} trial · ${daysLeft(profile.planTrialEndsAt)} days`
+                        : `${PLANS[plan].name} active`
                       : profile
-                        ? `${daysLeft(profile.trialEndsAt)} trial days left`
+                        ? `Starter trial · ${daysLeft(profile.trialEndsAt)} days`
                         : "Connecting"}
                   </div>
                 </div>
@@ -258,19 +296,76 @@ export default async function Dashboard({
                   <strong>{journey.title}</strong>
                   <p>{journey.message}</p>
                 </div>
+                {showPlanChoices ? (
+                  <section className="planChoices">
+                    <article>
+                      <span>STARTER</span>
+                      <strong>£{PLANS.starter.monthlyPrice}/month</strong>
+                      <p>
+                        Protect up to {PLANS.starter.repositoryLimit}{" "}
+                        repositories. Your current card-free trial is the
+                        Starter plan.
+                      </p>
+                      {originalTrialEnded ? (
+                        <form action="/api/billing/checkout" method="post">
+                          <input
+                            type="hidden"
+                            name="installationId"
+                            value={item.id}
+                          />
+                          <input type="hidden" name="plan" value="starter" />
+                          <button className="button secondary" type="submit">
+                            Continue with Starter
+                          </button>
+                        </form>
+                      ) : (
+                        <span className="planCurrent">Current plan</span>
+                      )}
+                    </article>
+                    <article className="recommendedPlan">
+                      <span>PRO · RECOMMENDED</span>
+                      <strong>£{PLANS.pro.monthlyPrice}/month</strong>
+                      <p>
+                        Protect up to {PLANS.pro.repositoryLimit} repositories.
+                        Enter a card now and get a fresh 14-day trial.
+                      </p>
+                      <form action="/api/billing/checkout" method="post">
+                        <input
+                          type="hidden"
+                          name="installationId"
+                          value={item.id}
+                        />
+                        <input type="hidden" name="plan" value="pro" />
+                        <button className="button primary" type="submit">
+                          {profile.proTrialStartedAt
+                            ? "Reactivate Pro"
+                            : "Start Pro 14-day trial"}
+                        </button>
+                      </form>
+                    </article>
+                  </section>
+                ) : null}
                 {profile &&
-                daysLeft(profile.trialEndsAt) === 0 &&
-                profile.billingStatus !== "active" ? (
-                  <form action="/api/billing/checkout" method="post">
-                    <input
-                      type="hidden"
-                      name="installationId"
-                      value={item.id}
-                    />
-                    <button className="button primary" type="submit">
-                      Activate protection
-                    </button>
-                  </form>
+                plan === "starter" &&
+                profile.billingStatus === "trialing" &&
+                !showPlanChoices ? (
+                  <div className="planNudge">
+                    <span>
+                      Starter protects {PLANS.starter.repositoryLimit} repos.
+                      Pro protects {PLANS.pro.repositoryLimit}.
+                    </span>
+                    <form action="/api/billing/checkout" method="post">
+                      <input
+                        type="hidden"
+                        name="installationId"
+                        value={item.id}
+                      />
+                      <input type="hidden" name="plan" value="pro" />
+                      <button className="button secondary" type="submit">
+                        Upgrade to Pro · 14 days free
+                      </button>
+                    </form>
+                  </div>
                 ) : null}
                 {profile?.stripeCustomerId &&
                 (profile.billingStatus === "active" ||
