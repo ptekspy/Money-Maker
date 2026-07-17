@@ -9,6 +9,7 @@ import {
   Upload,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { startCheckout } from "@/app/actions/checkout";
 import { startPilot } from "@/app/actions/pilot";
 import {
   assessCertificate,
@@ -357,19 +358,28 @@ export function ComplianceAudit() {
                     type="hidden"
                     value={dates["Property licence"]}
                   />
-                  <button
-                    className="min-h-12 rounded-lg bg-[#d9ff73] px-5 font-black text-[#18220d]"
-                    type="submit"
-                  >
-                    Start free 14-day pilot — no card
-                  </button>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <button
+                      className="min-h-12 rounded-lg border border-[#bcc7ae] bg-white px-5 font-black text-[#18220d]"
+                      type="submit"
+                    >
+                      Try free for 14 days
+                    </button>
+                    <button
+                      className="min-h-12 rounded-lg bg-[#d9ff73] px-5 font-black text-[#18220d]"
+                      formAction={startCheckout}
+                      type="submit"
+                    >
+                      Start monitoring — £29/year
+                    </button>
+                  </div>
                   <p className="text-center text-[#65715d] text-xs">
                     One property now; add up to two more in your private
-                    dashboard. The founding plan will be £29/year after the
-                    pilot.
+                    dashboard. Choose the no-card pilot or pay once now for a
+                    full year.
                   </p>
                   <p className="text-center text-[#65715d] text-xs leading-5">
-                    By starting the pilot, you agree to the{" "}
+                    By continuing, you agree to the{" "}
                     <a className="underline" href="/terms">
                       terms
                     </a>{" "}

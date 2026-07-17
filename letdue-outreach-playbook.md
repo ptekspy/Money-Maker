@@ -1,5 +1,25 @@
 # LetDue first-customer outreach
 
+## Live campaign state — 17 July 2026
+
+- LetDue's X account is live at `https://x.com/LetDueHQ`.
+- Published the first acquisition post with product artwork, a free-audit CTA and accessible image text:
+  `https://x.com/LetDueHQ/status/2078117894890602501`.
+- Published and pinned a direct founding-pilot offer for three self-managing landlords:
+  `https://x.com/LetDueHQ/status/2078122315330592857`.
+- Followed the NRLA, Property118, LandlordZONE and LandlordZONE Forums accounts.
+- Followed landlord-community founder Vanessa Warwick (`@4_Walls`).
+- Added two non-promotional, practical replies to current NRLA posts about EPC planning and new-tenancy evidence packs.
+- X is temporarily limiting the discoverability of the new account until it has more normal timeline engagement.
+- Checked the LetDue mailbox: one free pilot activation exists, but there is no paid-monitoring activation email and therefore no verified customer yet.
+- The 15:00 campaign check found no human prospect replies and no paid activation; the only matching inbound message remains SPC's automatic response.
+- On 17 July, Estate Agents Ilford received a helpful public X reply, a follow and a tailored referral-partner email at its published business inbox, `info@estateagentsilford.co.uk`.
+- Its website contact form required a phone number, so it was not submitted with invented details; the public business inbox was used instead.
+- Blackstones Residential published a fresh London landlord compliance checklist on 17 July. LetDue followed the account and prepared a tailored email to its published business inbox, `contact@blackstonesresidential.com`; the draft is waiting for send confirmation.
+- The latest mailbox check still found no paid activation or human prospect reply. Check this new lead for a response and send at most one follow-up no earlier than 21 July 2026.
+- The West Yorkshire Landlords Meetup page is relevant and has 46 members, but organiser messaging requires a Meetup login. No account was created and no message was sent.
+- A recurring acquisition heartbeat now checks for replies and paid-customer evidence at 09:00 and 15:00 while respecting the 19 July follow-up timing.
+
 ## Live campaign state — 15 July 2026
 
 - Live pilot invitations: Ixana Property, Nest Property Network and Josh at Casa Property Partners.
