@@ -8,7 +8,7 @@ import {
   ShieldCheck,
   Upload,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { startPilot } from "@/app/actions/pilot";
 import {
   assessCertificate,
@@ -51,6 +51,12 @@ export function ComplianceAudit() {
   const [audited, setAudited] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const [extractionMessage, setExtractionMessage] = useState("");
+  const [source, setSource] = useState("homepage");
+
+  useEffect(() => {
+    const candidate = new URLSearchParams(window.location.search).get("source");
+    if (candidate && /^[a-z0-9-]{1,64}$/.test(candidate)) setSource(candidate);
+  }, []);
 
   const required = useMemo(
     () => recommendedCertificates(hasGas, isHmo),
@@ -184,7 +190,7 @@ export function ComplianceAudit() {
               ) : (
                 <Upload size={18} />
               )}
-              {extracting ? "Reading certificate…" : "Read a certificate PDF"}
+              {extracting ? "Reading certificateâ€¦" : "Read a certificate PDF"}
             </span>
             <input
               className="sr-only"
@@ -287,7 +293,7 @@ export function ComplianceAudit() {
                       <p className="mt-1 text-[#65715d]">
                         {displayDueDate(item.expiry)}
                         {item.daysLeft !== null
-                          ? ` · ${Math.abs(item.daysLeft)} days ${item.daysLeft < 0 ? "overdue" : "remaining"}`
+                          ? ` Â· ${Math.abs(item.daysLeft)} days ${item.daysLeft < 0 ? "overdue" : "remaining"}`
                           : ""}
                       </p>
                     </div>
@@ -324,6 +330,7 @@ export function ComplianceAudit() {
                     />
                   </label>
                   <input name="address" type="hidden" value={address} />
+                  <input name="source" type="hidden" value={source} />
                   <input
                     aria-hidden="true"
                     className="hidden"
@@ -354,11 +361,11 @@ export function ComplianceAudit() {
                     className="min-h-12 rounded-lg bg-[#d9ff73] px-5 font-black text-[#18220d]"
                     type="submit"
                   >
-                    Start free 14-day pilot — no card
+                    Start free 14-day pilot â€” no card
                   </button>
                   <p className="text-center text-[#65715d] text-xs">
                     One property now; add up to two more in your private
-                    dashboard. The founding plan will be £29/year after the
+                    dashboard. The founding plan will be Â£29/year after the
                     pilot.
                   </p>
                   <p className="text-center text-[#65715d] text-xs leading-5">
