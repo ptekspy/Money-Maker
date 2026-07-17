@@ -15,7 +15,10 @@
 - The 15:00 campaign check found no human prospect replies and no paid activation; the only matching inbound message remains SPC's automatic response.
 - On 17 July, Estate Agents Ilford received a helpful public X reply, a follow and a tailored referral-partner email at its published business inbox, `info@estateagentsilford.co.uk`.
 - Its website contact form required a phone number, so it was not submitted with invented details; the public business inbox was used instead.
-- Blackstones Residential published a fresh London landlord compliance checklist on 17 July. LetDue followed the account and prepared a tailored email to its published business inbox, `contact@blackstonesresidential.com`; the draft is waiting for send confirmation.
+- Blackstones Residential published a fresh London landlord compliance checklist on 17 July. LetDue followed the account and sent a tailored email to its published business inbox, `contact@blackstonesresidential.com`. Check for a reply and send at most one follow-up, no earlier than 21 July.
+- My Landlord Certificate received a tailored aftercare-partner email at its published business inbox, `info@mylandlordcertificate.co.uk`. Check for a reply and send at most one follow-up, no earlier than 21 July.
+- Published the direct first-paid-customer ask on X:
+  `https://x.com/LetDueHQ/status/2078149770955087971`.
 - The latest mailbox check still found no paid activation or human prospect reply. Check this new lead for a response and send at most one follow-up no earlier than 21 July 2026.
 - The West Yorkshire Landlords Meetup page is relevant and has 46 members, but organiser messaging requires a Meetup login. No account was created and no message was sent.
 - A recurring acquisition heartbeat now checks for replies and paid-customer evidence at 09:00 and 15:00 while respecting the 19 July follow-up timing.
@@ -68,6 +71,29 @@ The opening offer is a **free three-property founding pilot**:
 - give 15 minutes of candid feedback.
 
 After Stripe is active, a useful pilot is invited onto the £29-per-year founding plan. A partner can instead offer its audience the free deadline audit at `https://letdue.com`.
+
+## Fast revenue wedge — first real pound
+
+Use this when the goal is a paid customer rather than only learning:
+
+- Ask for one self-managing landlord with one to three properties who already has a gas safety, EICR, EPC, insurance or licence date to track.
+- Position LetDue as the small certificate desk, not a property-management platform: no rent collection, no tenant management, no agency workflow.
+- Lead with the paid founding plan when the buyer already feels the pain: £29/year, one property now, add two more in the private dashboard.
+- Keep the free pilot available for cautious prospects, but do not hide the paid button behind the pilot.
+
+### X post — direct paid ask
+
+I need one self-managing landlord in England to be LetDue's first paid customer.
+
+If you have 1-3 rentals and your gas safety, EICR, EPC, insurance or licence dates live in a folder/spreadsheet, LetDue turns them into a reminder calendar.
+
+£29/year. Not a letting platform. Just the certificate desk.
+
+https://letdue.com
+
+### Partner angle — aftercare after the certificate
+
+For EPC, gas, EICR, fire-risk and HMO compliance suppliers: LetDue starts after the report is delivered. The customer gets a free deadline audit and, if useful, can pay £29/year to keep the renewal calendar alive.
 
 ## Message 1 — small landlord or HMO operator
 

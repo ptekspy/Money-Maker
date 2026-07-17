@@ -311,12 +311,14 @@ export function ComplianceAudit() {
                   <BellRing className="mt-1 shrink-0 text-[#52720d]" />
                   <div>
                     <h4 className="font-black text-xl">
-                      Put this property on autopilot
+                      Save the reminders now, or test it first
                     </h4>
                     <p className="mt-1 text-[#65715d] leading-7">
                       Upload certificates instead of typing dates. LetDue reads
                       them, stores the evidence, and reminds you at 90, 30, 14,
-                      7 and 0 days.
+                      7 and 0 days. If you already know you need this, the
+                      founding plan is the fastest way to stop worrying about
+                      the next certificate date.
                     </p>
                   </div>
                 </div>
@@ -370,13 +372,13 @@ export function ComplianceAudit() {
                       formAction={startCheckout}
                       type="submit"
                     >
-                      Start monitoring — £29/year
+                      Pay £29 and start today
                     </button>
                   </div>
                   <p className="text-center text-[#65715d] text-xs">
                     One property now; add up to two more in your private
-                    dashboard. Choose the no-card pilot or pay once now for a
-                    full year.
+                    dashboard. Choose the no-card pilot, or pay once now and get
+                    a full year of reminders.
                   </p>
                   <p className="text-center text-[#65715d] text-xs leading-5">
                     By continuing, you agree to the{" "}

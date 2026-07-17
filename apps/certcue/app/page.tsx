@@ -63,6 +63,11 @@ export default function HomePage() {
                 compliance calendar, and reminds you before an important date
                 becomes an expensive problem.
               </p>
+              <p className="mt-4 max-w-2xl font-bold text-[#394430] leading-7">
+                Built for self-managing landlords with one to three properties:
+                not a letting platform, not a rent system, just the certificate
+                desk you actually need.
+              </p>
               <a
                 className="mt-8 inline-flex min-h-13 items-center gap-2 rounded-lg bg-[#d9ff73] px-5 font-black"
                 href="#audit"
@@ -257,6 +262,11 @@ export default function HomePage() {
                 Monitor up to three properties, store every certificate, and
                 receive every reminder for £29 a year while the founding plan is
                 available.
+              </p>
+              <p className="mt-4 max-w-2xl font-bold text-[#eff7e8] leading-7">
+                If you already know one missed renewal would cost more than
+                this, start with one property today and add the other two from
+                your private dashboard.
               </p>
             </div>
             <div className="rounded-2xl bg-white p-6 text-[#18220d]">

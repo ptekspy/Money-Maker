@@ -15,6 +15,7 @@ const checkoutSchema = z.object({
   epc: z.string().max(10),
   insurance: z.string().max(10),
   propertyLicence: z.string().max(10),
+  source: z.string().trim().max(64).optional(),
 });
 
 export async function startCheckout(formData: FormData) {
@@ -48,8 +49,16 @@ export async function startCheckout(formData: FormData) {
     success_url: `${appUrl}/welcome?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appUrl}/?checkout=cancelled#audit`,
     allow_promotion_codes: true,
-    metadata: { onboarding },
-    subscription_data: { metadata: { product: "certcue" } },
+    metadata: {
+      onboarding,
+      acquisitionSource: data.source ?? "homepage",
+    },
+    subscription_data: {
+      metadata: {
+        product: "letdue",
+        acquisitionSource: data.source ?? "homepage",
+      },
+    },
   });
 
   if (!session.url) throw new Error("Stripe did not return a checkout URL.");
