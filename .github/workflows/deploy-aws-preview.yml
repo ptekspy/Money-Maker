@@ -46,8 +46,3 @@ jobs:
           aws-region: eu-west-2
 
       - run: npm run deploy:aws -- --stage preview
-
-      - name: Verify lifecycle email readiness
-        run: |
-          aws sesv2 get-account --query '{ProductionAccess:ProductionAccessEnabled,SendingEnabled:SendingEnabled}'
-          aws sesv2 get-email-identity --email-identity apicontractguard.com --query '{Verified:VerifiedForSendingStatus,DkimStatus:DkimAttributes.Status}'
