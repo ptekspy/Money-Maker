@@ -31,12 +31,28 @@ export type Installation = {
   trialEndsAt: string;
   billingStatus: BillingStatus;
   billingPlan?: BillingPlan;
+  billingProvider?: "stripe" | "github_marketplace";
+  githubMarketplacePlanId?: number;
+  githubMarketplaceEffectiveAt?: string;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
   planTrialEndsAt?: string;
   proTrialStartedAt?: string;
   workspaceId?: string;
   suspendedAt?: string;
+};
+
+export type MarketplacePurchase = {
+  pk: string;
+  sk: "PROFILE";
+  accountId: number;
+  accountLogin: string;
+  billingStatus: BillingStatus;
+  billingPlan: BillingPlan;
+  githubMarketplacePlanId: number;
+  effectiveAt: string;
+  trialEndsAt?: string;
+  updatedAt: string;
 };
 
 export type WorkspaceRole =
@@ -222,6 +238,88 @@ export async function saveInstallation(input: {
         );
       }
     });
+
+  const marketplacePurchase = await getMarketplacePurchase(input.accountId);
+  if (marketplacePurchase) {
+    await updateInstallationMarketplaceBilling(
+      input.installationId,
+      marketplacePurchase,
+    );
+  }
+}
+
+export async function getMarketplacePurchase(accountId: number) {
+  const result = await db.send(
+    new GetCommand({
+      TableName: tableName(),
+      Key: { pk: `MARKETPLACE_ACCOUNT#${accountId}`, sk: "PROFILE" },
+    }),
+  );
+  return (result.Item as MarketplacePurchase | undefined) ?? null;
+}
+
+async function updateInstallationMarketplaceBilling(
+  installationId: number,
+  purchase: MarketplacePurchase,
+) {
+  try {
+    await db.send(
+      new UpdateCommand({
+        TableName: tableName(),
+        Key: { pk: `INSTALLATION#${installationId}`, sk: "PROFILE" },
+        ConditionExpression: "attribute_exists(pk)",
+        UpdateExpression:
+          "SET billingStatus = :status, billingPlan = :plan, billingProvider = :provider, githubMarketplacePlanId = :planId, githubMarketplaceEffectiveAt = :effectiveAt, trialEndsAt = :trialEnd",
+        ExpressionAttributeValues: {
+          ":status": purchase.billingStatus,
+          ":plan": purchase.billingPlan,
+          ":provider": "github_marketplace",
+          ":planId": purchase.githubMarketplacePlanId,
+          ":effectiveAt": purchase.effectiveAt,
+          ":trialEnd": purchase.trialEndsAt ?? "",
+        },
+      }),
+    );
+    return true;
+  } catch (error) {
+    if ((error as { name?: string }).name === "ConditionalCheckFailedException")
+      return false;
+    throw error;
+  }
+}
+
+export async function saveMarketplacePurchase(input: {
+  accountId: number;
+  accountLogin: string;
+  billingStatus: BillingStatus;
+  billingPlan: BillingPlan;
+  githubMarketplacePlanId: number;
+  effectiveAt: string;
+  trialEndsAt?: string;
+}) {
+  const purchase: MarketplacePurchase = {
+    pk: `MARKETPLACE_ACCOUNT#${input.accountId}`,
+    sk: "PROFILE",
+    ...input,
+    updatedAt: new Date().toISOString(),
+  };
+  await db.send(
+    new PutCommand({
+      TableName: tableName(),
+      Item: purchase,
+    }),
+  );
+
+  const installations = await getInstallationsForAccount(input.accountId);
+  await Promise.all(
+    installations.map((installation) =>
+      updateInstallationMarketplaceBilling(
+        installation.installationId,
+        purchase,
+      ),
+    ),
+  );
+  return installations.length;
 }
 
 export async function saveUserProfile(input: {
@@ -999,6 +1097,7 @@ export async function updateBilling(input: {
   const updateExpression = [
     "SET billingStatus = :status",
     "billingPlan = :plan",
+    "billingProvider = :provider",
     "stripeCustomerId = :customer",
     "stripeSubscriptionId = :subscription",
     "planTrialEndsAt = :trialEnd",
@@ -1018,6 +1117,7 @@ export async function updateBilling(input: {
         ExpressionAttributeValues: {
           ":status": input.billingStatus,
           ":plan": input.billingPlan,
+          ":provider": "stripe",
           ":customer": input.stripeCustomerId ?? "",
           ":subscription": input.stripeSubscriptionId ?? "",
           ":trialEnd": input.planTrialEndsAt ?? "",
@@ -1085,8 +1185,11 @@ export async function updateWorkspaceBilling(input: {
 export function hasEntitlement(installation: Installation | null): boolean {
   if (!installation || installation.suspendedAt) return false;
   if (installation.billingStatus === "active") return true;
-  return (
-    installation.billingStatus === "trialing" &&
-    Date.parse(installation.trialEndsAt) > Date.now()
+  const trialEnd = Math.max(
+    ...[installation.trialEndsAt, installation.planTrialEndsAt]
+      .map((value) => Date.parse(value ?? ""))
+      .filter(Number.isFinite),
+    0,
   );
+  return installation.billingStatus === "trialing" && trialEnd > Date.now();
 }

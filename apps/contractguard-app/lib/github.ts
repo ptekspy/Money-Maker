@@ -58,11 +58,31 @@ export async function installationToken(installationId: number) {
 }
 
 export function verifyWebhookSignature(body: string, signature: string | null) {
-  if (!signature?.startsWith("sha256=")) return false;
-  const expected = `sha256=${createHmac(
-    "sha256",
+  return verifySignature(
+    body,
+    signature,
     requiredEnv("CONTRACTGUARD_GITHUB_WEBHOOK_SECRET"),
-  )
+  );
+}
+
+export function verifyMarketplaceWebhookSignature(
+  body: string,
+  signature: string | null,
+) {
+  return verifySignature(
+    body,
+    signature,
+    requiredEnv("CONTRACTGUARD_MARKETPLACE_WEBHOOK_SECRET"),
+  );
+}
+
+function verifySignature(
+  body: string,
+  signature: string | null,
+  secret: string,
+) {
+  if (!signature?.startsWith("sha256=")) return false;
+  const expected = `sha256=${createHmac("sha256", secret)
     .update(body)
     .digest("hex")}`;
   const actualBuffer = Buffer.from(signature);
