@@ -138,26 +138,67 @@ export default function Home() {
       </section>
 
       <section className="pricing shell">
-        <div className="pricing-card">
-          <div>
-            <span className="step">AVAILABLE NOW</span>
-            <h2>Contract Guard Pro</h2>
-            <p>
-              Automatic GitHub pull-request checks for OpenAPI repositories.
-            </p>
-          </div>
-          <div className="price">
-            <strong>GBP 9</strong>
-            <span>/ private repo / month</span>
-          </div>
-          <TrackedLink
-            className="button secondary"
-            href={`${authUrl}&campaign=pricing_trial`}
-            event="install_cta_clicked"
-            campaign="pricing_trial"
-          >
-            Start trial
-          </TrackedLink>
+        <span className="step">AVAILABLE NOW</span>
+        <h2>Simple plans that grow with the repositories you protect</h2>
+        <div className="pricing-grid">
+          <article className="pricing-card">
+            <div>
+              <h3>Starter</h3>
+              <p>Automatic checks for up to 3 repositories.</p>
+            </div>
+            <div className="price">
+              <strong>GBP 19</strong>
+              <span>/ month</span>
+            </div>
+            <TrackedLink
+              className="button secondary"
+              href={`${authUrl}&campaign=pricing_starter`}
+              event="install_cta_clicked"
+              campaign="pricing_starter"
+            >
+              Start free trial
+            </TrackedLink>
+          </article>
+          <article className="pricing-card recommended">
+            <div>
+              <span className="step">RECOMMENDED</span>
+              <h3>Pro</h3>
+              <p>Protect up to 20 repositories with a fresh 14-day trial.</p>
+            </div>
+            <div className="price">
+              <strong>GBP 49</strong>
+              <span>/ month</span>
+            </div>
+            <TrackedLink
+              className="button secondary"
+              href={`${authUrl}&campaign=pricing_pro`}
+              event="install_cta_clicked"
+              campaign="pricing_pro"
+            >
+              Start free trial
+            </TrackedLink>
+          </article>
+          <article className="pricing-card">
+            <div>
+              <h3>Teams</h3>
+              <p>
+                5 users, 50 repositories, shared billing and role-based access.
+                Additional users cost GBP 15/month.
+              </p>
+            </div>
+            <div className="price">
+              <strong>GBP 149</strong>
+              <span>/ month</span>
+            </div>
+            <TrackedLink
+              className="button secondary"
+              href={`${authUrl}&campaign=pricing_teams`}
+              event="install_cta_clicked"
+              campaign="pricing_teams"
+            >
+              Start Teams trial
+            </TrackedLink>
+          </article>
         </div>
       </section>
 

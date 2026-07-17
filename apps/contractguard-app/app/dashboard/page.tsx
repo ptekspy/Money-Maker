@@ -8,6 +8,7 @@ import {
   listRecentChecks,
   listRecentOperationalEvents,
   listRepositories,
+  listUserWorkspaces,
   saveInstallation,
 } from "@/lib/data";
 import { githubAppSlug } from "@/lib/env";
@@ -134,6 +135,7 @@ export default async function Dashboard({
     billingMessages[params.billing as keyof typeof billingMessages];
 
   const github = await userInstallations(session.accessToken);
+  const workspaceMemberships = await listUserWorkspaces(session.userId);
   const installations = await Promise.all(
     github.installations.map(async (item) => {
       await saveInstallation({
@@ -196,6 +198,23 @@ export default async function Dashboard({
           </a>
         </header>
         {billingMessage ? <div className="notice">{billingMessage}</div> : null}
+        {workspaceMemberships.length ? (
+          <section className="workspaceStrip">
+            <div>
+              <p className="eyebrow">TEAM WORKSPACES</p>
+              <strong>Shared protection and billing</strong>
+            </div>
+            {workspaceMemberships.map(({ member, workspace }) => (
+              <Link
+                className="button secondary"
+                href={`/teams/${workspace.workspaceId}`}
+                key={workspace.workspaceId}
+              >
+                {workspace.name} · {member.role}
+              </Link>
+            ))}
+          </section>
+        ) : null}
         <section className="quickStart">
           <article>
             <span>1</span>
@@ -343,6 +362,31 @@ export default async function Dashboard({
                         </button>
                       </form>
                     </article>
+                    <article>
+                      <span>TEAMS</span>
+                      <strong>£{PLANS.teams.monthlyPrice}/month</strong>
+                      <p>
+                        Share {PLANS.teams.repositoryLimit} repositories with{" "}
+                        {PLANS.teams.includedSeats} users. Additional users are
+                        £{PLANS.teams.additionalSeatPrice}/month.
+                      </p>
+                      <form action="/api/billing/checkout" method="post">
+                        <input
+                          type="hidden"
+                          name="installationId"
+                          value={item.id}
+                        />
+                        <input type="hidden" name="plan" value="teams" />
+                        <input
+                          type="hidden"
+                          name="workspaceName"
+                          value={`${item.account.login} team`}
+                        />
+                        <button className="button secondary" type="submit">
+                          Start Teams trial
+                        </button>
+                      </form>
+                    </article>
                   </section>
                 ) : null}
                 {profile &&
@@ -367,7 +411,48 @@ export default async function Dashboard({
                     </form>
                   </div>
                 ) : null}
+                {profile?.workspaceId ? (
+                  <div className="planNudge">
+                    <span>This installation belongs to a Teams workspace.</span>
+                    <Link
+                      className="button secondary"
+                      href={`/teams/${profile.workspaceId}`}
+                    >
+                      Open team workspace
+                    </Link>
+                  </div>
+                ) : profile && plan !== "teams" && !showPlanChoices ? (
+                  <div className="teamUpgrade">
+                    <div>
+                      <strong>Need shared access?</strong>
+                      <span>
+                        Teams includes {PLANS.teams.includedSeats} users and{" "}
+                        {PLANS.teams.repositoryLimit} repositories for £
+                        {PLANS.teams.monthlyPrice}/month.
+                      </span>
+                    </div>
+                    <form action="/api/billing/checkout" method="post">
+                      <input
+                        type="hidden"
+                        name="installationId"
+                        value={item.id}
+                      />
+                      <input type="hidden" name="plan" value="teams" />
+                      <input
+                        type="hidden"
+                        name="workspaceName"
+                        value={`${item.account.login} team`}
+                      />
+                      <button className="button secondary" type="submit">
+                        {profile.billingStatus === "active"
+                          ? "Convert to Teams · £149/month"
+                          : "Start Teams 14-day trial"}
+                      </button>
+                    </form>
+                  </div>
+                ) : null}
                 {profile?.stripeCustomerId &&
+                plan !== "teams" &&
                 (profile.billingStatus === "active" ||
                   profile.billingStatus === "past_due") ? (
                   <form action="/api/billing/portal" method="post">

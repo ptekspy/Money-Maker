@@ -419,17 +419,32 @@ h1 em {
 .pricing {
   padding: 36px 0 90px;
 }
-.pricing-card {
+.pricing > h2 {
+  max-width: 720px;
+}
+.pricing-grid {
   display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
-  gap: 40px;
-  padding: 36px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+.pricing-card {
+  display: flex;
+  min-height: 330px;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 30px;
   border-radius: 18px;
   background: var(--ink);
   color: #fff;
 }
-.pricing h2 {
+.pricing-card.recommended {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+.pricing h3 {
   margin: 10px 0 5px;
   font-size: 30px;
 }
@@ -450,6 +465,7 @@ h1 em {
   font-size: 12px;
 }
 .pricing .secondary {
+  justify-content: center;
   color: #fff;
   border-color: #53645c;
 }
@@ -685,6 +701,7 @@ h1 em {
   .legalGrid,
   .marketplacePanels,
   .guide-grid,
+  .pricing-grid,
   .resources > div {
     grid-template-columns: 1fr;
   }
@@ -692,9 +709,6 @@ h1 em {
     grid-template-columns: 1fr;
   }
   .consent {
-    grid-template-columns: 1fr;
-  }
-  .pricing-card {
     grid-template-columns: 1fr;
   }
   .checker-actions > span {

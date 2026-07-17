@@ -7,12 +7,14 @@ export const SESSION_COOKIE = "contractguard_session";
 export const STATE_COOKIE = "contractguard_oauth_state";
 export const VERIFIER_COOKIE = "contractguard_pkce_verifier";
 export const ATTRIBUTION_COOKIE = "contractguard_attribution";
+export const RETURN_TO_COOKIE = "contractguard_return_to";
 
 export type Session = {
   userId: number;
   login: string;
   avatarUrl: string;
   accessToken: string;
+  email?: string;
 };
 
 function sessionKey() {

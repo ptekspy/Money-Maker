@@ -1,6 +1,7 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
+  DeleteCommand,
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
@@ -34,7 +35,64 @@ export type Installation = {
   stripeSubscriptionId?: string;
   planTrialEndsAt?: string;
   proTrialStartedAt?: string;
+  workspaceId?: string;
   suspendedAt?: string;
+};
+
+export type WorkspaceRole =
+  | "owner"
+  | "admin"
+  | "developer"
+  | "billing"
+  | "viewer";
+
+export type Workspace = {
+  pk: string;
+  sk: "PROFILE";
+  workspaceId: string;
+  name: string;
+  ownerUserId: number;
+  billingStatus: BillingStatus;
+  billingPlan: "teams";
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  stripeSeatSubscriptionItemId?: string;
+  trialEndsAt?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type WorkspaceMember = {
+  pk: string;
+  sk: string;
+  workspaceId: string;
+  userId: number;
+  login: string;
+  email?: string;
+  role: WorkspaceRole;
+  joinedAt: string;
+};
+
+export type WorkspaceInvitation = {
+  pk: string;
+  sk: string;
+  workspaceId: string;
+  email: string;
+  role: Exclude<WorkspaceRole, "owner">;
+  invitedByUserId: number;
+  createdAt: string;
+  expiresAt: number;
+  acceptedAt?: string;
+};
+
+export type WorkspaceAuditEvent = {
+  pk: string;
+  sk: string;
+  workspaceId: string;
+  actorUserId?: number;
+  action: string;
+  detail?: string;
+  createdAt: string;
 };
 
 export type UserProfile = {
@@ -205,6 +263,319 @@ export async function getUserProfile(
   return (result.Item as UserProfile | undefined) ?? null;
 }
 
+function workspacePk(workspaceId: string) {
+  return `WORKSPACE#${workspaceId}`;
+}
+
+function invitationHash(secret: string) {
+  return createHash("sha256").update(secret).digest("hex");
+}
+
+export async function createWorkspace(input: {
+  name: string;
+  ownerUserId: number;
+  ownerLogin: string;
+  ownerEmail?: string;
+}) {
+  const workspaceId = randomUUID();
+  const now = new Date().toISOString();
+  const workspace: Workspace = {
+    pk: workspacePk(workspaceId),
+    sk: "PROFILE",
+    workspaceId,
+    name: input.name.trim().slice(0, 80) || `${input.ownerLogin}'s team`,
+    ownerUserId: input.ownerUserId,
+    billingStatus: "cancelled",
+    billingPlan: "teams",
+    createdAt: now,
+    updatedAt: now,
+  };
+  const owner: WorkspaceMember & { gsi1pk: string; gsi1sk: string } = {
+    pk: workspace.pk,
+    sk: `MEMBER#${input.ownerUserId}`,
+    workspaceId,
+    userId: input.ownerUserId,
+    login: input.ownerLogin,
+    email: input.ownerEmail,
+    role: "owner",
+    joinedAt: now,
+    gsi1pk: `USER#${input.ownerUserId}`,
+    gsi1sk: `WORKSPACE#${workspaceId}`,
+  };
+  await Promise.all([
+    db.send(
+      new PutCommand({
+        TableName: tableName(),
+        Item: workspace,
+        ConditionExpression: "attribute_not_exists(pk)",
+      }),
+    ),
+    db.send(
+      new PutCommand({
+        TableName: tableName(),
+        Item: owner,
+        ConditionExpression: "attribute_not_exists(pk)",
+      }),
+    ),
+  ]);
+  await recordWorkspaceAudit({
+    workspaceId,
+    actorUserId: input.ownerUserId,
+    action: "workspace.created",
+    detail: workspace.name,
+  });
+  return workspace;
+}
+
+export async function getWorkspace(
+  workspaceId: string,
+): Promise<Workspace | null> {
+  const result = await db.send(
+    new GetCommand({
+      TableName: tableName(),
+      Key: { pk: workspacePk(workspaceId), sk: "PROFILE" },
+    }),
+  );
+  return (result.Item as Workspace | undefined) ?? null;
+}
+
+export async function getWorkspaceMember(
+  workspaceId: string,
+  userId: number,
+): Promise<WorkspaceMember | null> {
+  const result = await db.send(
+    new GetCommand({
+      TableName: tableName(),
+      Key: { pk: workspacePk(workspaceId), sk: `MEMBER#${userId}` },
+    }),
+  );
+  return (result.Item as WorkspaceMember | undefined) ?? null;
+}
+
+export async function listWorkspaceMembers(workspaceId: string) {
+  const result = await db.send(
+    new QueryCommand({
+      TableName: tableName(),
+      KeyConditionExpression: "pk = :pk AND begins_with(sk, :prefix)",
+      ExpressionAttributeValues: {
+        ":pk": workspacePk(workspaceId),
+        ":prefix": "MEMBER#",
+      },
+      ScanIndexForward: true,
+    }),
+  );
+  return (result.Items ?? []) as WorkspaceMember[];
+}
+
+export async function listUserWorkspaces(userId: number) {
+  const memberships = await db.send(
+    new QueryCommand({
+      TableName: tableName(),
+      IndexName: "LookupIndex",
+      KeyConditionExpression: "gsi1pk = :user",
+      ExpressionAttributeValues: { ":user": `USER#${userId}` },
+    }),
+  );
+  const members = (memberships.Items ?? []).filter((item) =>
+    String(item.sk ?? "").startsWith("MEMBER#"),
+  ) as WorkspaceMember[];
+  const workspaces = await Promise.all(
+    members.map((member) => getWorkspace(member.workspaceId)),
+  );
+  return members.flatMap((member, index) => {
+    const workspace = workspaces[index];
+    return workspace ? [{ member, workspace }] : [];
+  });
+}
+
+export async function createWorkspaceInvitation(input: {
+  workspaceId: string;
+  email: string;
+  role: Exclude<WorkspaceRole, "owner">;
+  invitedByUserId: number;
+}) {
+  const secret = randomBytes(32).toString("base64url");
+  const now = new Date();
+  const invitation: WorkspaceInvitation = {
+    pk: workspacePk(input.workspaceId),
+    sk: `INVITE#${invitationHash(secret)}`,
+    workspaceId: input.workspaceId,
+    email: input.email.trim().toLowerCase(),
+    role: input.role,
+    invitedByUserId: input.invitedByUserId,
+    createdAt: now.toISOString(),
+    expiresAt: Math.floor(now.getTime() / 1000) + 60 * 60 * 24 * 7,
+  };
+  await db.send(
+    new PutCommand({
+      TableName: tableName(),
+      Item: invitation,
+      ConditionExpression: "attribute_not_exists(pk)",
+    }),
+  );
+  return {
+    invitation,
+    token: `${input.workspaceId}.${secret}`,
+  };
+}
+
+export async function getWorkspaceInvitation(token: string) {
+  const [workspaceId, secret] = token.split(".", 2);
+  if (!workspaceId || !secret) return null;
+  const result = await db.send(
+    new GetCommand({
+      TableName: tableName(),
+      Key: {
+        pk: workspacePk(workspaceId),
+        sk: `INVITE#${invitationHash(secret)}`,
+      },
+    }),
+  );
+  return (result.Item as WorkspaceInvitation | undefined) ?? null;
+}
+
+export async function acceptWorkspaceInvitation(input: {
+  token: string;
+  userId: number;
+  login: string;
+  email: string;
+}) {
+  const invitation = await getWorkspaceInvitation(input.token);
+  if (
+    !invitation ||
+    invitation.acceptedAt ||
+    invitation.expiresAt <= Math.floor(Date.now() / 1000) ||
+    invitation.email !== input.email.trim().toLowerCase()
+  )
+    return null;
+  const now = new Date().toISOString();
+  await db.send(
+    new PutCommand({
+      TableName: tableName(),
+      Item: {
+        pk: workspacePk(invitation.workspaceId),
+        sk: `MEMBER#${input.userId}`,
+        workspaceId: invitation.workspaceId,
+        userId: input.userId,
+        login: input.login,
+        email: input.email,
+        role: invitation.role,
+        joinedAt: now,
+        gsi1pk: `USER#${input.userId}`,
+        gsi1sk: `WORKSPACE#${invitation.workspaceId}`,
+      } satisfies WorkspaceMember & { gsi1pk: string; gsi1sk: string },
+      ConditionExpression: "attribute_not_exists(pk)",
+    }),
+  );
+  await db.send(
+    new UpdateCommand({
+      TableName: tableName(),
+      Key: { pk: invitation.pk, sk: invitation.sk },
+      UpdateExpression: "SET acceptedAt = :now",
+      ConditionExpression: "attribute_not_exists(acceptedAt)",
+      ExpressionAttributeValues: { ":now": now },
+    }),
+  );
+  await recordWorkspaceAudit({
+    workspaceId: invitation.workspaceId,
+    actorUserId: input.userId,
+    action: "member.joined",
+    detail: `${input.login} (${invitation.role})`,
+  });
+  return invitation;
+}
+
+export async function updateWorkspaceMemberRole(input: {
+  workspaceId: string;
+  userId: number;
+  role: Exclude<WorkspaceRole, "owner">;
+  actorUserId: number;
+}) {
+  await db.send(
+    new UpdateCommand({
+      TableName: tableName(),
+      Key: {
+        pk: workspacePk(input.workspaceId),
+        sk: `MEMBER#${input.userId}`,
+      },
+      UpdateExpression: "SET #role = :role",
+      ConditionExpression: "attribute_exists(pk) AND #role <> :owner",
+      ExpressionAttributeNames: { "#role": "role" },
+      ExpressionAttributeValues: {
+        ":role": input.role,
+        ":owner": "owner",
+      },
+    }),
+  );
+  await recordWorkspaceAudit({
+    workspaceId: input.workspaceId,
+    actorUserId: input.actorUserId,
+    action: "member.role_changed",
+    detail: `${input.userId} -> ${input.role}`,
+  });
+}
+
+export async function removeWorkspaceMember(input: {
+  workspaceId: string;
+  userId: number;
+  actorUserId: number;
+}) {
+  const member = await getWorkspaceMember(input.workspaceId, input.userId);
+  if (!member || member.role === "owner") return false;
+  await db.send(
+    new DeleteCommand({
+      TableName: tableName(),
+      Key: {
+        pk: workspacePk(input.workspaceId),
+        sk: `MEMBER#${input.userId}`,
+      },
+    }),
+  );
+  await recordWorkspaceAudit({
+    workspaceId: input.workspaceId,
+    actorUserId: input.actorUserId,
+    action: "member.removed",
+    detail: `${member.login} (${member.role})`,
+  });
+  return true;
+}
+
+export async function recordWorkspaceAudit(input: {
+  workspaceId: string;
+  actorUserId?: number;
+  action: string;
+  detail?: string;
+}) {
+  const now = new Date().toISOString();
+  await db.send(
+    new PutCommand({
+      TableName: tableName(),
+      Item: {
+        pk: workspacePk(input.workspaceId),
+        sk: `AUDIT#${now}#${randomUUID()}`,
+        ...input,
+        createdAt: now,
+      } satisfies WorkspaceAuditEvent,
+    }),
+  );
+}
+
+export async function listWorkspaceAudit(workspaceId: string, limit = 30) {
+  const result = await db.send(
+    new QueryCommand({
+      TableName: tableName(),
+      KeyConditionExpression: "pk = :pk AND begins_with(sk, :prefix)",
+      ExpressionAttributeValues: {
+        ":pk": workspacePk(workspaceId),
+        ":prefix": "AUDIT#",
+      },
+      ScanIndexForward: false,
+      Limit: limit,
+    }),
+  );
+  return (result.Items ?? []) as WorkspaceAuditEvent[];
+}
+
 function funnelPartition(date: Date) {
   return `FUNNEL#${date.toISOString().slice(0, 7)}`;
 }
@@ -304,6 +675,82 @@ export async function getInstallation(
   return (result.Item as Installation | undefined) ?? null;
 }
 
+export async function linkInstallationToWorkspace(input: {
+  workspaceId: string;
+  installationId: number;
+  actorUserId: number;
+}) {
+  const installation = await getInstallation(input.installationId);
+  if (
+    !installation ||
+    (installation.workspaceId && installation.workspaceId !== input.workspaceId)
+  )
+    return false;
+  await Promise.all([
+    db.send(
+      new UpdateCommand({
+        TableName: tableName(),
+        Key: {
+          pk: `INSTALLATION#${input.installationId}`,
+          sk: "PROFILE",
+        },
+        UpdateExpression: "SET workspaceId = :workspaceId",
+        ExpressionAttributeValues: { ":workspaceId": input.workspaceId },
+      }),
+    ),
+    db.send(
+      new PutCommand({
+        TableName: tableName(),
+        Item: {
+          pk: workspacePk(input.workspaceId),
+          sk: `INSTALLATION#${input.installationId}`,
+          workspaceId: input.workspaceId,
+          installationId: input.installationId,
+          accountLogin: installation.accountLogin,
+          linkedAt: new Date().toISOString(),
+        },
+      }),
+    ),
+  ]);
+  await recordWorkspaceAudit({
+    workspaceId: input.workspaceId,
+    actorUserId: input.actorUserId,
+    action: "installation.linked",
+    detail: installation.accountLogin,
+  });
+  return true;
+}
+
+export async function listWorkspaceInstallations(workspaceId: string) {
+  const result = await db.send(
+    new QueryCommand({
+      TableName: tableName(),
+      KeyConditionExpression: "pk = :pk AND begins_with(sk, :prefix)",
+      ExpressionAttributeValues: {
+        ":pk": workspacePk(workspaceId),
+        ":prefix": "INSTALLATION#",
+      },
+    }),
+  );
+  const links = (result.Items ?? []) as Array<{ installationId: number }>;
+  const installations = await Promise.all(
+    links.map((link) => getInstallation(link.installationId)),
+  );
+  return installations.filter((installation): installation is Installation =>
+    Boolean(installation),
+  );
+}
+
+export async function listWorkspaceRepositories(workspaceId: string) {
+  const installations = await listWorkspaceInstallations(workspaceId);
+  const repositories = await Promise.all(
+    installations.map((installation) =>
+      listRepositories(installation.installationId),
+    ),
+  );
+  return repositories.flat().filter((repository) => !repository.removed);
+}
+
 export async function getInstallationsForAccount(
   accountId: number,
 ): Promise<Installation[]> {
@@ -335,6 +782,22 @@ export async function listAllInstallations(limit = 100) {
       typeof item.accountLogin === "string" &&
       item.accountLogin.trim().length > 0,
   ) as Installation[];
+}
+
+export async function listAllWorkspaces(limit = 100) {
+  const result = await db.send(
+    new ScanCommand({
+      TableName: tableName(),
+      FilterExpression:
+        "sk = :profile AND attribute_exists(workspaceId) AND billingPlan = :plan",
+      ExpressionAttributeValues: {
+        ":profile": "PROFILE",
+        ":plan": "teams",
+      },
+      Limit: limit,
+    }),
+  );
+  return (result.Items ?? []) as Workspace[];
 }
 
 export async function setInstallationSuspended(
@@ -563,6 +1026,53 @@ export async function updateBilling(input: {
             : {}),
         },
       }),
+    );
+    return true;
+  } catch (error) {
+    if ((error as { name?: string }).name === "ConditionalCheckFailedException")
+      return false;
+    throw error;
+  }
+}
+
+export async function updateWorkspaceBilling(input: {
+  workspaceId: string;
+  billingStatus: BillingStatus;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  stripeSeatSubscriptionItemId?: string;
+  trialEndsAt?: string;
+}) {
+  try {
+    await db.send(
+      new UpdateCommand({
+        TableName: tableName(),
+        Key: { pk: workspacePk(input.workspaceId), sk: "PROFILE" },
+        ConditionExpression: "attribute_exists(pk)",
+        UpdateExpression:
+          "SET billingStatus = :status, stripeCustomerId = :customer, stripeSubscriptionId = :subscription, stripeSeatSubscriptionItemId = :seatItem, trialEndsAt = :trialEnd, updatedAt = :now",
+        ExpressionAttributeValues: {
+          ":status": input.billingStatus,
+          ":customer": input.stripeCustomerId ?? "",
+          ":subscription": input.stripeSubscriptionId ?? "",
+          ":seatItem": input.stripeSeatSubscriptionItemId ?? "",
+          ":trialEnd": input.trialEndsAt ?? "",
+          ":now": new Date().toISOString(),
+        },
+      }),
+    );
+    const installations = await listWorkspaceInstallations(input.workspaceId);
+    await Promise.all(
+      installations.map((installation) =>
+        updateBilling({
+          installationId: installation.installationId,
+          billingStatus: input.billingStatus,
+          billingPlan: "teams",
+          stripeCustomerId: input.stripeCustomerId,
+          stripeSubscriptionId: input.stripeSubscriptionId,
+          planTrialEndsAt: input.trialEndsAt,
+        }),
+      ),
     );
     return true;
   } catch (error) {

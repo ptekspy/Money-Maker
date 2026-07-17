@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import {
   ATTRIBUTION_COOKIE,
+  RETURN_TO_COOKIE,
   SESSION_COOKIE,
   STATE_COOKIE,
   sealSession,
@@ -111,8 +112,17 @@ export async function GET(request: NextRequest) {
     login: user.login,
     avatarUrl: user.avatar_url,
     accessToken: token.access_token,
+    email,
   });
-  const response = NextResponse.redirect(new URL("/dashboard", request.url));
+  const returnTo = request.cookies.get(RETURN_TO_COOKIE)?.value;
+  const response = NextResponse.redirect(
+    new URL(
+      returnTo?.startsWith("/") && !returnTo.startsWith("//")
+        ? returnTo
+        : "/dashboard",
+      request.url,
+    ),
+  );
   response.cookies.set(SESSION_COOKIE, session, {
     ...secureCookie,
     maxAge: 60 * 60 * 8,
@@ -120,5 +130,6 @@ export async function GET(request: NextRequest) {
   response.cookies.delete(STATE_COOKIE);
   response.cookies.delete(VERIFIER_COOKIE);
   response.cookies.delete(ATTRIBUTION_COOKIE);
+  response.cookies.delete(RETURN_TO_COOKIE);
   return response;
 }

@@ -27,6 +27,8 @@ const required = {
   stripeWebhookSecret: health.stripe?.webhookSecret,
   stripeStarterPriceId: health.stripe?.starterPriceId,
   stripeProPriceId: health.stripe?.proPriceId,
+  stripeTeamsPriceId: health.stripe?.teamsPriceId,
+  stripeTeamsSeatPriceId: health.stripe?.teamsSeatPriceId,
 };
 
 const missing = Object.entries(required)

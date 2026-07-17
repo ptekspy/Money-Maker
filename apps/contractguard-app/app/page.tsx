@@ -46,7 +46,8 @@ export default async function Home() {
         <div className="proof">
           <span>14-day free trial</span>
           <span>No card required</span>
-          <span>GBP 9 / private repo / month</span>
+          <span>Starter from GBP 19 / month</span>
+          <span>Teams: 5 users and 50 repositories</span>
         </div>
       </section>
       <section className="demoProof shell">

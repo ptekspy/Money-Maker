@@ -6,10 +6,13 @@ import {
   type CheckRecord,
   type Installation,
   listAllInstallations,
+  listAllWorkspaces,
   listFunnelEventsSince,
   listRecentChecks,
   listRecentOperationalEvents,
   listRepositories,
+  listWorkspaceInstallations,
+  listWorkspaceMembers,
 } from "@/lib/data";
 import { billingPlan, PLANS } from "@/lib/plans";
 import { stripeConfig } from "@/lib/stripe";
@@ -64,6 +67,18 @@ export default async function AdminPage() {
 
   const installations = (await listAllInstallations()).sort(
     (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt),
+  );
+  const workspaces = (await listAllWorkspaces()).sort(
+    (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt),
+  );
+  const workspaceRows = await Promise.all(
+    workspaces.map(async (workspace) => {
+      const [members, linkedInstallations] = await Promise.all([
+        listWorkspaceMembers(workspace.workspaceId),
+        listWorkspaceInstallations(workspace.workspaceId),
+      ]);
+      return { linkedInstallations, members, workspace };
+    }),
   );
   const rows = await Promise.all(
     installations.map(async (installation) => {
@@ -143,6 +158,33 @@ export default async function AdminPage() {
               {ops.filter((event) => event.severity === "error").length}
             </strong>
           </div>
+        </section>
+
+        <section className="opsPanel">
+          <div>
+            <p className="eyebrow">TEAM WORKSPACES</p>
+            <h2>Shared accounts and seats</h2>
+          </div>
+          {!workspaceRows.length ? (
+            <p className="muted">No Teams workspaces have been created yet.</p>
+          ) : (
+            workspaceRows.map(({ linkedInstallations, members, workspace }) => (
+              <div className="adminInstall" key={workspace.workspaceId}>
+                <div>
+                  <strong>{workspace.name}</strong>
+                  <small>
+                    {workspace.billingStatus} · created{" "}
+                    {shortDate(workspace.createdAt)}
+                  </small>
+                  <small>workspace {workspace.workspaceId}</small>
+                </div>
+                <div className="adminInstallMeta">
+                  <span>{members.length} members</span>
+                  <span>{linkedInstallations.length} installs</span>
+                </div>
+              </div>
+            ))
+          )}
         </section>
 
         <section className="opsPanel">
@@ -237,6 +279,14 @@ export default async function AdminPage() {
               </span>
               <span>
                 Pro price <strong>{stripe.proPriceId ? "yes" : "no"}</strong>
+              </span>
+              <span>
+                Teams base price{" "}
+                <strong>{stripe.teamsPriceId ? "yes" : "no"}</strong>
+              </span>
+              <span>
+                Teams seat price{" "}
+                <strong>{stripe.teamsSeatPriceId ? "yes" : "no"}</strong>
               </span>
             </div>
           </article>

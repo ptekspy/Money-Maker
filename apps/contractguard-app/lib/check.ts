@@ -4,6 +4,7 @@ import {
   getInstallation,
   hasEntitlement,
   listRepositories,
+  listWorkspaceRepositories,
   recordCheck,
   saveRepository,
 } from "@/lib/data";
@@ -121,7 +122,11 @@ export async function processPullRequest(job: PullRequestJob) {
     return;
   }
 
-  const repositories = (await listRepositories(job.installationId))
+  const repositories = (
+    installation?.workspaceId
+      ? await listWorkspaceRepositories(installation.workspaceId)
+      : await listRepositories(job.installationId)
+  )
     .filter((repository) => !repository.removed)
     .sort((a, b) => {
       const firstSeen =
@@ -142,7 +147,9 @@ export async function processPullRequest(job: PullRequestJob) {
       summary:
         plan === "starter"
           ? "Starter protects 3 repositories. Upgrade to Pro for a fresh 14-day trial and protection for up to 20 repositories."
-          : "Pro protects 20 repositories. Teams support is being designed for larger organizations.",
+          : plan === "pro"
+            ? "Pro protects 20 repositories. Upgrade to Teams for shared access and protection for up to 50 repositories."
+            : "Teams protects 50 repositories across the workspace. Remove an unused repository or contact support for Enterprise capacity.",
     });
     return;
   }

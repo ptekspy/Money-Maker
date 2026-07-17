@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
   ATTRIBUTION_COOKIE,
   oauthValues,
+  RETURN_TO_COOKIE,
   STATE_COOKIE,
   secureCookie,
   VERIFIER_COOKIE,
@@ -28,6 +29,13 @@ export async function GET(request: NextRequest) {
     ...secureCookie,
     maxAge: 600,
   });
+  const returnTo = request.nextUrl.searchParams.get("returnTo");
+  if (returnTo?.startsWith("/") && !returnTo.startsWith("//")) {
+    response.cookies.set(RETURN_TO_COOKIE, returnTo.slice(0, 500), {
+      ...secureCookie,
+      maxAge: 600,
+    });
+  }
   const source = request.nextUrl.searchParams.get("source")?.slice(0, 80);
   const campaign = request.nextUrl.searchParams.get("campaign")?.slice(0, 120);
   if (source || campaign) {

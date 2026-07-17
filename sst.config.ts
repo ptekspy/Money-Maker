@@ -136,6 +136,10 @@ export default $config({
           process.env.CONTRACTGUARD_STRIPE_STARTER_PRICE_ID ?? "",
         STRIPE_CONTRACTGUARD_PRO_PRICE_ID:
           process.env.CONTRACTGUARD_STRIPE_PRO_PRICE_ID ?? "",
+        STRIPE_CONTRACTGUARD_TEAMS_PRICE_ID:
+          process.env.CONTRACTGUARD_STRIPE_TEAMS_PRICE_ID ?? "",
+        STRIPE_CONTRACTGUARD_TEAMS_SEAT_PRICE_ID:
+          process.env.CONTRACTGUARD_STRIPE_TEAMS_SEAT_PRICE_ID ?? "",
         CONTRACTGUARD_EMAIL_FROM:
           process.env.CONTRACTGUARD_EMAIL_FROM ??
           "API Contract Guard <admin@apicontractguard.com>",

@@ -3,11 +3,14 @@ import type Stripe from "stripe";
 import {
   recordFunnelEvent,
   recordOperationalEvent,
+  recordWorkspaceAudit,
   updateBilling,
+  updateWorkspaceBilling,
 } from "@/lib/data";
 import { requiredEnv } from "@/lib/env";
 import { billingPlan } from "@/lib/plans";
 import { stripe, stripeWebhookConfigured } from "@/lib/stripe";
+import { syncWorkspaceSeatBilling } from "@/lib/teams";
 
 export const runtime = "nodejs";
 
@@ -48,7 +51,50 @@ export async function POST(request: NextRequest) {
       const subscription = event.data.object as Stripe.Subscription;
       const installationId = Number(subscription.metadata.installationId);
       const plan = billingPlan(subscription.metadata.plan);
-      if (installationId) {
+      const workspaceId = subscription.metadata.workspaceId;
+      if (plan === "teams" && workspaceId) {
+        const seatPriceId = requiredEnv(
+          "STRIPE_CONTRACTGUARD_TEAMS_SEAT_PRICE_ID",
+        );
+        const seatItem = subscription.items.data.find(
+          (item) => item.price.id === seatPriceId,
+        );
+        const updated = await updateWorkspaceBilling({
+          workspaceId,
+          billingStatus: status(subscription),
+          stripeCustomerId: String(subscription.customer),
+          stripeSubscriptionId: subscription.id,
+          stripeSeatSubscriptionItemId: seatItem?.id,
+          trialEndsAt: subscription.trial_end
+            ? new Date(subscription.trial_end * 1000).toISOString()
+            : undefined,
+        });
+        if (!updated) {
+          await recordOperationalEvent({
+            severity: "warning",
+            source: "billing",
+            message: "Ignored Stripe Teams event for an unknown workspace",
+            detail: `${event.type} - ${event.id}`,
+            installationId: installationId || undefined,
+          });
+          return NextResponse.json({ received: true });
+        }
+        await recordWorkspaceAudit({
+          workspaceId,
+          action: `billing.${subscription.status}`,
+          detail: event.type,
+        });
+        if (status(subscription) === "active") {
+          await syncWorkspaceSeatBilling(workspaceId);
+        }
+        if (subscription.status === "active") {
+          await recordFunnelEvent({
+            type: "subscription_activated",
+            installationId: installationId || undefined,
+            dedupeId: `stripe-${event.id}`,
+          });
+        }
+      } else if (installationId) {
         const updated = await updateBilling({
           installationId,
           billingStatus: status(subscription),
