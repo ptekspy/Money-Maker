@@ -144,6 +144,23 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="resources shell">
+        <span className="step">OPENAPI GUIDES</span>
+        <h2>Protect the contract, not just the code</h2>
+        <div>
+          <a href="/openapi-breaking-change-detection">
+            OpenAPI breaking change detection
+          </a>
+          <a href="/openapi-diff-github-actions">
+            OpenAPI diff for GitHub pull requests
+          </a>
+          <a href="/api-contract-testing">API contract testing</a>
+          <a href="/openapi-backward-compatibility">
+            OpenAPI backward compatibility
+          </a>
+        </div>
+      </section>
+
       <footer className="shell footer">
         <span>Copyright 2026 API Contract Guard</span>
         <div>
