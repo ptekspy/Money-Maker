@@ -15,6 +15,10 @@ const pilotSchema = z.object({
   epc: z.string().max(10),
   insurance: z.string().max(10),
   propertyLicence: z.string().max(10),
+  source: z
+    .string()
+    .regex(/^[a-z0-9-]{1,64}$/)
+    .default("homepage"),
   companyWebsite: z.literal("").optional().default(""),
 });
 
@@ -28,6 +32,7 @@ export async function startPilot(formData: FormData) {
     address: data.address,
     hasGas: data.hasGas === "true",
     isHmo: data.isHmo === "true",
+    source: data.source,
     dates: {
       "Gas safety": data.gasSafety,
       EICR: data.eicr,
