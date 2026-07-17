@@ -394,6 +394,59 @@ h1 em {
   color: var(--muted);
   line-height: 1.5;
 }
+.planChoices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.planChoices article {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+}
+.planChoices article > span:first-child {
+  color: var(--muted);
+  font:
+    800 11px ui-monospace,
+    monospace;
+  letter-spacing: 0.1em;
+}
+.planChoices article > strong {
+  display: block;
+  margin-top: 10px;
+  font-size: 24px;
+}
+.planChoices p {
+  min-height: 66px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.planChoices .recommendedPlan {
+  border-color: var(--green);
+  background: #f0faf3;
+}
+.planCurrent {
+  display: inline-flex;
+  padding: 10px 0;
+  color: var(--green);
+  font-weight: 800;
+}
+.planNudge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.planNudge form {
+  flex: 0 0 auto;
+}
 .status {
   padding: 8px 11px;
   border-radius: 99px;
@@ -555,11 +608,13 @@ h1 em {
   .quickStart,
   .metricGrid,
   .adminMetrics,
-  .adminGrid {
+  .adminGrid,
+  .planChoices {
     grid-template-columns: 1fr;
   }
   .dashboardHeader,
   .installationTop,
+  .planNudge,
   .adminInstall {
     align-items: start;
     flex-direction: column;

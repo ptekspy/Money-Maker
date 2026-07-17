@@ -11,6 +11,7 @@ import {
   listRecentOperationalEvents,
   listRepositories,
 } from "@/lib/data";
+import { billingPlan, PLANS } from "@/lib/plans";
 import { stripeConfig } from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
@@ -231,7 +232,11 @@ export default async function AdminPage() {
                 <strong>{stripe.webhookSecret ? "yes" : "no"}</strong>
               </span>
               <span>
-                Price ID <strong>{stripe.priceId ? "yes" : "no"}</strong>
+                Starter price{" "}
+                <strong>{stripe.starterPriceId ? "yes" : "no"}</strong>
+              </span>
+              <span>
+                Pro price <strong>{stripe.proPriceId ? "yes" : "no"}</strong>
               </span>
             </div>
           </article>
@@ -252,6 +257,7 @@ export default async function AdminPage() {
                   <small>
                     install {installation.installationId} -{" "}
                     {installation.repositorySelection} -{" "}
+                    {PLANS[billingPlan(installation.billingPlan)].name} -{" "}
                     {installation.billingStatus} -{" "}
                     {daysLeft(installation.trialEndsAt)} trial days left
                   </small>

@@ -3,11 +3,13 @@ import { compareContracts } from "@/lib/contract-diff";
 import {
   getInstallation,
   hasEntitlement,
+  listRepositories,
   recordCheck,
   saveRepository,
 } from "@/lib/data";
 import { appUrl } from "@/lib/env";
 import { githubFetch, installationToken } from "@/lib/github";
+import { billingPlan, PLANS, repositoryLimit } from "@/lib/plans";
 
 export type PullRequestJob = {
   installationId: number;
@@ -115,6 +117,32 @@ export async function processPullRequest(job: PullRequestJob) {
       title: "Trial ended",
       summary:
         "API Contract Guard is paused for this installation. Open the dashboard to activate automated checks.",
+    });
+    return;
+  }
+
+  const repositories = (await listRepositories(job.installationId))
+    .filter((repository) => !repository.removed)
+    .sort((a, b) => {
+      const firstSeen =
+        Date.parse(a.firstSeenAt ?? a.updatedAt) -
+        Date.parse(b.firstSeenAt ?? b.updatedAt);
+      return firstSeen || a.repositoryId - b.repositoryId;
+    });
+  const plan = billingPlan(installation?.billingPlan);
+  const limit = repositoryLimit(plan);
+  if (
+    !repositories
+      .slice(0, limit)
+      .some((repository) => repository.repositoryId === job.repositoryId)
+  ) {
+    await createCheck(job, token, {
+      conclusion: "action_required",
+      title: `${PLANS[plan].name} repository limit reached`,
+      summary:
+        plan === "starter"
+          ? "Starter protects 3 repositories. Upgrade to Pro for a fresh 14-day trial and protection for up to 20 repositories."
+          : "Pro protects 20 repositories. Teams support is being designed for larger organizations.",
     });
     return;
   }

@@ -9,6 +9,7 @@ import {
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { requiredEnv } from "@/lib/env";
+import type { BillingPlan } from "@/lib/plans";
 
 const db = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
   marshallOptions: { removeUndefinedValues: true },
@@ -28,8 +29,11 @@ export type Installation = {
   createdAt: string;
   trialEndsAt: string;
   billingStatus: BillingStatus;
+  billingPlan?: BillingPlan;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
+  planTrialEndsAt?: string;
+  proTrialStartedAt?: string;
   suspendedAt?: string;
 };
 
@@ -75,6 +79,7 @@ export type RepositoryRecord = {
   fullName: string;
   private: boolean;
   removed?: boolean;
+  firstSeenAt?: string;
   updatedAt: string;
 };
 
@@ -135,6 +140,7 @@ export async function saveInstallation(input: {
           createdAt: now.toISOString(),
           trialEndsAt: trialEnds.toISOString(),
           billingStatus: "trialing",
+          billingPlan: "starter",
         } satisfies Installation & { gsi1pk: string; gsi1sk: string },
         ConditionExpression: "attribute_not_exists(pk)",
       }),
@@ -368,14 +374,26 @@ export async function saveRepository(input: {
   private: boolean;
   removed?: boolean;
 }) {
+  const now = new Date().toISOString();
   await db.send(
-    new PutCommand({
+    new UpdateCommand({
       TableName: tableName(),
-      Item: {
+      Key: {
         pk: `INSTALLATION#${input.installationId}`,
         sk: `REPOSITORY#${input.repositoryId}`,
-        ...input,
-        updatedAt: new Date().toISOString(),
+      },
+      UpdateExpression:
+        "SET installationId = :installationId, repositoryId = :repositoryId, fullName = :fullName, #private = :private, removed = :removed, firstSeenAt = if_not_exists(firstSeenAt, :now), updatedAt = :now",
+      ExpressionAttributeNames: {
+        "#private": "private",
+      },
+      ExpressionAttributeValues: {
+        ":installationId": input.installationId,
+        ":repositoryId": input.repositoryId,
+        ":fullName": input.fullName,
+        ":private": input.private,
+        ":removed": input.removed ?? false,
+        ":now": now,
       },
     }),
   );
@@ -509,21 +527,40 @@ export async function claimWebhook(deliveryId: string): Promise<boolean> {
 export async function updateBilling(input: {
   installationId: number;
   billingStatus: BillingStatus;
+  billingPlan: BillingPlan;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
+  planTrialEndsAt?: string;
+  proTrialStarted?: boolean;
 }) {
+  const updateExpression = [
+    "SET billingStatus = :status",
+    "billingPlan = :plan",
+    "stripeCustomerId = :customer",
+    "stripeSubscriptionId = :subscription",
+    "planTrialEndsAt = :trialEnd",
+    input.proTrialStarted
+      ? "proTrialStartedAt = if_not_exists(proTrialStartedAt, :now)"
+      : "",
+  ]
+    .filter(Boolean)
+    .join(", ");
   try {
     await db.send(
       new UpdateCommand({
         TableName: tableName(),
         Key: { pk: `INSTALLATION#${input.installationId}`, sk: "PROFILE" },
         ConditionExpression: "attribute_exists(pk)",
-        UpdateExpression:
-          "SET billingStatus = :status, stripeCustomerId = :customer, stripeSubscriptionId = :subscription",
+        UpdateExpression: updateExpression,
         ExpressionAttributeValues: {
           ":status": input.billingStatus,
+          ":plan": input.billingPlan,
           ":customer": input.stripeCustomerId ?? "",
           ":subscription": input.stripeSubscriptionId ?? "",
+          ":trialEnd": input.planTrialEndsAt ?? "",
+          ...(input.proTrialStarted
+            ? { ":now": new Date().toISOString() }
+            : {}),
         },
       }),
     );
