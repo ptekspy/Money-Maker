@@ -53,7 +53,7 @@ export async function sendLifecycleEmail(installation: Installation) {
       kind: "trial_ended",
       to: user.email,
       subject: "Your API Contract Guard trial has ended",
-      text: `Hi ${user.login},\n\nYour API Contract Guard trial has ended. Existing results remain visible, but new pull-request protection requires activation.\n\nActivate protection: ${appUrl}\n\nAPI Contract Guard`,
+      text: `Hi ${user.login},\n\nYour API Contract Guard trial has ended. Existing results remain visible, but new pull-request protection requires activation.\n\nFounding offer: activate Starter for £1 for the first month, then £19/month. Cancel any time.\n\nActivate protection: ${appUrl}\n\nAPI Contract Guard`,
     });
   }
   if (remaining <= 1) {
@@ -62,7 +62,7 @@ export async function sendLifecycleEmail(installation: Installation) {
       kind: "trial_1_day",
       to: user.email,
       subject: "One day left on your API Contract Guard trial",
-      text: `Hi ${user.login},\n\nThere is one day left on the trial for ${installation.accountLogin}. Activate protection to keep automated OpenAPI checks running.\n\nActivate protection: ${appUrl}\n\nAPI Contract Guard`,
+      text: `Hi ${user.login},\n\nThere is one day left on the trial for ${installation.accountLogin}. Activate protection to keep automated OpenAPI checks running.\n\nFounding offer: your first Starter month is £1, then £19/month. Cancel any time.\n\nActivate protection: ${appUrl}\n\nAPI Contract Guard`,
     });
   }
   if (remaining <= 3) {
@@ -71,7 +71,7 @@ export async function sendLifecycleEmail(installation: Installation) {
       kind: "trial_3_days",
       to: user.email,
       subject: "Three days left on your API Contract Guard trial",
-      text: `Hi ${user.login},\n\nThere are ${remaining} days left on the trial for ${installation.accountLogin}. Your dashboard shows the repositories and checks currently protected.\n\nReview protection: ${appUrl}\n\nAPI Contract Guard`,
+      text: `Hi ${user.login},\n\nThere are ${remaining} days left on the trial for ${installation.accountLogin}. Your dashboard shows the repositories and checks currently protected.\n\nFounding offer: your first Starter month is £1, then £19/month. Cancel any time.\n\nReview protection: ${appUrl}\n\nAPI Contract Guard`,
     });
   }
   return false;

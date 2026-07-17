@@ -96,7 +96,7 @@ export function SeoLandingPage({
             event="install_cta_clicked"
             campaign="seo_trial"
           >
-            Start 14-day trial
+            Start free · first month £1
           </TrackedLink>
         </section>
 
