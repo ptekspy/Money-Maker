@@ -244,9 +244,7 @@ export default function Home() {
           </a>
           <a href="/openapi-diff-tool">OpenAPI diff tool</a>
           <a href="/openapi-ci-check">OpenAPI CI check</a>
-          <a href="/stop-breaking-api-changes">
-            Stop breaking API changes
-          </a>
+          <a href="/stop-breaking-api-changes">Stop breaking API changes</a>
           <a href="/api-contract-testing">API contract testing</a>
           <a href="/openapi-backward-compatibility">
             OpenAPI backward compatibility
