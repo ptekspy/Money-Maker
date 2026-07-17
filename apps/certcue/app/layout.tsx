@@ -7,9 +7,19 @@ const sans = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
 export const metadata: Metadata = {
-  title: "LetDue — Every property deadline, handled",
+  metadataBase: new URL("https://letdue.com"),
+  title: "LetDue | Certificate reminders for small landlords",
   description:
-    "LetDue reads UK rental-property certificates, builds a compliance calendar, and reminds landlords before important dates expire.",
+    "LetDue reads rental-property certificates, builds a clear deadline calendar, and reminds small landlords in England before important dates expire.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "LetDue | Know what expires next",
+    description:
+      "Certificate storage and deadline reminders for self-managing landlords with one to three properties.",
+    type: "website",
+    url: "https://letdue.com",
+    siteName: "LetDue",
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

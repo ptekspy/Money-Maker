@@ -8,6 +8,7 @@ import {
   addProperty,
   getProperty,
   getUserByToken,
+  hasActiveAccess,
   saveCertificate,
 } from "@/lib/data";
 import { extractCertificateDetails } from "@/lib/extract-certificate";
@@ -30,7 +31,7 @@ export async function updateCertificate(formData: FormData) {
   const parsed = certificateSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
   const user = await getUserByToken(parsed.data.token);
-  if (!user) return;
+  if (!user || !hasActiveAccess(user)) return;
   const property = await getProperty(user.id, parsed.data.propertyId);
   if (!property) return;
   await saveCertificate({
@@ -65,7 +66,7 @@ export async function addPortfolioProperty(formData: FormData) {
     .safeParse(formData.get("address"));
   if (!token.success || !address.success) return;
   const user = await getUserByToken(token.data);
-  if (user?.subscriptionStatus !== "active") return;
+  if (!user || !hasActiveAccess(user)) return;
   const property = await addProperty({
     userId: user.id,
     address: address.data,
@@ -81,7 +82,12 @@ export async function uploadCertificate(formData: FormData) {
   const file = formData.get("certificate");
   if (!token.success || !propertyId.success || !(file instanceof File)) return;
   const user = await getUserByToken(token.data);
-  if (!user || !(await getProperty(user.id, propertyId.data))) return;
+  if (
+    !user ||
+    !hasActiveAccess(user) ||
+    !(await getProperty(user.id, propertyId.data))
+  )
+    return;
   if (
     file.size > 10_000_000 ||
     (file.type !== "application/pdf" &&
