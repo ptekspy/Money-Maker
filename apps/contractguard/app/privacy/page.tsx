@@ -17,7 +17,7 @@ export default function PrivacyPage() {
         },
         {
           title: "Third parties",
-          body: "GitHub provides installation, repository, pull-request and check-run APIs. Stripe handles paid subscription checkout and billing when a customer activates paid protection.",
+          body: "GitHub provides installation, repository, pull-request and check-run APIs. Stripe handles paid subscription checkout and billing. If a visitor accepts optional analytics, Google Analytics measures page views and acquisition channels; analytics does not load when consent is declined.",
         },
         {
           title: "Security",
