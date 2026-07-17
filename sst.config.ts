@@ -52,6 +52,14 @@ export default $config({
       assets: {
         fileOptions: [
           {
+            files: "**",
+            cacheControl: "max-age=31536000,public,immutable",
+          },
+          {
+            files: "**/*.html",
+            cacheControl: "max-age=0,no-cache,no-store,must-revalidate",
+          },
+          {
             files: ["icon", "opengraph-image"],
             contentType: "image/png",
             cacheControl: "max-age=31536000,public,immutable",
