@@ -315,6 +315,29 @@ export default async function Dashboard({
                   <strong>{journey.title}</strong>
                   <p>{journey.message}</p>
                 </div>
+                {profile &&
+                plan === "starter" &&
+                profile.billingStatus === "trialing" ? (
+                  <div className="planNudge foundingOffer">
+                    <span>
+                      <strong>Founding offer: first month £1</strong>
+                      Then £{PLANS.starter.monthlyPrice}/month. Card required;
+                      cancel any time.
+                    </span>
+                    <form action="/api/billing/checkout" method="post">
+                      <input
+                        type="hidden"
+                        name="installationId"
+                        value={item.id}
+                      />
+                      <input type="hidden" name="plan" value="starter" />
+                      <input type="hidden" name="offer" value="founding" />
+                      <button className="button primary" type="submit">
+                        Claim founding offer
+                      </button>
+                    </form>
+                  </div>
+                ) : null}
                 {showPlanChoices ? (
                   <section className="planChoices">
                     <article>

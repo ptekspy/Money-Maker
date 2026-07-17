@@ -78,12 +78,12 @@ export default function Home() {
             event="install_cta_clicked"
             campaign="homepage_install"
           >
-            Install the GitHub App
+            Get the first month for £1
           </TrackedLink>
           <a className="button secondary" href={demoUrl}>
             View live proof
           </a>
-          <span>No card required for the 14-day trial.</span>
+          <span>Founding Starter offer: £1 now, then £19/month.</span>
         </div>
         <div className="trust-row">
           <span>GitHub App</span>
@@ -105,9 +105,9 @@ export default function Home() {
           <p>A new repository can be protected without a sales call.</p>
         </article>
         <article>
-          <span>Pilot offer</span>
-          <strong>14 days, no card</strong>
-          <p>Stripe can activate billing after the trial.</p>
+          <span>Founding offer</span>
+          <strong>First month for £1</strong>
+          <p>Then £19/month. Cancel any time from the billing portal.</p>
         </article>
       </section>
 
@@ -177,8 +177,8 @@ export default function Home() {
               <p>Automatic checks for up to 3 repositories.</p>
             </div>
             <div className="price">
-              <strong>GBP 19</strong>
-              <span>/ month</span>
+              <strong>GBP 1</strong>
+              <span>first month, then GBP 19/month</span>
             </div>
             <TrackedLink
               className="button secondary"
@@ -186,7 +186,7 @@ export default function Home() {
               event="install_cta_clicked"
               campaign="pricing_starter"
             >
-              Start free trial
+              Claim founding offer
             </TrackedLink>
           </article>
           <article className="pricing-card recommended">

@@ -447,6 +447,18 @@ h1 em {
 .planNudge form {
   flex: 0 0 auto;
 }
+.foundingOffer {
+  border-color: var(--green);
+  background: #f0faf3;
+}
+.foundingOffer > span {
+  display: grid;
+  gap: 4px;
+}
+.foundingOffer strong {
+  color: var(--ink);
+  font-size: 16px;
+}
 .workspaceStrip,
 .teamUpgrade,
 .teamBillingCard,

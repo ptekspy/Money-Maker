@@ -31,7 +31,7 @@ export async function sendLifecycleEmail(installation: Installation) {
       kind: "installation_welcome",
       to: user.email,
       subject: "API Contract Guard is connected",
-      text: `Hi ${user.login},\n\nAPI Contract Guard is connected to ${installation.accountLogin}.\n\nNext, open a pull request that changes an OpenAPI YAML or JSON file. The first compatibility check will appear directly on the pull request.\n\nOpen your dashboard: ${appUrl}\n\nAPI Contract Guard`,
+      text: `Hi ${user.login},\n\nAPI Contract Guard is connected to ${installation.accountLogin}.\n\nNext, open a pull request that changes an OpenAPI YAML or JSON file. The first compatibility check will appear directly on the pull request.\n\nFounding offer: activate Starter for £1 for the first month, then £19/month. Cancel any time.\n\nOpen your dashboard: ${appUrl}\n\nAPI Contract Guard`,
     });
   }
 
@@ -41,7 +41,7 @@ export async function sendLifecycleEmail(installation: Installation) {
       kind: "first_check_reminder",
       to: user.email,
       subject: "Run your first OpenAPI pull-request check",
-      text: `Hi ${user.login},\n\nYour GitHub App is installed, but no OpenAPI pull-request check has run yet.\n\nChange an openapi.yaml, openapi.yml or openapi.json file on a branch and open a pull request. Contract Guard will compare it with the base branch automatically.\n\nOpen your dashboard: ${appUrl}\n\nAPI Contract Guard`,
+      text: `Hi ${user.login},\n\nYour GitHub App is installed, but no OpenAPI pull-request check has run yet.\n\nChange an openapi.yaml, openapi.yml or openapi.json file on a branch and open a pull request. Contract Guard will compare it with the base branch automatically.\n\nFounding offer: activate Starter for £1 for the first month, then £19/month. Cancel any time.\n\nOpen your dashboard: ${appUrl}\n\nAPI Contract Guard`,
     });
     if (sent) return true;
   }

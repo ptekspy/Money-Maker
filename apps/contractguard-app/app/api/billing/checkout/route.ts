@@ -41,6 +41,8 @@ export async function POST(request: NextRequest) {
   const form = await request.formData();
   const installationId = Number(form.get("installationId"));
   const plan = billingPlan(String(form.get("plan") ?? "starter"));
+  const foundingOffer =
+    plan === "starter" && String(form.get("offer") ?? "") === "founding";
   const allowed = (
     await userInstallations(session.accessToken)
   ).installations.some((installation) => installation.id === installationId);
@@ -168,6 +170,18 @@ export async function POST(request: NextRequest) {
 
   const proTrialEligible = plan === "pro" && !installation.proTrialStartedAt;
   const origin = appUrl(request.nextUrl.origin);
+  const foundingCoupon = foundingOffer
+    ? await stripe().coupons.create({
+        amount_off: 1800,
+        currency: "gbp",
+        duration: "once",
+        name: "Founding first month GBP 1",
+        metadata: {
+          installationId: String(installationId),
+          offer: "founding",
+        },
+      })
+    : null;
   const checkout = await stripe().checkout.sessions.create({
     mode: "subscription",
     ...(installation.stripeCustomerId
@@ -177,14 +191,17 @@ export async function POST(request: NextRequest) {
     billing_address_collection: "auto",
     payment_method_collection: "always",
     line_items: [{ price: priceId(plan), quantity: 1 }],
-    allow_promotion_codes: true,
-    success_url: `${origin}/dashboard?billing=success&plan=${plan}`,
+    ...(foundingCoupon
+      ? { discounts: [{ coupon: foundingCoupon.id }] }
+      : { allow_promotion_codes: true }),
+    success_url: `${origin}/dashboard?billing=success&plan=${plan}${foundingOffer ? "&offer=founding" : ""}`,
     cancel_url: `${origin}/dashboard?billing=cancelled`,
     subscription_data: {
       ...(proTrialEligible ? { trial_period_days: 14 } : {}),
       metadata: {
         installationId: String(installationId),
         plan,
+        offer: foundingOffer ? "founding" : "standard",
       },
     },
     metadata: {
@@ -193,6 +210,7 @@ export async function POST(request: NextRequest) {
       githubLogin: session.login,
       accountLogin: installation.accountLogin,
       proTrialEligible: String(proTrialEligible),
+      offer: foundingOffer ? "founding" : "standard",
     },
   });
   await recordFunnelEvent({
