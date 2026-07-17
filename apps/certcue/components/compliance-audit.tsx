@@ -190,7 +190,7 @@ export function ComplianceAudit() {
               ) : (
                 <Upload size={18} />
               )}
-              {extracting ? "Reading certificateâ€¦" : "Read a certificate PDF"}
+              {extracting ? "Reading certificate…" : "Read a certificate PDF"}
             </span>
             <input
               className="sr-only"
@@ -293,7 +293,7 @@ export function ComplianceAudit() {
                       <p className="mt-1 text-[#65715d]">
                         {displayDueDate(item.expiry)}
                         {item.daysLeft !== null
-                          ? ` Â· ${Math.abs(item.daysLeft)} days ${item.daysLeft < 0 ? "overdue" : "remaining"}`
+                          ? ` · ${Math.abs(item.daysLeft)} days ${item.daysLeft < 0 ? "overdue" : "remaining"}`
                           : ""}
                       </p>
                     </div>
@@ -361,11 +361,11 @@ export function ComplianceAudit() {
                     className="min-h-12 rounded-lg bg-[#d9ff73] px-5 font-black text-[#18220d]"
                     type="submit"
                   >
-                    Start free 14-day pilot â€” no card
+                    Start free 14-day pilot — no card
                   </button>
                   <p className="text-center text-[#65715d] text-xs">
                     One property now; add up to two more in your private
-                    dashboard. The founding plan will be Â£29/year after the
+                    dashboard. The founding plan will be £29/year after the
                     pilot.
                   </p>
                   <p className="text-center text-[#65715d] text-xs leading-5">

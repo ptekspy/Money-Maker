@@ -72,7 +72,7 @@ export function DeadlineCalculator({
         <BellRing size={18} /> Track this property free
       </a>
       <p className="mt-3 text-center text-[#aeb9a7] text-xs">
-        14-day pilot Â· no card Â· Â£29/year afterwards
+        14-day pilot · no card · £29/year afterwards
       </p>
     </section>
   );
