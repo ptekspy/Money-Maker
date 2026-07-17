@@ -47,6 +47,10 @@ export default $config({
 
     const landlordSaas = new sst.aws.Nextjs("LandlordSaas", {
       path: "apps/certcue",
+      buildCommand:
+        process.env.SST_SKIP_OPEN_NEXT_BUILD === "1"
+          ? "true"
+          : undefined,
       link: [landlordData, landlordDocuments],
       permissions: [
         {
