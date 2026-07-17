@@ -75,10 +75,6 @@ export default $config({
       visibilityTimeout: "5 minutes",
     });
 
-    const contractGuardEmail = new sst.aws.Email("ContractGuardEmail", {
-      sender: "admin@apicontractguard.com",
-    });
-
     contractGuardChecks.subscribe(
       {
         handler: "infra/contractguard-check.handler",
@@ -98,7 +94,13 @@ export default $config({
 
     const contractGuardApp = new sst.aws.Nextjs("ContractGuardApp", {
       path: "apps/contractguard-app",
-      link: [contractGuardData, contractGuardChecks, contractGuardEmail],
+      link: [contractGuardData, contractGuardChecks],
+      permissions: [
+        {
+          actions: ["ses:SendEmail", "ses:SendRawEmail"],
+          resources: ["*"],
+        },
+      ],
       domain: {
         name: "app.apicontractguard.com",
         dns: false,
@@ -145,7 +147,13 @@ export default $config({
       function: {
         handler: "infra/contractguard-lifecycle.daily",
         timeout: "2 minutes",
-        link: [contractGuardData, contractGuardEmail],
+        link: [contractGuardData],
+        permissions: [
+          {
+            actions: ["ses:SendEmail", "ses:SendRawEmail"],
+            resources: ["*"],
+          },
+        ],
         environment: {
           CONTRACTGUARD_TABLE_NAME: contractGuardData.name,
           CONTRACTGUARD_EMAIL_FROM:
@@ -162,7 +170,13 @@ export default $config({
       function: {
         handler: "infra/contractguard-lifecycle.weekly",
         timeout: "2 minutes",
-        link: [contractGuardData, contractGuardEmail],
+        link: [contractGuardData],
+        permissions: [
+          {
+            actions: ["ses:SendEmail", "ses:SendRawEmail"],
+            resources: ["*"],
+          },
+        ],
         environment: {
           CONTRACTGUARD_TABLE_NAME: contractGuardData.name,
           CONTRACTGUARD_EMAIL_FROM:
