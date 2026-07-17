@@ -5,6 +5,9 @@ import { parse } from "yaml";
 import { trackEvent } from "@/lib/analytics";
 import { type ContractChange, compareContracts } from "@/lib/contract-diff";
 
+const installUrl =
+  "https://app.apicontractguard.com/api/auth/github/start?source=website&campaign=checker_result";
+
 const baselineExample = `openapi: 3.0.3
 info: { title: Orders API, version: 1.0.0 }
 paths:
@@ -241,6 +244,24 @@ export function ContractChecker() {
                 currently supported.
               </p>
             )}
+          </div>
+          <div className="checker-conversion">
+            <div>
+              <span className="step">AUTOMATE THIS CHECK</span>
+              <h3>Run the same protection on every pull request</h3>
+              <p>
+                Install API Contract Guard, choose up to 3 repositories, and
+                start a 14-day trial without entering card details.
+              </p>
+            </div>
+            <a
+              className="button primary"
+              data-track-campaign="checker_result"
+              data-track-event="install_cta_clicked"
+              href={installUrl}
+            >
+              Protect my repositories
+            </a>
           </div>
         </section>
       ) : null}

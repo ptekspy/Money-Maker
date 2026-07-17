@@ -7,6 +7,36 @@ const demoUrl =
 const authUrl = `${appUrl}/api/auth/github/start?source=website`;
 
 export default function Home() {
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "API Contract Guard",
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Web, GitHub",
+    description:
+      "Automated GitHub pull-request checks that detect breaking OpenAPI changes before merge.",
+    offers: [
+      {
+        "@type": "Offer",
+        name: "Starter",
+        price: "19",
+        priceCurrency: "GBP",
+      },
+      {
+        "@type": "Offer",
+        name: "Pro",
+        price: "49",
+        priceCurrency: "GBP",
+      },
+      {
+        "@type": "Offer",
+        name: "Teams",
+        price: "149",
+        priceCurrency: "GBP",
+      },
+    ],
+  };
+
   return (
     <main>
       <nav className="nav shell">
@@ -216,6 +246,7 @@ export default function Home() {
           <a href="/openapi-backward-compatibility">
             OpenAPI backward compatibility
           </a>
+          <a href="/guides">All OpenAPI guides</a>
         </div>
       </section>
 
@@ -227,6 +258,9 @@ export default function Home() {
           <a href="/support">Support</a>
         </div>
       </footer>
+      <script type="application/ld+json">
+        {JSON.stringify(productSchema)}
+      </script>
     </main>
   );
 }

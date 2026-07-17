@@ -346,6 +346,26 @@ h1 em {
 .change-list {
   margin-top: 8px;
 }
+.checker-conversion {
+  align-items: center;
+  background: linear-gradient(135deg, #10221f, #16342e);
+  border: 1px solid rgba(111, 235, 194, 0.26);
+  border-radius: 16px;
+  display: flex;
+  gap: 1.5rem;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding: 1.4rem;
+}
+.checker-conversion h3 {
+  color: #f5fffb;
+  margin: 0.35rem 0;
+}
+.checker-conversion p {
+  color: #b9ccc5;
+  margin: 0;
+  max-width: 620px;
+}
 .change {
   display: grid;
   grid-template-columns: 90px 1fr;
@@ -688,6 +708,10 @@ h1 em {
   white-space: nowrap;
 }
 @media (max-width: 800px) {
+  .checker-conversion {
+    align-items: stretch;
+    flex-direction: column;
+  }
   .hero {
     padding: 68px 0;
   }

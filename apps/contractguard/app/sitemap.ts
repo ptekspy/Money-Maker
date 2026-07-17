@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { guides } from "@/lib/guides";
 
 export const dynamic = "force-static";
 
@@ -15,10 +16,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ["/privacy", 0.2],
   ] as const;
 
-  return pages.map(([path, priority]) => ({
-    url: `https://apicontractguard.com${path}`,
-    lastModified: new Date("2026-07-17"),
-    changeFrequency: "weekly" as const,
-    priority,
-  }));
+  return [
+    ...pages.map(([path, priority]) => ({
+      url: `https://apicontractguard.com${path}`,
+      lastModified: new Date("2026-07-17"),
+      changeFrequency: "weekly" as const,
+      priority,
+    })),
+    {
+      url: "https://apicontractguard.com/guides",
+      lastModified: new Date("2026-07-17"),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    },
+    ...guides.map((guide) => ({
+      url: `https://apicontractguard.com/guides/${guide.slug}`,
+      lastModified: new Date("2026-07-17"),
+      changeFrequency: "monthly" as const,
+      priority: 0.85,
+    })),
+  ];
 }
