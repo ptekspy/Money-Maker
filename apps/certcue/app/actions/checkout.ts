@@ -76,8 +76,16 @@ export async function startPilotCheckout(formData: FormData) {
     success_url: `${appUrl}/dashboard/${token.data}?billing=processing`,
     cancel_url: `${appUrl}/dashboard/${token.data}?billing=cancelled`,
     allow_promotion_codes: true,
-    metadata: { upgradeToken: token.data },
-    subscription_data: { metadata: { product: "letdue" } },
+    metadata: {
+      upgradeToken: token.data,
+      acquisitionSource: user.acquisitionSource ?? "unknown",
+    },
+    subscription_data: {
+      metadata: {
+        product: "letdue",
+        acquisitionSource: user.acquisitionSource ?? "unknown",
+      },
+    },
   });
 
   if (!session.url) throw new Error("Stripe did not return a checkout URL.");
