@@ -1,7 +1,9 @@
 import {
   ArrowRight,
   BellRing,
+  CalendarClock,
   Check,
+  ClipboardCheck,
   FileCheck2,
   ScanLine,
 } from "lucide-react";
@@ -34,6 +36,7 @@ export default function HomePage() {
         </a>
         <nav className="hidden gap-6 font-bold text-[#5e6b55] text-sm md:flex">
           <a href="#how">How it works</a>
+          <a href="#tools">Free tools</a>
           <a href="#audit">Free audit</a>
           <a href="#pricing">Pricing</a>
         </nav>
@@ -66,7 +69,7 @@ export default function HomePage() {
                 Run a free property audit <ArrowRight size={18} />
               </a>
               <p className="mt-3 text-[#6e7967] text-sm">
-                No account · No card · England beta
+                No account Â· No card Â· England beta
               </p>
             </div>
             <div className="rounded-3xl bg-[#18220d] p-5 text-white shadow-2xl">
@@ -105,7 +108,7 @@ export default function HomePage() {
                 <BellRing className="mb-2" size={20} />
                 <strong>Next reminder scheduled</strong>
                 <p className="mt-1 text-[#cbd8c2] text-sm">
-                  Gas safety · 30-day warning
+                  Gas safety Â· 30-day warning
                 </p>
               </div>
             </div>
@@ -186,6 +189,56 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        <section
+          id="tools"
+          className="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24"
+        >
+          <div className="max-w-3xl">
+            <p className="font-black text-[#52720d] text-sm uppercase">
+              Free landlord tools
+            </p>
+            <h2 className="mt-3 text-4xl leading-tight md:text-6xl">
+              Work out the date. Then stop relying on memory.
+            </h2>
+          </div>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {[
+              {
+                icon: CalendarClock,
+                title: "Gas safety expiry calculator",
+                text: "Turn the date on your gas safety record into a five-stage reminder schedule.",
+                href: "/tools/gas-safety-certificate-expiry-calculator",
+              },
+              {
+                icon: CalendarClock,
+                title: "EICR renewal calculator",
+                text: "See when to start acting before the next inspection date on your electrical report.",
+                href: "/tools/eicr-renewal-calculator",
+              },
+              {
+                icon: ClipboardCheck,
+                title: "England landlord checklist",
+                text: "A plain-English starting list of the evidence and recurring dates worth organising.",
+                href: "/guides/landlord-compliance-checklist-england",
+              },
+            ].map(({ icon: Icon, title, text, href }) => (
+              <a
+                className="group rounded-2xl border border-[#d5dbc9] bg-white p-6 transition hover:-translate-y-1 hover:border-[#8da456] hover:shadow-lg"
+                href={href}
+                key={title}
+              >
+                <Icon className="text-[#52720d]" size={27} />
+                <h3 className="mt-5 text-2xl group-hover:text-[#52720d]">
+                  {title}
+                </h3>
+                <p className="mt-2 text-[#65715d] leading-7">{text}</p>
+                <span className="mt-5 inline-flex items-center gap-2 font-black">
+                  Use free tool <ArrowRight size={17} />
+                </span>
+              </a>
+            ))}
+          </div>
+        </section>
         <ComplianceAudit />
         <section
           id="pricing"
@@ -201,12 +254,12 @@ export default function HomePage() {
               </h2>
               <p className="mt-5 max-w-2xl text-[#cbd4c5] text-lg leading-8">
                 Monitor up to three properties, store every certificate, and
-                receive every reminder for £29 a year while the founding plan is
+                receive every reminder for Â£29 a year while the founding plan is
                 available.
               </p>
             </div>
             <div className="rounded-2xl bg-white p-6 text-[#18220d]">
-              <strong className="text-5xl">£29</strong>
+              <strong className="text-5xl">Â£29</strong>
               <span className="font-bold text-[#65715d]"> / year</span>
               <ul className="mt-6 grid gap-3">
                 {[
@@ -234,7 +287,7 @@ export default function HomePage() {
       </main>
       <footer className="flex flex-wrap justify-between gap-4 border-[#d5dbc9] border-t px-4 py-7 font-bold text-[#687260] text-sm md:px-8">
         <span className="text-[#18220d]">LetDue</span>
-        <span>Compliance information, not legal advice · England beta</span>
+        <span>Compliance information, not legal advice Â· England beta</span>
         <span className="flex gap-4">
           <a href="/privacy">Privacy</a>
           <a href="/terms">Terms</a>
