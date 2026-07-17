@@ -69,7 +69,7 @@ export default function HomePage() {
                 Run a free property audit <ArrowRight size={18} />
               </a>
               <p className="mt-3 text-[#6e7967] text-sm">
-                No account Â· No card Â· England beta
+                No account · No card · England beta
               </p>
             </div>
             <div className="rounded-3xl bg-[#18220d] p-5 text-white shadow-2xl">
@@ -108,7 +108,7 @@ export default function HomePage() {
                 <BellRing className="mb-2" size={20} />
                 <strong>Next reminder scheduled</strong>
                 <p className="mt-1 text-[#cbd8c2] text-sm">
-                  Gas safety Â· 30-day warning
+                  Gas safety · 30-day warning
                 </p>
               </div>
             </div>
@@ -254,12 +254,12 @@ export default function HomePage() {
               </h2>
               <p className="mt-5 max-w-2xl text-[#cbd4c5] text-lg leading-8">
                 Monitor up to three properties, store every certificate, and
-                receive every reminder for Â£29 a year while the founding plan is
+                receive every reminder for £29 a year while the founding plan is
                 available.
               </p>
             </div>
             <div className="rounded-2xl bg-white p-6 text-[#18220d]">
-              <strong className="text-5xl">Â£29</strong>
+              <strong className="text-5xl">£29</strong>
               <span className="font-bold text-[#65715d]"> / year</span>
               <ul className="mt-6 grid gap-3">
                 {[
@@ -287,7 +287,7 @@ export default function HomePage() {
       </main>
       <footer className="flex flex-wrap justify-between gap-4 border-[#d5dbc9] border-t px-4 py-7 font-bold text-[#687260] text-sm md:px-8">
         <span className="text-[#18220d]">LetDue</span>
-        <span>Compliance information, not legal advice Â· England beta</span>
+        <span>Compliance information, not legal advice · England beta</span>
         <span className="flex gap-4">
           <a href="/privacy">Privacy</a>
           <a href="/terms">Terms</a>

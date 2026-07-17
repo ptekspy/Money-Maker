@@ -28,7 +28,7 @@ export function MarketingFrame({ children }: MarketingFrameProps) {
         <a className="text-[#18220d]" href="/">
           LetDue
         </a>
-        <span>Compliance information, not legal advice Â· England beta</span>
+        <span>Compliance information, not legal advice · England beta</span>
         <span className="flex gap-4">
           <a href="/privacy">Privacy</a>
           <a href="/terms">Terms</a>
