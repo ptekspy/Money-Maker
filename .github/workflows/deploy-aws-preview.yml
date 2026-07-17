@@ -46,7 +46,11 @@ jobs:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: eu-west-2
 
-      - run: npm run deploy:aws -- --stage preview
+      - name: Deploy Contract Guard worker
+        run: npm run deploy:aws -- --stage preview --target ContractGuardChecks
+
+      - name: Deploy Contract Guard application
+        run: npm run deploy:aws -- --stage preview --target ContractGuardApp
 
       - name: Verify deployed public services and integrations
         run: node .github/scripts/contractguard-smoke.mjs
