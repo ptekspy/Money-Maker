@@ -3,6 +3,7 @@ import {
   getProperty,
   getUser,
   listCertificatesDue,
+  listPilotsEnding,
   releaseReminder,
 } from "./data";
 import { sendEmail } from "./email";
@@ -50,5 +51,35 @@ export async function runReminders(now = new Date()) {
       throw error;
     }
   }
-  return { due: due.length, sent };
+  const appUrl = process.env.NEXT_PUBLIC_CERTCUE_URL ?? "https://letdue.com";
+  const pilotIntervals = [7, 3, 0];
+  let pilotDue = 0;
+  let pilotSent = 0;
+
+  for (const daysLeft of pilotIntervals) {
+    const endDate = new Date(now);
+    endDate.setUTCDate(endDate.getUTCDate() + daysLeft);
+    const pilots = await listPilotsEnding(isoDate(endDate));
+    pilotDue += pilots.length;
+    for (const user of pilots) {
+      if (user.plan !== "pilot" || user.subscriptionStatus !== "active")
+        continue;
+      const reminderDate = isoDate(now);
+      if (!(await claimReminder(`pilot:${user.id}`, reminderDate))) continue;
+      const timing = daysLeft === 0 ? "ends today" : `ends in ${daysLeft} days`;
+      try {
+        await sendEmail({
+          to: user.email,
+          subject: `Your LetDue pilot ${timing}`,
+          text: `Your LetDue pilot ${timing}. Keep monitoring up to three properties for £29 a year.\n\nContinue your monitoring: ${appUrl}/dashboard/${user.accessToken}\n\nNo action is needed if you do not want to continue.`,
+        });
+        pilotSent += 1;
+      } catch (error) {
+        await releaseReminder(`pilot:${user.id}`, reminderDate);
+        throw error;
+      }
+    }
+  }
+
+  return { due: due.length, sent, pilotDue, pilotSent };
 }

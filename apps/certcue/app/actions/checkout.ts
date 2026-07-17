@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getUserByToken } from "@/lib/data";
 import { getStripe } from "@/lib/stripe";
 
 const checkoutSchema = z.object({
@@ -49,6 +50,34 @@ export async function startCheckout(formData: FormData) {
     allow_promotion_codes: true,
     metadata: { onboarding },
     subscription_data: { metadata: { product: "certcue" } },
+  });
+
+  if (!session.url) throw new Error("Stripe did not return a checkout URL.");
+  redirect(session.url);
+}
+
+export async function startPilotCheckout(formData: FormData) {
+  const token = z.uuid().safeParse(formData.get("token"));
+  if (!token.success) redirect("/");
+
+  const user = await getUserByToken(token.data);
+  if (user?.plan !== "pilot") redirect("/");
+
+  const priceId = process.env.STRIPE_CERTCUE_ANNUAL_PRICE_ID;
+  const appUrl = process.env.NEXT_PUBLIC_CERTCUE_URL;
+  if (!priceId || !appUrl || !process.env.STRIPE_SECRET_KEY) {
+    redirect("/setup-required");
+  }
+
+  const session = await getStripe().checkout.sessions.create({
+    mode: "subscription",
+    customer_email: user.email,
+    line_items: [{ price: priceId, quantity: 1 }],
+    success_url: `${appUrl}/dashboard/${token.data}?billing=processing`,
+    cancel_url: `${appUrl}/dashboard/${token.data}?billing=cancelled`,
+    allow_promotion_codes: true,
+    metadata: { upgradeToken: token.data },
+    subscription_data: { metadata: { product: "letdue" } },
   });
 
   if (!session.url) throw new Error("Stripe did not return a checkout URL.");
