@@ -46,3 +46,6 @@ jobs:
           aws-region: eu-west-2
 
       - run: npm run deploy:aws -- --stage preview
+
+      - name: Verify deployed public services and integrations
+        run: node .github/scripts/contractguard-smoke.mjs
