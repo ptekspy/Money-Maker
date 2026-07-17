@@ -49,6 +49,9 @@ jobs:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: eu-west-2
 
+      - name: Clear stale preview deployment lock
+        run: npx sst unlock --stage preview
+
       - run: npm run deploy:aws -- --stage preview
 
       - name: Verify deployed public services and integrations
