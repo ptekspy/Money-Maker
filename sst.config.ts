@@ -57,14 +57,24 @@ export default $config({
       },
     });
 
+    const landlordStripeSecretKey = new sst.Secret(
+      "LandlordStripeSecretKey",
+    );
+    const landlordStripeWebhookSecret = new sst.Secret(
+      "LandlordStripeWebhookSecret",
+    );
+    const landlordStripeAnnualPriceId = new sst.Secret(
+      "LandlordStripeAnnualPriceId",
+    );
+    const landlordStripeEnvironment = {
+      STRIPE_SECRET_KEY: landlordStripeSecretKey.value,
+      STRIPE_WEBHOOK_SECRET: landlordStripeWebhookSecret.value,
+      STRIPE_CERTCUE_ANNUAL_PRICE_ID: landlordStripeAnnualPriceId.value,
+    };
+
     const landlordSaas =
       $app.stage === "production"
         ? (() => {
-            const stripeSecretKey = new sst.Secret("LandlordStripeSecretKey");
-            const stripeWebhookSecret = new sst.Secret(
-              "LandlordStripeWebhookSecret",
-            );
-            const stripePriceId = new sst.Secret("LandlordStripeAnnualPriceId");
             const site = new sst.aws.Nextjs("LandlordSaas", {
               path: "apps/certcue",
               link: [landlordData, landlordDocuments],
@@ -78,9 +88,7 @@ export default $config({
                 LETDUE_TABLE_NAME: landlordData.name,
                 LETDUE_DOCUMENTS_BUCKET: landlordDocuments.name,
                 NEXT_PUBLIC_CERTCUE_URL: "https://letdue.com",
-                STRIPE_SECRET_KEY: stripeSecretKey.value,
-                STRIPE_WEBHOOK_SECRET: stripeWebhookSecret.value,
-                STRIPE_CERTCUE_ANNUAL_PRICE_ID: stripePriceId.value,
+                ...landlordStripeEnvironment,
                 EMAIL_FROM: "LetDue <reminders@letdue.com>",
               },
             });
@@ -99,6 +107,7 @@ export default $config({
               LETDUE_TABLE_NAME: landlordData.name,
               LETDUE_DOCUMENTS_BUCKET: landlordDocuments.name,
               NEXT_PUBLIC_CERTCUE_URL: "https://letdue.com",
+              ...landlordStripeEnvironment,
               EMAIL_FROM: "LetDue <reminders@letdue.com>",
             },
             domain: {
