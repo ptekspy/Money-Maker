@@ -8,6 +8,7 @@ import {
   ScanLine,
 } from "lucide-react";
 import { ComplianceAudit } from "@/components/compliance-audit";
+import { ProductHuntBadge } from "@/components/product-hunt-badge";
 
 const benefits = [
   {
@@ -293,6 +294,7 @@ export default function HomePage() {
           <a href="/terms">Terms</a>
         </span>
         <a href="mailto:hello@letdue.com">hello@letdue.com</a>
+        <ProductHuntBadge />
       </footer>
     </>
   );

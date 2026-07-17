@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ProductHuntBadge } from "@/components/product-hunt-badge";
 
 type MarketingFrameProps = {
   children: ReactNode;
@@ -34,6 +35,7 @@ export function MarketingFrame({ children }: MarketingFrameProps) {
           <a href="/terms">Terms</a>
         </span>
         <a href="mailto:hello@letdue.com">hello@letdue.com</a>
+        <ProductHuntBadge />
       </footer>
     </>
   );
