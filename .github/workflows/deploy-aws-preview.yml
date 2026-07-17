@@ -5,6 +5,15 @@ on:
     branches:
       - codex/aws-previews
   workflow_dispatch:
+    inputs:
+      stage:
+        description: "SST stage to deploy"
+        required: true
+        default: "preview"
+        type: choice
+        options:
+          - preview
+          - production
 
 permissions:
   id-token: write
@@ -18,6 +27,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
+      DEPLOY_STAGE: ${{ inputs.stage || 'preview' }}
       CONTRACTGUARD_GITHUB_APP_ID: ${{ secrets.CONTRACTGUARD_GITHUB_APP_ID }}
       CONTRACTGUARD_GITHUB_CLIENT_ID: ${{ secrets.CONTRACTGUARD_GITHUB_CLIENT_ID }}
       CONTRACTGUARD_GITHUB_CLIENT_SECRET: ${{ secrets.CONTRACTGUARD_GITHUB_CLIENT_SECRET }}
@@ -52,9 +62,17 @@ jobs:
       # GitHub serializes this workflow via the sst-preview concurrency group.
       # The preview stage can retain a stale lock after a completed deployment.
       - name: Clear stale preview deployment lock
+        if: env.DEPLOY_STAGE == 'preview'
         run: npx sst unlock --stage preview
 
-      - run: npm run deploy:aws -- --stage preview
+      - name: Deploy Contract Guard marketing site
+        run: npm run deploy:aws -- --stage "$DEPLOY_STAGE" --target ContractGuard
+
+      - name: Deploy Contract Guard worker
+        run: npm run deploy:aws -- --stage "$DEPLOY_STAGE" --target ContractGuardChecks
+
+      - name: Deploy Contract Guard application
+        run: npm run deploy:aws -- --stage "$DEPLOY_STAGE" --target ContractGuardApp
 
       - name: Verify deployed public services and integrations
         run: node .github/scripts/contractguard-smoke.mjs
