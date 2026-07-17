@@ -59,7 +59,9 @@ export function ComplianceAudit() {
   const results = required.map((kind) =>
     assessCertificate({ kind, expiry: dates[kind] }),
   );
-  const attention = results.filter((item) => item.status !== "Current").length;
+  const attention = results.filter(
+    (item) => item.status === "Overdue" || item.status === "Due soon",
+  ).length;
 
   function loadExample() {
     const now = new Date();
@@ -135,8 +137,8 @@ export function ComplianceAudit() {
           Find the deadline most likely to catch you out.
         </h2>
         <p className="mt-4 text-[#526047] text-lg leading-8">
-          No account needed. Enter the dates you know; LetDue turns them into a
-          clear action list. Document reading is included in monitored plans.
+          No account needed. Upload one PDF or enter the dates you know; LetDue
+          turns them into a clear action list.
         </p>
       </div>
 
@@ -172,7 +174,7 @@ export function ComplianceAudit() {
                 onChange={(event) => setIsHmo(event.target.checked)}
                 type="checkbox"
               />{" "}
-              HMO
+              Licence to track
             </label>
           </div>
           <label className="grid cursor-pointer gap-2 rounded-lg border border-[#b8c4aa] border-dashed bg-[#f7f8f3] p-4 text-center font-black">
@@ -263,7 +265,7 @@ export function ComplianceAudit() {
                 <div className="text-right">
                   <strong className="block text-4xl">{attention}</strong>
                   <span className="text-[#d8dfd0] text-sm">
-                    items need attention
+                    dated items need attention
                   </span>
                 </div>
               </div>
@@ -306,8 +308,8 @@ export function ComplianceAudit() {
                     </h4>
                     <p className="mt-1 text-[#65715d] leading-7">
                       Upload certificates instead of typing dates. LetDue reads
-                      them, stores the evidence, and reminds you at 90, 30, 14
-                      and 7 days.
+                      them, stores the evidence, and reminds you at 90, 30, 14,
+                      7 and 0 days.
                     </p>
                   </div>
                 </div>

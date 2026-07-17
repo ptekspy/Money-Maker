@@ -260,6 +260,7 @@ export default $config({
         environment: {
           LETDUE_TABLE_NAME: landlordData.name,
           EMAIL_FROM: "LetDue <reminders@letdue.com>",
+          NEXT_PUBLIC_CERTCUE_URL: "https://letdue.com",
         },
       },
     });

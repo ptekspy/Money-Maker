@@ -1,5 +1,10 @@
 import type Stripe from "stripe";
-import { activateCustomer, setSubscriptionStatus } from "@/lib/data";
+import {
+  activateCustomer,
+  activatePilotSubscription,
+  getUserByToken,
+  setSubscriptionStatus,
+} from "@/lib/data";
 import { sendEmail } from "@/lib/email";
 import { getStripe } from "@/lib/stripe";
 
@@ -16,8 +21,28 @@ async function activateCheckout(session: Stripe.Checkout.Session) {
     typeof session.customer === "string"
       ? session.customer
       : session.customer?.id;
+  if (!customerId) return;
+
+  const upgradeToken = session.metadata?.upgradeToken;
+  if (upgradeToken) {
+    const existingUser = await getUserByToken(upgradeToken);
+    if (!existingUser) return;
+    const user = await activatePilotSubscription({
+      userId: existingUser.id,
+      stripeCustomerId: customerId,
+    });
+    if (!user) return;
+    const dashboardUrl = `${process.env.NEXT_PUBLIC_CERTCUE_URL}/dashboard/${user.accessToken}`;
+    await sendEmail({
+      to: user.email,
+      subject: "Your LetDue monitoring is active",
+      text: `Thank you for becoming a LetDue founding customer. Your three-property monitoring and reminders are now active.\n\nOpen your private dashboard: ${dashboardUrl}\n\nKeep this link private.`,
+    });
+    return;
+  }
+
   const onboardingText = session.metadata?.onboarding;
-  if (!email || !customerId || !onboardingText) return;
+  if (!email || !onboardingText) return;
 
   const onboarding = JSON.parse(onboardingText) as Onboarding;
   const { user } = await activateCustomer({
