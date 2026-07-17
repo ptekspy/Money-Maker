@@ -322,7 +322,13 @@ export async function listAllInstallations(limit = 100) {
       Limit: limit,
     }),
   );
-  return (result.Items ?? []) as Installation[];
+  return (result.Items ?? []).filter(
+    (item) =>
+      Number.isSafeInteger(item.installationId) &&
+      Number(item.installationId) > 0 &&
+      typeof item.accountLogin === "string" &&
+      item.accountLogin.trim().length > 0,
+  ) as Installation[];
 }
 
 export async function setInstallationSuspended(
