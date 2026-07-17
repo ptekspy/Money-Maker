@@ -21,6 +21,7 @@ export type LetDueUser = {
   subscriptionStatus: "active" | "cancelled" | "past_due";
   plan?: "pilot" | "paid";
   pilotEndsAt?: string;
+  acquisitionSource?: string;
 };
 
 export function hasActiveAccess(user: LetDueUser, now = new Date()) {
@@ -203,6 +204,7 @@ export async function activatePilot(input: {
   address: string;
   hasGas: boolean;
   isHmo: boolean;
+  source: string;
   dates: Record<string, string>;
 }) {
   const normalizedEmail = input.email.trim().toLowerCase();
@@ -217,6 +219,7 @@ export async function activatePilot(input: {
     subscriptionStatus: "active",
     plan: "pilot",
     pilotEndsAt,
+    acquisitionSource: input.source,
   };
   const property: LetDueProperty = {
     id: crypto.randomUUID(),
