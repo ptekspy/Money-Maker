@@ -66,14 +66,8 @@ jobs:
         if: env.DEPLOY_STAGE == 'preview'
         run: npx sst unlock --stage preview
 
-      - name: Deploy Contract Guard marketing site
-        run: npm run deploy:aws -- --stage "$DEPLOY_STAGE" --target ContractGuard
-
-      - name: Deploy Contract Guard worker
-        run: npm run deploy:aws -- --stage "$DEPLOY_STAGE" --target ContractGuardChecks
-
-      - name: Deploy Contract Guard application
-        run: npm run deploy:aws -- --stage "$DEPLOY_STAGE" --target ContractGuardApp
+      - name: Deploy AWS stack
+        run: npm run deploy:aws -- --stage "$DEPLOY_STAGE"
 
       - name: Verify deployed public services and integrations
         run: node .github/scripts/contractguard-smoke.mjs
