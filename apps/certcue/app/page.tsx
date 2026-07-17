@@ -11,7 +11,7 @@ const benefits = [
   {
     icon: ScanLine,
     title: "Drop in certificates",
-    text: "Upload gas safety, EICR, EPC, insurance and licence documents. LetDue reads the dates for you.",
+    text: "Upload gas safety, EICR, EPC and the insurance or licence documents you choose to track. LetDue reads the dates for you.",
   },
   {
     icon: FileCheck2,
@@ -21,7 +21,7 @@ const benefits = [
   {
     icon: BellRing,
     title: "Get warned early",
-    text: "Useful reminders arrive before the rush: 90, 30, 14 and 7 days ahead of the deadline.",
+    text: "Useful reminders arrive before the rush: 90, 30, 14 and 7 days ahead, plus the due date.",
   },
 ];
 
@@ -49,7 +49,7 @@ export default function HomePage() {
           <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1fr_480px]">
             <div>
               <p className="font-black text-[#52720d] text-sm uppercase">
-                UK property compliance, without the spreadsheet
+                England property deadlines, without the spreadsheet
               </p>
               <h1 className="mt-4 max-w-4xl text-6xl leading-[0.92] tracking-[-0.055em] md:text-8xl">
                 Know what expires next.
@@ -126,6 +126,66 @@ export default function HomePage() {
             </article>
           ))}
         </section>
+        <section className="border-[#d5dbc9] border-y bg-white px-4 py-16 md:px-8 md:py-24">
+          <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+            <div>
+              <p className="font-black text-[#52720d] text-sm uppercase">
+                Small-landlord focus
+              </p>
+              <h2 className="mt-3 text-4xl leading-tight md:text-6xl">
+                The useful part of compliance software. Nothing else.
+              </h2>
+              <p className="mt-4 text-[#526047] text-lg leading-8">
+                LetDue is for self-managing landlords with one to three
+                properties. It does not collect rent, manage tenants or replace
+                your letting agent. It keeps the documents and dates that are
+                easy to lose sight of.
+              </p>
+            </div>
+            <div className="grid gap-3">
+              {[
+                [
+                  "Gas safety",
+                  "Usually checked every year where the landlord provides gas appliances.",
+                  "https://www.hse.gov.uk/gas/landlords/safetycheckswho.htm",
+                ],
+                [
+                  "Electrical safety",
+                  "Electrical installations are generally inspected at least every five years in England.",
+                  "https://www.gov.uk/government/publications/electrical-safety-standards-in-the-private-and-social-rented-sectors-guidance",
+                ],
+                [
+                  "EPC",
+                  "A domestic EPC is normally valid for ten years, unless a newer one is produced.",
+                  "https://www.gov.uk/government/publications/energy-performance-certificates-for-the-construction-sale-and-let-of-dwellings",
+                ],
+                [
+                  "Property licensing",
+                  "Large HMOs need a licence; councils can require licences for other rented properties too.",
+                  "https://www.gov.uk/renting-out-a-property/houses-in-multiple-occupation-hmo",
+                ],
+              ].map(([title, text, href]) => (
+                <a
+                  className="group grid gap-1 rounded-xl border border-[#d5dbc9] bg-[#f7f8f3] p-4 transition hover:border-[#8da456] hover:bg-[#f2f7e7]"
+                  href={href}
+                  key={title}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <strong className="text-lg group-hover:text-[#52720d]">
+                    {title}
+                  </strong>
+                  <span className="text-[#65715d] leading-6">{text}</span>
+                </a>
+              ))}
+              <p className="px-1 pt-2 text-[#6e7967] text-sm leading-6">
+                Rules vary by property and council. LetDue organises your
+                records and reminders; it does not provide legal advice or
+                guarantee compliance.
+              </p>
+            </div>
+          </div>
+        </section>
         <ComplianceAudit />
         <section
           id="pricing"
@@ -141,7 +201,8 @@ export default function HomePage() {
               </h2>
               <p className="mt-5 max-w-2xl text-[#cbd4c5] text-lg leading-8">
                 Monitor up to three properties, store every certificate, and
-                receive every reminder for £29 a year.
+                receive every reminder for £29 a year while the founding plan is
+                available.
               </p>
             </div>
             <div className="rounded-2xl bg-white p-6 text-[#18220d]">
@@ -151,7 +212,7 @@ export default function HomePage() {
                 {[
                   "Up to 3 properties",
                   "Automatic certificate date reading",
-                  "Email reminders at four intervals",
+                  "Email reminders at five useful intervals",
                   "Downloadable compliance pack",
                   "Cancel any time",
                 ].map((item) => (

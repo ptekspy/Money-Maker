@@ -1,7 +1,8 @@
 import { CheckCircle2, Clock3, CreditCard, ShieldAlert } from "lucide-react";
 import { notFound } from "next/navigation";
+import { startPilotCheckout } from "@/app/actions/checkout";
 import { assessCertificate, recommendedCertificates } from "@/lib/compliance";
-import { getUserByToken, listPortfolio } from "@/lib/data";
+import { getUserByToken, hasActiveAccess, listPortfolio } from "@/lib/data";
 import {
   addPortfolioProperty,
   openBillingPortal,
@@ -27,6 +28,7 @@ export default async function DashboardPage({
     upload?: string;
     pilot?: string;
     property?: string;
+    billing?: string;
   }>;
 }) {
   const { token } = await params;
@@ -34,7 +36,14 @@ export default async function DashboardPage({
   const user = await getUserByToken(token);
   if (!user) notFound();
   const properties = await listPortfolio(user.id);
-  const { saved, upload, pilot, property: propertyResult } = await searchParams;
+  const {
+    saved,
+    upload,
+    pilot,
+    property: propertyResult,
+    billing,
+  } = await searchParams;
+  const accessActive = hasActiveAccess(user);
   const pilotEnds = user.pilotEndsAt
     ? new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(
         new Date(user.pilotEndsAt),
@@ -61,12 +70,14 @@ export default async function DashboardPage({
         <div className="flex items-center gap-3">
           <span
             className={`rounded-full px-3 py-2 font-black text-sm ${
-              user.subscriptionStatus === "active"
+              accessActive
                 ? "bg-[#dff5d8] text-[#26531b]"
                 : "bg-[#ffe0d9] text-[#7a2514]"
             }`}
           >
-            {user.subscriptionStatus.replace("_", " ")}
+            {user.plan === "pilot" && !accessActive
+              ? "pilot ended"
+              : user.subscriptionStatus.replace("_", " ")}
           </span>
           {user.plan !== "pilot" ? (
             <form action={openBillingPortal}>
@@ -91,6 +102,59 @@ export default async function DashboardPage({
             already have.
           </p>
         </div>
+      ) : null}
+
+      {billing ? (
+        <div
+          className={`mt-6 rounded-xl p-5 ${
+            billing === "cancelled"
+              ? "bg-[#fff0bd] text-[#684c00]"
+              : "bg-[#dff5d8] text-[#26531b]"
+          }`}
+        >
+          <p className="font-black">
+            {billing === "cancelled"
+              ? "Checkout cancelled — nothing was charged."
+              : user.plan === "paid"
+                ? "Thank you — your monitoring is active."
+                : "Payment received. Your account is being activated."}
+          </p>
+        </div>
+      ) : null}
+
+      {user.plan === "pilot" ? (
+        <section className="mt-8 grid gap-5 rounded-2xl bg-[#18220d] p-6 text-white md:grid-cols-[1fr_auto] md:items-center">
+          <div>
+            <p className="font-black text-[#d9ff73] text-xs uppercase">
+              {accessActive ? "Founding pilot" : "Pilot ended"}
+            </p>
+            <h2 className="mt-2 text-3xl">
+              Keep every property deadline on watch.
+            </h2>
+            <p className="mt-2 max-w-2xl text-[#cbd4c5] leading-7">
+              Continue monitoring up to three properties, with secure PDF
+              storage and email reminders at 90, 30, 14, 7 and 0 days.
+            </p>
+          </div>
+          <div className="min-w-52 rounded-xl bg-white p-5 text-[#18220d]">
+            <p>
+              <strong className="text-4xl">£29</strong>{" "}
+              <span className="font-bold text-[#65715d]">/ year</span>
+            </p>
+            <form action={startPilotCheckout} className="mt-4">
+              <input name="token" type="hidden" value={token} />
+              <button
+                className="min-h-12 w-full rounded-lg bg-[#d9ff73] px-4 font-black"
+                type="submit"
+              >
+                Continue monitoring
+              </button>
+            </form>
+            <p className="mt-2 text-center text-[#65715d] text-xs">
+              Secure checkout · Cancel any time
+            </p>
+          </div>
+        </section>
       ) : null}
 
       {saved ? (
@@ -130,7 +194,7 @@ export default async function DashboardPage({
         </p>
       ) : null}
 
-      {properties.length < 3 ? (
+      {accessActive && properties.length < 3 ? (
         <section className="mt-8 rounded-2xl border border-[#d5dbc9] bg-[#f7f8f3] p-5">
           <p className="font-black text-[#52720d] text-xs uppercase">
             Portfolio setup
@@ -154,7 +218,7 @@ export default async function DashboardPage({
               <input defaultChecked name="hasGas" type="checkbox" /> Gas
             </label>
             <label className="flex min-h-11 items-center gap-2 rounded-lg border border-[#d5dbc9] bg-white px-3 font-bold text-sm">
-              <input name="isHmo" type="checkbox" /> HMO
+              <input name="isHmo" type="checkbox" /> Licence
             </label>
             <button
               className="min-h-11 rounded-lg bg-[#18220d] px-4 font-black text-white"
@@ -194,26 +258,28 @@ export default async function DashboardPage({
                   {required.length} checks tracked
                 </span>
               </div>
-              <form
-                action={uploadCertificate}
-                className="flex flex-wrap items-center gap-3 border-[#d5dbc9] border-b bg-[#f7f8f3] p-4"
-              >
-                <input name="token" type="hidden" value={token} />
-                <input name="propertyId" type="hidden" value={property.id} />
-                <input
-                  accept="application/pdf,.pdf"
-                  className="min-w-0 flex-1 rounded-lg border border-[#bcc7ae] bg-white p-2"
-                  name="certificate"
-                  required
-                  type="file"
-                />
-                <button
-                  className="min-h-11 rounded-lg bg-[#18220d] px-4 font-black text-white"
-                  type="submit"
+              {accessActive ? (
+                <form
+                  action={uploadCertificate}
+                  className="flex flex-wrap items-center gap-3 border-[#d5dbc9] border-b bg-[#f7f8f3] p-4"
                 >
-                  Read and store PDF
-                </button>
-              </form>
+                  <input name="token" type="hidden" value={token} />
+                  <input name="propertyId" type="hidden" value={property.id} />
+                  <input
+                    accept="application/pdf,.pdf"
+                    className="min-w-0 flex-1 rounded-lg border border-[#bcc7ae] bg-white p-2"
+                    name="certificate"
+                    required
+                    type="file"
+                  />
+                  <button
+                    className="min-h-11 rounded-lg bg-[#18220d] px-4 font-black text-white"
+                    type="submit"
+                  >
+                    Read and store PDF
+                  </button>
+                </form>
+              ) : null}
               <div className="divide-y divide-[#e2e7db]">
                 {required.map((kind) => {
                   const certificate = byKind.get(kind);
@@ -246,31 +312,33 @@ export default async function DashboardPage({
                             : "Add the expiry date to activate reminders."}
                         </p>
                       </div>
-                      <form
-                        action={updateCertificate}
-                        className="flex flex-wrap gap-2"
-                      >
-                        <input name="token" type="hidden" value={token} />
-                        <input
-                          name="propertyId"
-                          type="hidden"
-                          value={property.id}
-                        />
-                        <input name="kind" type="hidden" value={kind} />
-                        <input
-                          className="min-h-11 rounded-lg border border-[#bcc7ae] px-3"
-                          defaultValue={certificate?.expiryDate ?? ""}
-                          name="expiryDate"
-                          required
-                          type="date"
-                        />
-                        <button
-                          className="min-h-11 rounded-lg bg-[#d9ff73] px-4 font-black"
-                          type="submit"
+                      {accessActive ? (
+                        <form
+                          action={updateCertificate}
+                          className="flex flex-wrap gap-2"
                         >
-                          Save date
-                        </button>
-                      </form>
+                          <input name="token" type="hidden" value={token} />
+                          <input
+                            name="propertyId"
+                            type="hidden"
+                            value={property.id}
+                          />
+                          <input name="kind" type="hidden" value={kind} />
+                          <input
+                            className="min-h-11 rounded-lg border border-[#bcc7ae] px-3"
+                            defaultValue={certificate?.expiryDate ?? ""}
+                            name="expiryDate"
+                            required
+                            type="date"
+                          />
+                          <button
+                            className="min-h-11 rounded-lg bg-[#d9ff73] px-4 font-black"
+                            type="submit"
+                          >
+                            Save date
+                          </button>
+                        </form>
+                      ) : null}
                     </div>
                   );
                 })}

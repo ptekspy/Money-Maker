@@ -23,6 +23,12 @@ export type LetDueUser = {
   pilotEndsAt?: string;
 };
 
+export function hasActiveAccess(user: LetDueUser, now = new Date()) {
+  if (user.subscriptionStatus !== "active") return false;
+  if (user.plan !== "pilot") return true;
+  return Boolean(user.pilotEndsAt && new Date(user.pilotEndsAt) > now);
+}
+
 export type LetDueProperty = {
   id: string;
   userId: string;
@@ -203,13 +209,14 @@ export async function activatePilot(input: {
   if (await lookupUserId("EMAIL", normalizedEmail)) return null;
 
   const userId = crypto.randomUUID();
+  const pilotEndsAt = new Date(Date.now() + 14 * 86_400_000).toISOString();
   const user: LetDueUser = {
     id: userId,
     email: normalizedEmail,
     accessToken: crypto.randomUUID(),
     subscriptionStatus: "active",
     plan: "pilot",
-    pilotEndsAt: new Date(Date.now() + 14 * 86_400_000).toISOString(),
+    pilotEndsAt,
   };
   const property: LetDueProperty = {
     id: crypto.randomUUID(),
@@ -224,7 +231,13 @@ export async function activatePilot(input: {
     client.send(
       new PutCommand({
         TableName: tableName,
-        Item: { pk: `USER#${userId}`, sk: "PROFILE", ...user },
+        Item: {
+          pk: `USER#${userId}`,
+          sk: "PROFILE",
+          gsi1pk: `PILOT#${pilotEndsAt.slice(0, 10)}`,
+          gsi1sk: `USER#${userId}`,
+          ...user,
+        },
       }),
     ),
     client.send(
@@ -265,6 +278,39 @@ export async function activatePilot(input: {
   );
 
   return { user, property };
+}
+
+export async function activatePilotSubscription(input: {
+  userId: string;
+  stripeCustomerId: string;
+}) {
+  await Promise.all([
+    client.send(
+      new UpdateCommand({
+        TableName: tableName,
+        Key: { pk: `USER#${input.userId}`, sk: "PROFILE" },
+        UpdateExpression:
+          "set stripeCustomerId = :customer, subscriptionStatus = :status, #plan = :plan remove pilotEndsAt, gsi1pk, gsi1sk",
+        ExpressionAttributeNames: { "#plan": "plan" },
+        ExpressionAttributeValues: {
+          ":customer": input.stripeCustomerId,
+          ":status": "active",
+          ":plan": "paid",
+        },
+      }),
+    ),
+    client.send(
+      new PutCommand({
+        TableName: tableName,
+        Item: {
+          pk: `CUSTOMER#${input.stripeCustomerId}`,
+          sk: "LOOKUP",
+          userId: input.userId,
+        },
+      }),
+    ),
+  ]);
+  return getUser(input.userId);
 }
 
 export async function addProperty(input: {
@@ -388,6 +434,18 @@ export async function listCertificatesDue(expiryDate: string) {
     }),
   );
   return (result.Items ?? []) as LetDueCertificate[];
+}
+
+export async function listPilotsEnding(endDate: string) {
+  const result = await client.send(
+    new QueryCommand({
+      TableName: tableName,
+      IndexName: "LookupIndex",
+      KeyConditionExpression: "gsi1pk = :pk",
+      ExpressionAttributeValues: { ":pk": `PILOT#${endDate}` },
+    }),
+  );
+  return (result.Items ?? []) as LetDueUser[];
 }
 
 export async function claimReminder(
