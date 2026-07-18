@@ -14,8 +14,9 @@ export function trackEvent(
   event: MarketingEvent,
   properties: Record<string, string | number> = {},
 ) {
-  if (window.localStorage.getItem(storageKey) !== "accepted") return;
-  window.gtag?.("event", event, properties);
+  if (window.localStorage.getItem(storageKey) === "accepted") {
+    window.gtag?.("event", event, properties);
+  }
   void fetch(endpoint, {
     method: "POST",
     body: JSON.stringify({
