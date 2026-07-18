@@ -394,6 +394,59 @@ h1 em {
   color: var(--muted);
   line-height: 1.5;
 }
+.supportDrawer {
+  margin-top: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.46);
+  padding: 16px;
+}
+.supportDrawer summary {
+  cursor: pointer;
+  color: var(--green-dark);
+  font-weight: 800;
+}
+.supportDrawer form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.supportDrawer label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.supportDrawer label span {
+  font-weight: 500;
+}
+.supportDrawer input,
+.supportDrawer select,
+.supportDrawer textarea {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  padding: 8px 10px;
+  color: var(--ink);
+}
+.supportDrawer textarea {
+  grid-column: 1 / -1;
+  min-height: 116px;
+  resize: vertical;
+  line-height: 1.5;
+}
+.supportDrawer label:has(textarea),
+.supportDrawer button {
+  grid-column: 1 / -1;
+}
+.hiddenField {
+  position: absolute;
+  left: -9999px;
+}
 .planChoices {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -786,6 +839,9 @@ h1 em {
   .teamGrid,
   .teamMetrics,
   .inviteForm {
+    grid-template-columns: 1fr;
+  }
+  .supportDrawer form {
     grid-template-columns: 1fr;
   }
   .dashboardHeader,

@@ -175,7 +175,7 @@ export type OperationalEvent = {
   pk: "OPS";
   sk: string;
   severity: "info" | "warning" | "error";
-  source: "webhook" | "worker" | "billing";
+  source: "webhook" | "worker" | "billing" | "support";
   message: string;
   detail?: string;
   installationId?: number;

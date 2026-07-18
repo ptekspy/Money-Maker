@@ -27,6 +27,12 @@ const billingMessages = {
     "Checkout completed. Stripe will update protection as soon as the billing webhook arrives.",
 } as const;
 
+const supportMessages = {
+  error:
+    "Support message could not be sent. Please email support@apicontractguard.com directly.",
+  sent: "Support message sent. We have the account context and will reply by email.",
+} as const;
+
 function daysLeft(trialEndsAt?: string) {
   if (!trialEndsAt) return 0;
   return Math.max(
@@ -124,7 +130,7 @@ function journeyMessage(input: {
 export default async function Dashboard({
   searchParams,
 }: {
-  searchParams?: Promise<{ billing?: string }>;
+  searchParams?: Promise<{ billing?: string; support?: string }>;
 }) {
   const session = await currentSession();
   if (!session) redirect("/api/auth/github/start?returnTo=/dashboard");
@@ -133,6 +139,9 @@ export default async function Dashboard({
   const billingMessage =
     params?.billing &&
     billingMessages[params.billing as keyof typeof billingMessages];
+  const supportMessage =
+    params?.support &&
+    supportMessages[params.support as keyof typeof supportMessages];
 
   const github = await userInstallations(session.accessToken);
   const workspaceMemberships = await listUserWorkspaces(session.userId);
@@ -198,6 +207,7 @@ export default async function Dashboard({
           </a>
         </header>
         {billingMessage ? <div className="notice">{billingMessage}</div> : null}
+        {supportMessage ? <div className="notice">{supportMessage}</div> : null}
         {workspaceMemberships.length ? (
           <section className="workspaceStrip">
             <div>
@@ -315,6 +325,72 @@ export default async function Dashboard({
                   <strong>{journey.title}</strong>
                   <p>{journey.message}</p>
                 </div>
+                {profile ? (
+                  <details className="supportDrawer">
+                    <summary>Contact support about this installation</summary>
+                    <form action="/api/support/contact" method="post">
+                      <input type="hidden" name="source" value="internal" />
+                      <input
+                        type="hidden"
+                        name="returnTo"
+                        value="/dashboard"
+                      />
+                      <input
+                        type="hidden"
+                        name="installationId"
+                        value={item.id}
+                      />
+                      <input
+                        type="hidden"
+                        name="accountLogin"
+                        value={item.account.login}
+                      />
+                      <label className="hiddenField">
+                        Website
+                        <input name="website" tabIndex={-1} autoComplete="off" />
+                      </label>
+                      <label>
+                        Issue type
+                        <select name="issueType" defaultValue="check-result">
+                          <option value="setup">Setup or install</option>
+                          <option value="billing">Billing</option>
+                          <option value="check-result">Check result</option>
+                          <option value="repository-access">
+                            Repository access
+                          </option>
+                          <option value="general">General question</option>
+                        </select>
+                      </label>
+                      <label>
+                        Repository <span>optional</span>
+                        <input
+                          name="repository"
+                          placeholder={`${item.account.login}/api`}
+                        />
+                      </label>
+                      <label>
+                        Pull request or check URL <span>optional</span>
+                        <input
+                          name="prUrl"
+                          type="url"
+                          placeholder="https://github.com/..."
+                        />
+                      </label>
+                      <label>
+                        Message
+                        <textarea
+                          name="message"
+                          minLength={10}
+                          required
+                          placeholder="Tell us what went wrong or what you need help with."
+                        />
+                      </label>
+                      <button className="button primary" type="submit">
+                        Send to support
+                      </button>
+                    </form>
+                  </details>
+                ) : null}
                 {profile &&
                 plan === "starter" &&
                 profile.billingStatus === "trialing" ? (

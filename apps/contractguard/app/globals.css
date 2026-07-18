@@ -539,6 +539,86 @@ h1 em {
   color: var(--muted);
   line-height: 1.6;
 }
+.supportLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) 0.9fr;
+  gap: 18px;
+  margin-top: 42px;
+  align-items: start;
+}
+.contactForm,
+.supportCards article {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.5);
+}
+.contactForm {
+  display: grid;
+  gap: 14px;
+  padding: 26px;
+}
+.contactForm label {
+  display: grid;
+  gap: 7px;
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 750;
+}
+.contactForm label span {
+  color: var(--muted);
+  font-weight: 500;
+}
+.contactForm input,
+.contactForm select,
+.contactForm textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  padding: 12px 13px;
+  color: var(--ink);
+  outline: none;
+}
+.contactForm textarea {
+  min-height: 150px;
+  resize: vertical;
+  line-height: 1.5;
+}
+.contactForm input:focus,
+.contactForm select:focus,
+.contactForm textarea:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(27, 107, 74, 0.11);
+}
+.hiddenField {
+  position: absolute;
+  left: -9999px;
+}
+.formNotice {
+  margin-top: 24px;
+  border: 1px solid #d8c681;
+  border-radius: 12px;
+  background: #fff8d9;
+  padding: 14px 16px;
+  color: #5f4b08;
+  font-weight: 650;
+}
+.supportCards {
+  display: grid;
+  gap: 14px;
+}
+.supportCards article {
+  padding: 24px;
+}
+.supportCards h2 {
+  margin: 0 0 10px;
+  font-size: 22px;
+}
+.supportCards p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
 .marketplacePanels {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -723,6 +803,7 @@ h1 em {
   .feature-grid,
   .proof-strip,
   .legalGrid,
+  .supportLayout,
   .marketplacePanels,
   .guide-grid,
   .pricing-grid,
