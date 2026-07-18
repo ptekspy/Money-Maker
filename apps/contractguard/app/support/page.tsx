@@ -66,7 +66,11 @@ export default function SupportPage() {
             </label>
             <label>
               Pull request or check URL <span>optional</span>
-              <input name="prUrl" type="url" placeholder="https://github.com/..." />
+              <input
+                name="prUrl"
+                type="url"
+                placeholder="https://github.com/..."
+              />
             </label>
             <label>
               Message
@@ -85,9 +89,9 @@ export default function SupportPage() {
             <article>
               <h2>Email</h2>
               <p>
-                You can also email support@apicontractguard.com directly. Include
-                your GitHub organization, repository, pull request, and check
-                output when reporting a check issue.
+                You can also email support@apicontractguard.com directly.
+                Include your GitHub organization, repository, pull request, and
+                check output when reporting a check issue.
               </p>
             </article>
             <article>

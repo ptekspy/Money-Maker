@@ -330,11 +330,7 @@ export default async function Dashboard({
                     <summary>Contact support about this installation</summary>
                     <form action="/api/support/contact" method="post">
                       <input type="hidden" name="source" value="internal" />
-                      <input
-                        type="hidden"
-                        name="returnTo"
-                        value="/dashboard"
-                      />
+                      <input type="hidden" name="returnTo" value="/dashboard" />
                       <input
                         type="hidden"
                         name="installationId"
@@ -347,7 +343,11 @@ export default async function Dashboard({
                       />
                       <label className="hiddenField">
                         Website
-                        <input name="website" tabIndex={-1} autoComplete="off" />
+                        <input
+                          name="website"
+                          tabIndex={-1}
+                          autoComplete="off"
+                        />
                       </label>
                       <label>
                         Issue type

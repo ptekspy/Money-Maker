@@ -46,7 +46,10 @@ export async function POST(request: NextRequest) {
     source === "internal"
       ? "https://app.apicontractguard.com/dashboard"
       : "https://apicontractguard.com/support";
-  const successUrl = withStatus(redirectTo(request, returnTo, fallback), "sent");
+  const successUrl = withStatus(
+    redirectTo(request, returnTo, fallback),
+    "sent",
+  );
   const errorUrl = withStatus(redirectTo(request, returnTo, fallback), "error");
 
   if (clean(form.get("website"), 200)) {
@@ -77,8 +80,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.redirect(loginUrl, 303);
     }
 
-    const requestedInstallationId = Number(clean(form.get("installationId"), 40));
-    if (Number.isSafeInteger(requestedInstallationId) && requestedInstallationId > 0) {
+    const requestedInstallationId = Number(
+      clean(form.get("installationId"), 40),
+    );
+    if (
+      Number.isSafeInteger(requestedInstallationId) &&
+      requestedInstallationId > 0
+    ) {
       const github = await userInstallations(session.accessToken);
       const hasAccess = github.installations.some(
         (installation) => installation.id === requestedInstallationId,
@@ -97,11 +105,15 @@ export async function POST(request: NextRequest) {
       `User ID: ${session.userId}`,
       contactEmail ? `Email: ${contactEmail}` : "Email: not supplied by GitHub",
     ].join("\n");
-  } else if (!contactEmail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(contactEmail)) {
+  } else if (
+    !contactEmail ||
+    !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(contactEmail)
+  ) {
     return NextResponse.redirect(errorUrl, 303);
   }
 
-  const subjectPrefix = source === "internal" ? "User support" : "Public contact";
+  const subjectPrefix =
+    source === "internal" ? "User support" : "Public contact";
   const subject = `[API Contract Guard] ${subjectPrefix}: ${issueType}`;
   const body = [
     subject,
