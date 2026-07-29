@@ -8,6 +8,7 @@ import {
   ScanLine,
 } from "lucide-react";
 import { ComplianceAudit } from "@/components/compliance-audit";
+import { ContactForm } from "@/components/contact-form";
 import { ProductHuntBadge } from "@/components/product-hunt-badge";
 
 const benefits = [
@@ -28,7 +29,12 @@ const benefits = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ contact?: string }>;
+}) {
+  const { contact } = await searchParams;
   return (
     <>
       <header className="flex min-h-18 items-center justify-between border-[#d5dbc9] border-b bg-[#f4f5ef]/95 px-4 backdrop-blur md:px-8">
@@ -39,6 +45,7 @@ export default function HomePage() {
           <a href="#how">How it works</a>
           <a href="#tools">Free tools</a>
           <a href="#audit">Free audit</a>
+          <a href="/founding-plan">Founding plan</a>
           <a href="#pricing">Pricing</a>
         </nav>
         <a
@@ -68,12 +75,20 @@ export default function HomePage() {
                 not a letting platform, not a rent system, just the certificate
                 desk you actually need.
               </p>
-              <a
-                className="mt-8 inline-flex min-h-13 items-center gap-2 rounded-lg bg-[#d9ff73] px-5 font-black"
-                href="#audit"
-              >
-                Run a free property audit <ArrowRight size={18} />
-              </a>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <a
+                  className="inline-flex min-h-13 items-center gap-2 rounded-lg bg-[#d9ff73] px-5 font-black"
+                  href="#audit"
+                >
+                  Run a free property audit <ArrowRight size={18} />
+                </a>
+                <a
+                  className="inline-flex min-h-13 items-center rounded-lg border border-[#aeb9a7] bg-white/70 px-5 font-black text-[#18220d]"
+                  href="/founding-plan?source=homepage-hero"
+                >
+                  See the £29 founding plan
+                </a>
+              </div>
               <p className="mt-3 text-[#6e7967] text-sm">
                 No account · No card · England beta
               </p>
@@ -227,6 +242,18 @@ export default function HomePage() {
                 text: "A plain-English starting list of the evidence and recurring dates worth organising.",
                 href: "/guides/landlord-compliance-checklist-england",
               },
+              {
+                icon: BellRing,
+                title: "Certificate renewal reminders",
+                text: "A focused guide for keeping gas safety, EICR, EPC, insurance and licence dates on watch.",
+                href: "/guides/landlord-certificate-renewal-reminders",
+              },
+              {
+                icon: ClipboardCheck,
+                title: "Spreadsheet alternative",
+                text: "Replace a manual certificate tracker with reminders built for one to three rental properties.",
+                href: "/guides/landlord-certificate-tracking-spreadsheet-alternative",
+              },
             ].map(({ icon: Icon, title, text, href }) => (
               <a
                 className="group rounded-2xl border border-[#d5dbc9] bg-white p-6 transition hover:-translate-y-1 hover:border-[#8da456] hover:shadow-lg"
@@ -288,18 +315,21 @@ export default function HomePage() {
               </ul>
               <a
                 className="mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#d9ff73] px-4 font-black"
-                href="#audit"
+                href="/founding-plan"
               >
-                Audit your first property
+                See the founding plan
               </a>
             </div>
           </div>
         </section>
+        <ContactForm sent={contact === "sent"} />
       </main>
       <footer className="flex flex-wrap justify-between gap-4 border-[#d5dbc9] border-t px-4 py-7 font-bold text-[#687260] text-sm md:px-8">
         <span className="text-[#18220d]">LetDue</span>
         <span>Compliance information, not legal advice · England beta</span>
         <span className="flex gap-4">
+          <a href="/founding-plan">Founding plan</a>
+          <a href="/partners/certificate-aftercare">Partners</a>
           <a href="/privacy">Privacy</a>
           <a href="/terms">Terms</a>
         </span>

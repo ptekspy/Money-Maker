@@ -2,6 +2,12 @@
 
 ## Live campaign state — 17 July 2026
 
+- 24 July afternoon check: no paid activation or human prospect reply found. Published a practical landlord admin post about recording the renewal/action date separately from certificate PDFs:
+  `https://x.com/LetDueHQ/status/2080655337007223282`.
+
+- 25 July morning check: no paid activation, prospect reply or social customer signal found. Published a Saturday landlord-admin post:
+  `https://x.com/LetDueHQ/status/2080926811584639022`.
+
 - LetDue's X account is live at `https://x.com/LetDueHQ`.
 - Published the first acquisition post with product artwork, a free-audit CTA and accessible image text:
   `https://x.com/LetDueHQ/status/2078117894890602501`.
@@ -19,6 +25,9 @@
 - My Landlord Certificate received a tailored aftercare-partner email at its published business inbox, `info@mylandlordcertificate.co.uk`. Check for a reply and send at most one follow-up, no earlier than 21 July.
 - Published the direct first-paid-customer ask on X:
   `https://x.com/LetDueHQ/status/2078149770955087971`.
+- Added two practical X replies from LetDue in live landlord/compliance conversations:
+  `https://x.com/LetDueHQ/status/2078154916024000567` and
+  `https://x.com/LetDueHQ/status/2078155132517138671`.
 - The latest mailbox check still found no paid activation or human prospect reply. Check this new lead for a response and send at most one follow-up no earlier than 21 July 2026.
 - The West Yorkshire Landlords Meetup page is relevant and has 46 members, but organiser messaging requires a Meetup login. No account was created and no message was sent.
 - A recurring acquisition heartbeat now checks for replies and paid-customer evidence at 09:00 and 15:00 while respecting the 19 July follow-up timing.

@@ -322,6 +322,30 @@ export function ComplianceAudit() {
                     </p>
                   </div>
                 </div>
+                <div className="mt-5 grid gap-3 rounded-xl border border-[#d5dbc9] bg-white p-4 sm:grid-cols-2">
+                  <div>
+                    <strong className="text-[#18220d]">
+                      Choose the free pilot if...
+                    </strong>
+                    <p className="mt-1 text-[#65715d] text-sm leading-6">
+                      You want to check the reminder flow before committing, or
+                      you are still gathering certificate dates.
+                    </p>
+                  </div>
+                  <div>
+                    <strong className="text-[#18220d]">Pay today if...</strong>
+                    <p className="mt-1 text-[#65715d] text-sm leading-6">
+                      One date is already close, you manage more than one
+                      certificate, or you want the full year set up now while it
+                      is fresh.
+                    </p>
+                  </div>
+                </div>
+                <p className="mt-4 rounded-xl bg-[#fff8dc] p-3 font-bold text-[#5f4a05] text-sm leading-6">
+                  Founding customers get direct setup help: reply to the welcome
+                  email with your certificates and we will help make sure the
+                  first property is organised correctly.
+                </p>
                 <form action={startPilot} className="mt-5 grid gap-3">
                   <label className="grid gap-1 font-bold text-sm">
                     Reminder email

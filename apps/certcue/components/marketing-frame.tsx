@@ -31,6 +31,8 @@ export function MarketingFrame({ children }: MarketingFrameProps) {
         </a>
         <span>Compliance information, not legal advice · England beta</span>
         <span className="flex gap-4">
+          <a href="/founding-plan">Founding plan</a>
+          <a href="/partners/certificate-aftercare">Partners</a>
           <a href="/privacy">Privacy</a>
           <a href="/terms">Terms</a>
         </span>

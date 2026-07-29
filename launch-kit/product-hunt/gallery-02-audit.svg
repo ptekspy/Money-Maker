@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1270" height="760" viewBox="0 0 1270 760">
+  <defs>
+    <filter id="s" x="-20%" y="-20%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#18220d" flood-opacity=".16"/>
+    </filter>
+  </defs>
+  <rect width="1270" height="760" fill="#18220d"/>
+  <text x="64" y="70" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="900" fill="#ffffff">Let<tspan fill="#d9ff73">Due</tspan></text>
+  <text x="64" y="166" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="900" letter-spacing="-2.5" fill="#ffffff">
+    <tspan x="64">A useful answer</tspan><tspan x="64" dy="64">in under a minute.</tspan>
+  </text>
+  <text x="68" y="315" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#cbd4c5">
+    <tspan x="68">Enter the dates you know—or upload a certificate.</tspan>
+    <tspan x="68" dy="34">LetDue turns them into a plain-English action pack.</tspan>
+  </text>
+  <g transform="translate(64 430)">
+    <circle cx="18" cy="18" r="18" fill="#d9ff73"/><text x="13" y="25" font-family="Arial" font-size="20" font-weight="900" fill="#18220d">1</text>
+    <text x="50" y="25" font-family="Arial" font-size="18" font-weight="800" fill="#ffffff">Add property dates</text>
+    <circle cx="18" cy="78" r="18" fill="#d9ff73"/><text x="13" y="85" font-family="Arial" font-size="20" font-weight="900" fill="#18220d">2</text>
+    <text x="50" y="85" font-family="Arial" font-size="18" font-weight="800" fill="#ffffff">See missing and urgent items</text>
+    <circle cx="18" cy="138" r="18" fill="#d9ff73"/><text x="13" y="145" font-family="Arial" font-size="20" font-weight="900" fill="#18220d">3</text>
+    <text x="50" y="145" font-family="Arial" font-size="18" font-weight="800" fill="#ffffff">Put reminders on autopilot</text>
+  </g>
+
+  <g transform="translate(642 64)" filter="url(#s)">
+    <rect width="560" height="632" rx="26" fill="#f4f5ef"/>
+    <text x="34" y="47" font-family="Arial" font-size="13" font-weight="900" letter-spacing="1.4" fill="#52720d">FREE PROPERTY AUDIT</text>
+    <text x="34" y="88" font-family="Arial" font-size="29" font-weight="900" fill="#18220d">18 Meadow Lane, Leeds</text>
+    <rect x="34" y="116" width="492" height="70" rx="12" fill="#ffffff" stroke="#d5dbc9"/>
+    <text x="52" y="142" font-family="Arial" font-size="13" fill="#6e7967">Property status</text>
+    <text x="52" y="169" font-family="Arial" font-size="18" font-weight="900" fill="#18220d">2 dated items need attention</text>
+    <g font-family="Arial">
+      <rect x="34" y="205" width="492" height="72" rx="12" fill="#ffffff" stroke="#d5dbc9"/>
+      <text x="52" y="235" font-size="18" font-weight="800" fill="#18220d">Gas safety</text>
+      <text x="52" y="259" font-size="14" fill="#6e7967">9 Aug 2026 · 24 days remaining</text>
+      <rect x="413" y="224" width="92" height="30" rx="15" fill="#fff0bd"/><text x="428" y="245" font-size="13" font-weight="900" fill="#684c00">Due soon</text>
+      <rect x="34" y="292" width="492" height="72" rx="12" fill="#ffffff" stroke="#d5dbc9"/>
+      <text x="52" y="322" font-size="18" font-weight="800" fill="#18220d">EICR</text>
+      <text x="52" y="346" font-size="14" fill="#6e7967">17 Apr 2028 · 641 days remaining</text>
+      <rect x="426" y="311" width="79" height="30" rx="15" fill="#e2f1d3"/><text x="442" y="332" font-size="13" font-weight="900" fill="#31560c">Current</text>
+      <rect x="34" y="379" width="492" height="72" rx="12" fill="#ffffff" stroke="#d5dbc9"/>
+      <text x="52" y="409" font-size="18" font-weight="800" fill="#18220d">EPC</text>
+      <text x="52" y="433" font-size="14" fill="#6e7967">5 Jul 2026 · 11 days overdue</text>
+      <rect x="414" y="398" width="91" height="30" rx="15" fill="#ffe1dc"/><text x="430" y="419" font-size="13" font-weight="900" fill="#8a2416">Overdue</text>
+      <rect x="34" y="466" width="492" height="72" rx="12" fill="#ffffff" stroke="#d5dbc9"/>
+      <text x="52" y="496" font-size="18" font-weight="800" fill="#18220d">Landlord insurance</text>
+      <text x="52" y="520" font-size="14" fill="#6e7967">16 Oct 2026 · 92 days remaining</text>
+      <rect x="426" y="485" width="79" height="30" rx="15" fill="#e2f1d3"/><text x="442" y="506" font-size="13" font-weight="900" fill="#31560c">Current</text>
+    </g>
+    <rect x="34" y="558" width="492" height="48" rx="11" fill="#d9ff73"/>
+    <text x="149" y="589" font-family="Arial" font-size="17" font-weight="900" fill="#18220d">Start a free 14-day pilot →</text>
+  </g>
+</svg>

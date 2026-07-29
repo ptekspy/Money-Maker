@@ -66,6 +66,13 @@ export async function getUserByToken(token: string) {
   return getItem<LetDueUser>(`USER#${userId}`, "PROFILE");
 }
 
+export async function getUserByEmail(email: string) {
+  const normalizedEmail = email.trim().toLowerCase();
+  const userId = await lookupUserId("EMAIL", normalizedEmail);
+  if (!userId) return null;
+  return getItem<LetDueUser>(`USER#${userId}`, "PROFILE");
+}
+
 export async function getUser(userId: string) {
   return getItem<LetDueUser>(`USER#${userId}`, "PROFILE");
 }

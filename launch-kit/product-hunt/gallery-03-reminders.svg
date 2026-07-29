@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1270" height="760" viewBox="0 0 1270 760">
+  <defs><filter id="s"><feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#18220d" flood-opacity=".15"/></filter></defs>
+  <rect width="1270" height="760" fill="#f4f5ef"/>
+  <rect x="0" y="0" width="1270" height="20" fill="#d9ff73"/>
+  <text x="67" y="80" font-family="Arial" font-size="28" font-weight="900" fill="#18220d">Let<tspan fill="#52720d">Due</tspan></text>
+  <text x="67" y="181" font-family="Arial" font-size="60" font-weight="900" letter-spacing="-2.8" fill="#18220d">
+    <tspan x="67">The right warning.</tspan><tspan x="67" dy="66">Before the rush.</tspan>
+  </text>
+  <text x="70" y="343" font-family="Arial" font-size="23" fill="#526047">
+    <tspan x="70">Useful email reminders at five intervals—</tspan>
+    <tspan x="70" dy="35">so “I forgot” never becomes the expensive part.</tspan>
+  </text>
+  <g transform="translate(70 453)" font-family="Arial">
+    <rect x="0" y="0" width="94" height="50" rx="25" fill="#18220d"/><text x="26" y="32" font-size="17" font-weight="900" fill="#d9ff73">90 days</text>
+    <rect x="110" y="0" width="94" height="50" rx="25" fill="#18220d"/><text x="136" y="32" font-size="17" font-weight="900" fill="#d9ff73">30 days</text>
+    <rect x="220" y="0" width="94" height="50" rx="25" fill="#18220d"/><text x="246" y="32" font-size="17" font-weight="900" fill="#d9ff73">14 days</text>
+    <rect x="330" y="0" width="84" height="50" rx="25" fill="#18220d"/><text x="357" y="32" font-size="17" font-weight="900" fill="#d9ff73">7 days</text>
+    <rect x="430" y="0" width="91" height="50" rx="25" fill="#52720d"/><text x="455" y="32" font-size="17" font-weight="900" fill="#ffffff">Due day</text>
+  </g>
+  <text x="71" y="560" font-family="Arial" font-size="16" font-weight="800" fill="#6e7967">Gas safety · EICR · EPC · Insurance · Property licences</text>
+
+  <g transform="translate(726 106)" filter="url(#s)" font-family="Arial">
+    <rect width="456" height="540" rx="28" fill="#ffffff"/>
+    <rect width="456" height="82" rx="28" fill="#18220d"/>
+    <rect y="55" width="456" height="27" fill="#18220d"/>
+    <circle cx="40" cy="41" r="17" fill="#d9ff73"/>
+    <path d="M34 40h12M40 34v12" stroke="#18220d" stroke-width="3" stroke-linecap="round"/>
+    <text x="68" y="47" font-size="20" font-weight="900" fill="#ffffff">Let<tspan fill="#d9ff73">Due</tspan></text>
+    <text x="34" y="129" font-size="14" font-weight="900" fill="#52720d" letter-spacing="1.1">GAS SAFETY · 30-DAY WARNING</text>
+    <text x="34" y="183" font-size="30" font-weight="900" fill="#18220d">Time to arrange the</text>
+    <text x="34" y="219" font-size="30" font-weight="900" fill="#18220d">next safety check.</text>
+    <text x="34" y="270" font-size="17" fill="#526047">12 Ash Grove</text>
+    <rect x="34" y="294" width="388" height="93" rx="14" fill="#f4f5ef"/>
+    <text x="55" y="326" font-size="13" fill="#6e7967">Certificate expires</text>
+    <text x="55" y="362" font-size="26" font-weight="900" fill="#18220d">16 August 2026</text>
+    <text x="34" y="428" font-size="16" fill="#526047">Your evidence stays stored with the property.</text>
+    <rect x="34" y="460" width="245" height="49" rx="11" fill="#d9ff73"/>
+    <text x="68" y="491" font-size="17" font-weight="900" fill="#18220d">Open property dashboard →</text>
+  </g>
+</svg>

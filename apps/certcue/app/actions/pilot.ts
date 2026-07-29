@@ -49,7 +49,21 @@ export async function startPilot(formData: FormData) {
     await sendEmail({
       to: activated.user.email,
       subject: "Your free LetDue pilot is active",
-      text: `Your 14-day LetDue pilot is active for ${data.address}.\n\nOpen your private dashboard: ${dashboardUrl}\n\nKeep this link private. For help or to stop reminders, contact hello@letdue.com.`,
+      text: `Your 14-day LetDue pilot is active for ${data.address}.
+
+Open your private dashboard:
+${dashboardUrl}
+
+What to do next:
+1. Bookmark the dashboard link.
+2. Add any certificate dates you already know.
+3. Upload PDFs where you have them, so LetDue can keep the evidence with the reminder.
+
+If the audit is useful, you can continue monitoring up to three properties for £29/year from the same dashboard.
+
+LetDue organises documents, dates and reminders. It does not provide legal advice or guarantee compliance.
+
+For help or to stop reminders, contact hello@letdue.com.`,
     });
   } catch {
     // The dashboard remains available immediately while SES production access

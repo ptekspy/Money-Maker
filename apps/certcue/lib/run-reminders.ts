@@ -71,7 +71,16 @@ export async function runReminders(now = new Date()) {
         await sendEmail({
           to: user.email,
           subject: `Your LetDue pilot ${timing}`,
-          text: `Your LetDue pilot ${timing}. Keep monitoring up to three properties for £29 a year.\n\nContinue your monitoring: ${appUrl}/dashboard/${user.accessToken}\n\nNo action is needed if you do not want to continue.`,
+          text: `Your LetDue pilot ${timing}.
+
+If the reminders are useful, keep monitoring up to three properties for £29/year:
+${appUrl}/dashboard/${user.accessToken}
+
+Choose "Continue monitoring" on your dashboard to move to the founding plan.
+
+No action is needed if you do not want to continue.
+
+LetDue organises documents, dates and reminders. It does not provide legal advice or guarantee compliance.`,
         });
         pilotSent += 1;
       } catch (error) {

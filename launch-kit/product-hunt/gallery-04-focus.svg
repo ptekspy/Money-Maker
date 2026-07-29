@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1270" height="760" viewBox="0 0 1270 760">
+  <rect width="1270" height="760" fill="#d9ff73"/>
+  <text x="64" y="76" font-family="Arial" font-size="28" font-weight="900" fill="#18220d">LetDue</text>
+  <text x="64" y="169" font-family="Arial" font-size="57" font-weight="900" letter-spacing="-2.6" fill="#18220d">
+    <tspan x="64">Compliance software</tspan><tspan x="64" dy="64">without the software bloat.</tspan>
+  </text>
+  <text x="68" y="323" font-family="Arial" font-size="22" fill="#364128">
+    Built for self-managing landlords with one to three properties.
+  </text>
+  <g transform="translate(64 382)" font-family="Arial">
+    <rect width="350" height="260" rx="24" fill="#18220d"/>
+    <circle cx="48" cy="49" r="20" fill="#d9ff73"/><path d="M39 49l7 7 12-15" fill="none" stroke="#18220d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="82" y="57" font-size="24" font-weight="900" fill="#ffffff">What LetDue does</text>
+    <text x="34" y="112" font-size="18" font-weight="700" fill="#ffffff">✓ Reads certificate dates</text>
+    <text x="34" y="153" font-size="18" font-weight="700" fill="#ffffff">✓ Stores the evidence</text>
+    <text x="34" y="194" font-size="18" font-weight="700" fill="#ffffff">✓ Builds your calendar</text>
+    <text x="34" y="235" font-size="18" font-weight="700" fill="#ffffff">✓ Sends useful reminders</text>
+  </g>
+  <g transform="translate(438 382)" font-family="Arial">
+    <rect width="350" height="260" rx="24" fill="#f4f5ef" stroke="#99b345" stroke-width="2"/>
+    <circle cx="48" cy="49" r="20" fill="#d5dbc9"/><path d="M40 41l16 16M56 41L40 57" stroke="#526047" stroke-width="5" stroke-linecap="round"/>
+    <text x="82" y="57" font-size="24" font-weight="900" fill="#18220d">What it skips</text>
+    <text x="34" y="112" font-size="18" font-weight="700" fill="#526047">× Rent collection</text>
+    <text x="34" y="153" font-size="18" font-weight="700" fill="#526047">× Tenant messaging</text>
+    <text x="34" y="194" font-size="18" font-weight="700" fill="#526047">× Maintenance tickets</text>
+    <text x="34" y="235" font-size="18" font-weight="700" fill="#526047">× Enterprise complexity</text>
+  </g>
+  <g transform="translate(812 382)" font-family="Arial">
+    <rect width="390" height="260" rx="24" fill="#ffffff"/>
+    <text x="34" y="48" font-size="14" font-weight="900" fill="#52720d" letter-spacing="1.2">FOUNDING PLAN</text>
+    <text x="34" y="107" font-size="58" font-weight="900" fill="#18220d">£29<tspan font-size="20" fill="#6e7967"> / year</tspan></text>
+    <text x="34" y="148" font-size="16" font-weight="700" fill="#526047">Up to three properties</text>
+    <text x="34" y="180" font-size="16" font-weight="700" fill="#526047">Free 14-day pilot · No card</text>
+    <rect x="34" y="201" width="322" height="45" rx="10" fill="#18220d"/>
+    <text x="103" y="230" font-size="17" font-weight="900" fill="#ffffff">Avoid one expensive miss →</text>
+  </g>
+</svg>

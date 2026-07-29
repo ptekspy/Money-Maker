@@ -1,6 +1,7 @@
 import { CheckCircle2, Clock3, CreditCard, ShieldAlert } from "lucide-react";
 import { notFound } from "next/navigation";
 import { startPilotCheckout } from "@/app/actions/checkout";
+import { SupportForm } from "@/components/support-form";
 import { assessCertificate, recommendedCertificates } from "@/lib/compliance";
 import { getUserByToken, hasActiveAccess, listPortfolio } from "@/lib/data";
 import {
@@ -29,6 +30,7 @@ export default async function DashboardPage({
     pilot?: string;
     property?: string;
     billing?: string;
+    support?: string;
   }>;
 }) {
   const { token } = await params;
@@ -42,6 +44,7 @@ export default async function DashboardPage({
     pilot,
     property: propertyResult,
     billing,
+    support,
   } = await searchParams;
   const accessActive = hasActiveAccess(user);
   const pilotEnds = user.pilotEndsAt
@@ -347,6 +350,7 @@ export default async function DashboardPage({
           );
         })}
       </div>
+      <SupportForm sent={support === "sent"} token={token} />
     </main>
   );
 }
