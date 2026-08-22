@@ -56,9 +56,10 @@ jobs:
 
       - name: Show infrastructure changes
         # This repository's SST stage also contains unrelated products. Targeting
-        # LandlordSaas prevents a LetDue release from reconciling or removing them.
-        run: npm exec sst diff -- --stage "${{ inputs.stage }}" --target LandlordSaas
+        # only LetDue's web app and reminder worker prevents a LetDue release from
+        # reconciling or removing them.
+        run: npm exec sst diff -- --stage "${{ inputs.stage }}" --target LandlordSaas --target LandlordDailyReminders
 
       - name: Deploy LetDue
         if: ${{ inputs.mode == 'deploy' }}
-        run: npm run deploy:aws -- --stage "${{ inputs.stage }}" --target LandlordSaas
+        run: npm run deploy:aws -- --stage "${{ inputs.stage }}" --target LandlordSaas --target LandlordDailyReminders
