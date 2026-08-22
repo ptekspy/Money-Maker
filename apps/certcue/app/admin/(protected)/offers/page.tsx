@@ -75,7 +75,7 @@ export default async function AdminOffersPage({
               <input
                 className="mt-2 min-h-12 w-full rounded-xl border border-[#bcc7ae] px-4 font-normal"
                 defaultValue="5"
-                max="100"
+                max="10000"
                 min="1"
                 name="propertyLimit"
                 required

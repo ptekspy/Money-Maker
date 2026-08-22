@@ -2,6 +2,7 @@ import { CheckCircle2, Clock3, CreditCard, ShieldAlert } from "lucide-react";
 import { notFound } from "next/navigation";
 import { startPilotCheckout } from "@/app/actions/checkout";
 import { LetDueLogo } from "@/components/letdue-brand";
+import { PortfolioPlans } from "@/components/portfolio-plans";
 import { SupportForm } from "@/components/support-form";
 import { assessCertificate, recommendedCertificates } from "@/lib/compliance";
 import {
@@ -37,6 +38,7 @@ export default async function DashboardPage({
     property?: string;
     billing?: string;
     support?: string;
+    upgrade?: string;
   }>;
 }) {
   const { token } = await params;
@@ -51,6 +53,7 @@ export default async function DashboardPage({
     property: propertyResult,
     billing,
     support,
+    upgrade,
   } = await searchParams;
   const accessActive = hasActiveAccess(user);
   const propertyLimit = propertyLimitForUser(user);
@@ -148,7 +151,7 @@ export default async function DashboardPage({
           </div>
           <div className="min-w-52 rounded-xl bg-white p-5 text-[#18220d]">
             <p>
-              <strong className="text-4xl">£29</strong>{" "}
+              <strong className="text-4xl">£28</strong>{" "}
               <span className="font-bold text-[#65715d]">/ year</span>
             </p>
             <form action={startPilotCheckout} className="mt-4">
@@ -202,6 +205,30 @@ export default async function DashboardPage({
             ? "Property added. Add its dates or upload a certificate below."
             : `This account monitors up to ${propertyLimit} properties.`}
         </p>
+      ) : null}
+
+      {upgrade ? (
+        <div
+          className={`mt-6 rounded-xl p-4 font-bold ${
+            upgrade === "success"
+              ? "bg-[#dff5d8] text-[#26531b]"
+              : upgrade === "payment"
+                ? "bg-[#fff0bd] text-[#684c00]"
+                : "bg-[#ffe0d9] text-[#7a2514]"
+          }`}
+        >
+          {upgrade === "success"
+            ? `Upgrade complete. This account can now monitor up to ${propertyLimit} properties.`
+            : upgrade === "payment"
+              ? "Your bank needs another payment step. Complete it from the Stripe invoice, then your new allowance will activate automatically."
+              : upgrade === "unavailable"
+                ? "We could not find an active annual subscription to upgrade. Contact support and we will sort this out."
+                : "That plan is not an available upgrade for this account."}
+        </div>
+      ) : null}
+
+      {user.plan === "paid" && propertyLimit < 250 ? (
+        <PortfolioPlans currentLimit={propertyLimit} token={token} />
       ) : null}
 
       {accessActive && properties.length < propertyLimit ? (

@@ -23,7 +23,7 @@ import { hashUserToken, newUserToken } from "@/lib/user-auth";
 
 const packageSchema = z.object({
   email: z.email().trim().toLowerCase(),
-  propertyLimit: z.coerce.number().int().min(1).max(100),
+  propertyLimit: z.coerce.number().int().min(1).max(10_000),
   price: z
     .string()
     .trim()
@@ -131,7 +131,7 @@ export async function updatePropertyLimit(formData: FormData) {
     .number()
     .int()
     .min(1)
-    .max(100)
+    .max(10_000)
     .safeParse(formData.get("propertyLimit"));
   if (!userId.success || !limit.success || !(await getUser(userId.data)))
     return;

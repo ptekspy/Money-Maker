@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getUserByToken } from "@/lib/data";
+import { annualPricePenceForLimit, isPublicPropertyLimit } from "@/lib/pricing";
 import { getStripe } from "@/lib/stripe";
 
 const checkoutSchema = z.object({
@@ -16,7 +17,27 @@ const checkoutSchema = z.object({
   insurance: z.string().max(10),
   propertyLicence: z.string().max(10),
   source: z.string().trim().max(64).optional(),
+  propertyLimit: z.coerce.number().int(),
 });
+
+async function annualLineItem(propertyLimit: number) {
+  const priceId = process.env.STRIPE_CERTCUE_ANNUAL_PRICE_ID;
+  if (!priceId) throw new Error("The LetDue Stripe product is not configured.");
+  const basePrice = await getStripe().prices.retrieve(priceId);
+  const product =
+    typeof basePrice.product === "string"
+      ? basePrice.product
+      : basePrice.product.id;
+  return {
+    quantity: 1,
+    price_data: {
+      currency: "gbp",
+      product,
+      unit_amount: annualPricePenceForLimit(propertyLimit),
+      recurring: { interval: "year" as const },
+    },
+  };
+}
 
 export async function startCheckout(formData: FormData) {
   const parsed = checkoutSchema.safeParse(Object.fromEntries(formData));
@@ -29,6 +50,9 @@ export async function startCheckout(formData: FormData) {
   }
 
   const data = parsed.data;
+  if (!isPublicPropertyLimit(data.propertyLimit)) {
+    redirect("/?checkout=invalid#audit");
+  }
   const onboarding = JSON.stringify({
     address: data.address,
     hasGas: data.hasGas === "true",
@@ -45,18 +69,20 @@ export async function startCheckout(formData: FormData) {
   const session = await getStripe().checkout.sessions.create({
     mode: "subscription",
     customer_email: data.email,
-    line_items: [{ price: priceId, quantity: 1 }],
+    line_items: [await annualLineItem(data.propertyLimit)],
     success_url: `${appUrl}/welcome?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appUrl}/?checkout=cancelled#audit`,
     allow_promotion_codes: true,
     metadata: {
       onboarding,
       acquisitionSource: data.source ?? "homepage",
+      propertyLimit: String(data.propertyLimit),
     },
     subscription_data: {
       metadata: {
         product: "letdue",
         acquisitionSource: data.source ?? "homepage",
+        propertyLimit: String(data.propertyLimit),
       },
     },
   });
@@ -81,18 +107,20 @@ export async function startPilotCheckout(formData: FormData) {
   const session = await getStripe().checkout.sessions.create({
     mode: "subscription",
     customer_email: user.email,
-    line_items: [{ price: priceId, quantity: 1 }],
+    line_items: [await annualLineItem(3)],
     success_url: `${appUrl}/dashboard/${token.data}?billing=processing`,
     cancel_url: `${appUrl}/dashboard/${token.data}?billing=cancelled`,
     allow_promotion_codes: true,
     metadata: {
       upgradeToken: token.data,
       acquisitionSource: user.acquisitionSource ?? "unknown",
+      propertyLimit: "3",
     },
     subscription_data: {
       metadata: {
         product: "letdue",
         acquisitionSource: user.acquisitionSource ?? "unknown",
+        propertyLimit: "3",
       },
     },
   });

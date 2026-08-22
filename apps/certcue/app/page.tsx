@@ -2,7 +2,6 @@ import {
   ArrowRight,
   BellRing,
   CalendarClock,
-  Check,
   ClipboardCheck,
   FileCheck2,
   ScanLine,
@@ -10,6 +9,7 @@ import {
 import { ComplianceAudit } from "@/components/compliance-audit";
 import { ContactForm } from "@/components/contact-form";
 import { LetDueLogo, PaddySystemsEndorsement } from "@/components/letdue-brand";
+import { PortfolioPlans } from "@/components/portfolio-plans";
 import { ProductHuntBadge } from "@/components/product-hunt-badge";
 
 const benefits = [
@@ -75,9 +75,9 @@ export default async function HomePage({
                 becomes an expensive problem.
               </p>
               <p className="mt-4 max-w-2xl font-bold text-[#394430] leading-7">
-                Built for self-managing landlords with one to three properties:
-                not a letting platform, not a rent system, just the certificate
-                desk you actually need.
+                Built for self-managing landlords and growing portfolios: not a
+                letting platform, not a rent system, just the certificate desk
+                you actually need.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <a
@@ -88,9 +88,9 @@ export default async function HomePage({
                 </a>
                 <a
                   className="inline-flex min-h-13 items-center rounded-lg border border-[#aeb9a7] bg-white/70 px-5 font-black text-[#18220d]"
-                  href="/founding-plan?source=homepage-hero"
+                  href="#pricing"
                 >
-                  See the £29 founding plan
+                  See plans from £28/year
                 </a>
               </div>
               <p className="mt-3 text-[#6e7967] text-sm">
@@ -164,10 +164,10 @@ export default async function HomePage({
                 The useful part of compliance software. Nothing else.
               </h2>
               <p className="mt-4 text-[#526047] text-lg leading-8">
-                LetDue is for self-managing landlords with one to three
-                properties. It does not collect rent, manage tenants or replace
-                your letting agent. It keeps the documents and dates that are
-                easy to lose sight of.
+                LetDue is for self-managing landlords and focused property
+                teams. It does not collect rent, manage tenants or replace your
+                letting agent. It keeps the documents and dates that are easy to
+                lose sight of.
               </p>
             </div>
             <div className="grid gap-3">
@@ -277,55 +277,7 @@ export default async function HomePage({
           </div>
         </section>
         <ComplianceAudit />
-        <section
-          id="pricing"
-          className="bg-[#18220d] px-4 py-16 text-white md:px-8 md:py-24"
-        >
-          <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_420px] lg:items-center">
-            <div>
-              <p className="font-black text-[#d9ff73] text-sm uppercase">
-                Founding plan
-              </p>
-              <h2 className="mt-3 text-5xl md:text-7xl">
-                One avoided deadline pays for years.
-              </h2>
-              <p className="mt-5 max-w-2xl text-[#cbd4c5] text-lg leading-8">
-                Monitor up to three properties, store every certificate, and
-                receive every reminder for £29 a year while the founding plan is
-                available.
-              </p>
-              <p className="mt-4 max-w-2xl font-bold text-[#eff7e8] leading-7">
-                If you already know one missed renewal would cost more than
-                this, start with one property today and add the other two from
-                your private dashboard.
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white p-6 text-[#18220d]">
-              <strong className="text-5xl">£29</strong>
-              <span className="font-bold text-[#65715d]"> / year</span>
-              <ul className="mt-6 grid gap-3">
-                {[
-                  "Up to 3 properties",
-                  "Automatic certificate date reading",
-                  "Email reminders at five useful intervals",
-                  "Downloadable compliance pack",
-                  "Cancel any time",
-                ].map((item) => (
-                  <li className="flex gap-2 font-bold" key={item}>
-                    <Check className="text-[#52720d]" size={19} />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <a
-                className="mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#d9ff73] px-4 font-black"
-                href="/founding-plan"
-              >
-                See the founding plan
-              </a>
-            </div>
-          </div>
-        </section>
+        <PortfolioPlans />
         <ContactForm sent={contact === "sent"} />
       </main>
       <footer className="flex flex-wrap justify-between gap-4 border-[#d5dbc9] border-t px-4 py-7 font-bold text-[#687260] text-sm md:px-8">

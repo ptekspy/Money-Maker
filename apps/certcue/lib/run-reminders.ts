@@ -67,7 +67,7 @@ export async function runReminders(now = new Date()) {
           subject: `Your LetDue pilot ${timing}`,
           text: `Your LetDue pilot ${timing}.
 
-If the reminders are useful, keep monitoring up to three properties for £29/year:
+If the reminders are useful, keep monitoring up to three properties for £28/year:
 ${appUrl}/dashboard/${user.accessToken}
 
 Choose "Continue monitoring" on your dashboard to move to the founding plan.

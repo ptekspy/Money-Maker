@@ -59,7 +59,7 @@ What to do next:
 2. Add any certificate dates you already know.
 3. Upload PDFs where you have them, so LetDue can keep the evidence with the reminder.
 
-If the audit is useful, you can continue monitoring up to three properties for £29/year from the same dashboard.
+If the audit is useful, you can continue monitoring up to three properties for £28/year from the same dashboard.
 
 LetDue organises documents, dates and reminders. It does not provide legal advice or guarantee compliance.
 

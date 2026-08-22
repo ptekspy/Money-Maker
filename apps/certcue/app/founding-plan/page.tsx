@@ -3,12 +3,12 @@ import type { Metadata } from "next";
 import { MarketingFrame } from "@/components/marketing-frame";
 
 export const metadata: Metadata = {
-  title: "LetDue founding plan | £29/year for small landlords",
+  title: "LetDue founding plan | £28/year for small landlords",
   description:
-    "LetDue's £29/year founding plan monitors certificate and renewal dates for up to three rental properties in England.",
+    "LetDue's £28/year plan monitors certificate and renewal dates for up to three rental properties in England.",
   alternates: { canonical: "/founding-plan" },
   openGraph: {
-    title: "LetDue founding plan | £29/year",
+    title: "LetDue founding plan | £28/year",
     description:
       "A focused certificate reminder desk for self-managing landlords with one to three properties.",
     url: "/founding-plan",
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "LetDue founding plan | £29/year",
+    title: "LetDue founding plan | £28/year",
     description:
       "Monitor certificate and renewal dates for up to three rental properties.",
   },
@@ -70,7 +70,7 @@ export default function FoundingPlanPage() {
               Founding customer plan
             </p>
             <h1 className="mt-4 max-w-4xl text-5xl leading-[0.95] tracking-[-0.045em] md:text-7xl">
-              Pay £29 once. Put your next landlord deadline on watch today.
+              Pay £28 once. Put your next landlord deadline on watch today.
             </h1>
             <p className="mt-6 max-w-3xl text-[#526047] text-xl leading-8">
               LetDue is for self-managing landlords in England who need a small,
@@ -82,7 +82,7 @@ export default function FoundingPlanPage() {
                 className="inline-flex min-h-13 items-center gap-2 rounded-lg bg-[#d9ff73] px-5 font-black"
                 href="/?source=founding-plan#audit"
               >
-                Audit then pay £29 <ArrowRight size={18} />
+                Audit then pay £28 <ArrowRight size={18} />
               </a>
               <a
                 className="inline-flex min-h-13 items-center rounded-lg border border-[#aeb9a7] px-5 font-black text-[#18220d]"
@@ -96,7 +96,7 @@ export default function FoundingPlanPage() {
             <p className="font-black text-[#d9ff73] text-sm uppercase">
               Founding price
             </p>
-            <strong className="mt-4 block text-6xl">£29</strong>
+            <strong className="mt-4 block text-6xl">£28</strong>
             <p className="mt-2 text-[#cbd4c5]">per year, up to 3 properties</p>
             <p className="mt-5 rounded-xl bg-[#26351a] p-4 font-bold text-[#d9ff73]">
               Best when you already know one missed renewal would cost more than
@@ -174,7 +174,7 @@ export default function FoundingPlanPage() {
             className="mt-8 inline-flex min-h-12 items-center rounded-lg bg-[#d9ff73] px-5 font-black text-[#18220d]"
             href="/?source=founding-plan-faq#audit"
           >
-            Run the audit and pay £29
+            Run the audit and pay £28
           </a>
         </div>
       </section>

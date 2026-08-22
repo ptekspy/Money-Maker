@@ -8,9 +8,12 @@ import {
   getProperty,
   getUserByToken,
   hasActiveAccess,
+  propertyLimitForUser,
   saveCertificate,
+  setUserPropertyLimit,
 } from "@/lib/data";
 import { extractCertificateDetails } from "@/lib/extract-certificate";
+import { annualPricePenceForLimit } from "@/lib/pricing";
 import { getStripe } from "@/lib/stripe";
 
 const certificateSchema = z.object({
@@ -53,6 +56,95 @@ export async function openBillingPortal(formData: FormData) {
     return_url: `${appUrl}/dashboard/${token.data}`,
   });
   redirect(session.url);
+}
+
+export async function upgradePortfolio(formData: FormData) {
+  const token = z.uuid().safeParse(formData.get("token"));
+  const target = z.coerce
+    .number()
+    .int()
+    .min(4)
+    .max(249)
+    .safeParse(formData.get("propertyLimit"));
+  const prorationDate = z.coerce
+    .number()
+    .int()
+    .positive()
+    .safeParse(formData.get("prorationDate"));
+  const nowEpoch = Math.floor(Date.now() / 1000);
+  if (
+    !token.success ||
+    !target.success ||
+    !prorationDate.success ||
+    Math.abs(nowEpoch - prorationDate.data) > 1_800 ||
+    !process.env.STRIPE_SECRET_KEY
+  ) {
+    return;
+  }
+
+  const user = await getUserByToken(token.data);
+  if (
+    !user?.stripeCustomerId ||
+    user.plan !== "paid" ||
+    !hasActiveAccess(user) ||
+    target.data <= propertyLimitForUser(user)
+  ) {
+    redirect(`/dashboard/${token.data}?upgrade=invalid#portfolio-plans`);
+  }
+
+  const stripe = getStripe();
+  const subscriptions = await stripe.subscriptions.list({
+    customer: user.stripeCustomerId,
+    status: "active",
+    limit: 10,
+  });
+  const subscription = subscriptions.data.find(
+    (candidate) => candidate.items.data.length === 1,
+  );
+  const item = subscription?.items.data[0];
+  if (!subscription || !item) {
+    redirect(`/dashboard/${token.data}?upgrade=unavailable#portfolio-plans`);
+  }
+
+  const product =
+    typeof item.price.product === "string"
+      ? item.price.product
+      : item.price.product.id;
+  const updated = await stripe.subscriptions.update(
+    subscription.id,
+    {
+      items: [
+        {
+          id: item.id,
+          price_data: {
+            currency: "gbp",
+            product,
+            unit_amount: annualPricePenceForLimit(target.data),
+            recurring: { interval: "year" },
+          },
+        },
+      ],
+      payment_behavior: "pending_if_incomplete",
+      proration_behavior: "always_invoice",
+      proration_date: prorationDate.data,
+      expand: ["latest_invoice"],
+    },
+    {
+      idempotencyKey: `letdue-upgrade-${user.id}-${target.data}-${prorationDate.data}`,
+    },
+  );
+
+  if (updated.pending_update) {
+    const invoice =
+      updated.latest_invoice && typeof updated.latest_invoice !== "string"
+        ? updated.latest_invoice
+        : null;
+    if (invoice?.hosted_invoice_url) redirect(invoice.hosted_invoice_url);
+    redirect(`/dashboard/${token.data}?upgrade=payment#portfolio-plans`);
+  }
+
+  await setUserPropertyLimit(user.id, target.data);
+  redirect(`/dashboard/${token.data}?upgrade=success#portfolio-plans`);
 }
 
 export async function addPortfolioProperty(formData: FormData) {

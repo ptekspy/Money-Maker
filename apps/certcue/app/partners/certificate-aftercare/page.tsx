@@ -37,7 +37,7 @@ const steps = [
   {
     title: "Useful customers can continue",
     detail:
-      "If the calendar helps, they can start a no-card pilot or pay £29/year for monitoring across up to three properties.",
+      "If the calendar helps, they can start a no-card pilot or pay £28/year for monitoring across up to three properties.",
   },
 ] as const;
 

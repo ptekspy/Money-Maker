@@ -122,7 +122,7 @@ export default function CertificateRenewalRemindersPage() {
             <h2 className="mt-5 text-3xl">Free first step</h2>
             <p className="mt-3 text-[#526047] leading-7">
               Run one real property through the free audit. If the result is
-              useful, start the no-card pilot or pay £29/year for ongoing
+              useful, start the no-card pilot or pay £28/year for ongoing
               monitoring across up to three properties.
             </p>
             <a

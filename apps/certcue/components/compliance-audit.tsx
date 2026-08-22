@@ -16,6 +16,11 @@ import {
   type CertificateKind,
   recommendedCertificates,
 } from "@/lib/compliance";
+import {
+  isPublicPropertyLimit,
+  moneyFromPence,
+  portfolioPlans,
+} from "@/lib/pricing";
 
 const certificateKinds: CertificateKind[] = [
   "Gas safety",
@@ -53,11 +58,19 @@ export function ComplianceAudit() {
   const [extracting, setExtracting] = useState(false);
   const [extractionMessage, setExtractionMessage] = useState("");
   const [source, setSource] = useState("homepage");
+  const [propertyLimit, setPropertyLimit] = useState(3);
 
   useEffect(() => {
-    const candidate = new URLSearchParams(window.location.search).get("source");
+    const query = new URLSearchParams(window.location.search);
+    const candidate = query.get("source");
     if (candidate && /^[a-z0-9-]{1,64}$/.test(candidate)) setSource(candidate);
+    const pack = Number(query.get("pack"));
+    if (isPublicPropertyLimit(pack)) setPropertyLimit(pack);
   }, []);
+
+  const selectedPlan =
+    portfolioPlans.find((plan) => plan.propertyLimit === propertyLimit) ??
+    portfolioPlans[0];
 
   const required = useMemo(
     () => recommendedCertificates(hasGas, isHmo),
@@ -359,6 +372,11 @@ export function ComplianceAudit() {
                   <input name="address" type="hidden" value={address} />
                   <input name="source" type="hidden" value={source} />
                   <input
+                    name="propertyLimit"
+                    type="hidden"
+                    value={selectedPlan.propertyLimit}
+                  />
+                  <input
                     aria-hidden="true"
                     className="hidden"
                     name="companyWebsite"
@@ -396,13 +414,14 @@ export function ComplianceAudit() {
                       formAction={startCheckout}
                       type="submit"
                     >
-                      Pay £29 and start today
+                      Pay {moneyFromPence(selectedPlan.pricePence)} and start
+                      today
                     </button>
                   </div>
                   <p className="text-center text-[#65715d] text-xs">
-                    One property now; add up to two more in your private
-                    dashboard. Choose the no-card pilot, or pay once now and get
-                    a full year of reminders.
+                    Your selected plan includes up to{" "}
+                    {selectedPlan.propertyLimit} properties. Start with this one
+                    now and add the rest from your private dashboard.
                   </p>
                   <p className="text-center text-[#65715d] text-xs leading-5">
                     By continuing, you agree to the{" "}

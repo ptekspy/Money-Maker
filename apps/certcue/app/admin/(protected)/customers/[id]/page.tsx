@@ -117,7 +117,7 @@ export default async function AdminCustomerPage({
               <input
                 className="min-h-11 rounded-lg border border-[#bcc7ae] bg-white px-3 font-normal"
                 defaultValue={propertyLimit}
-                max="100"
+                max="10000"
                 min={Math.max(1, properties.length)}
                 name="propertyLimit"
                 required

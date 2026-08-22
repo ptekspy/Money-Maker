@@ -4,10 +4,13 @@ import {
   activateOfferSubscription,
   activatePilotSubscription,
   getOffer,
+  getUserByCustomerId,
   getUserByToken,
   setSubscriptionStatus,
+  setUserPropertyLimit,
 } from "@/lib/data";
 import { sendEmail } from "@/lib/email";
+import { propertyLimitForAnnualPrice } from "@/lib/pricing";
 import { getStripe } from "@/lib/stripe";
 
 type Onboarding = {
@@ -33,7 +36,7 @@ async function activateCheckout(session: Stripe.Checkout.Session) {
     offerUserId &&
     Number.isInteger(offerPropertyLimit) &&
     offerPropertyLimit >= 1 &&
-    offerPropertyLimit <= 100
+    offerPropertyLimit <= 10_000
   ) {
     const offer = await getOffer(offerId);
     if (
@@ -89,6 +92,13 @@ async function activateCheckout(session: Stripe.Checkout.Session) {
   if (!email || !onboardingText) return;
 
   const onboarding = JSON.parse(onboardingText) as Onboarding;
+  const purchasedPropertyLimit = Number(session.metadata?.propertyLimit);
+  const propertyLimit =
+    Number.isInteger(purchasedPropertyLimit) &&
+    purchasedPropertyLimit >= 3 &&
+    purchasedPropertyLimit <= 100
+      ? purchasedPropertyLimit
+      : 3;
   const { user } = await activateCustomer({
     email,
     stripeCustomerId: customerId,
@@ -97,6 +107,7 @@ async function activateCheckout(session: Stripe.Checkout.Session) {
     hasGas: onboarding.hasGas,
     isHmo: onboarding.isHmo,
     dates: onboarding.dates,
+    propertyLimit,
   });
 
   const dashboardUrl = `${process.env.NEXT_PUBLIC_CERTCUE_URL}/dashboard/${user.accessToken}`;
@@ -151,6 +162,27 @@ export async function POST(request: Request) {
         ? subscription.customer
         : subscription.customer.id;
     await setSubscriptionStatus(customerId, "past_due");
+  }
+
+  if (
+    event.type === "customer.subscription.updated" &&
+    event.data.object.status === "active" &&
+    !event.data.object.pending_update
+  ) {
+    const subscription = event.data.object;
+    const customerId =
+      typeof subscription.customer === "string"
+        ? subscription.customer
+        : subscription.customer.id;
+    const pricePence = subscription.items.data[0]?.price.unit_amount;
+    const propertyLimit =
+      typeof pricePence === "number"
+        ? propertyLimitForAnnualPrice(pricePence)
+        : null;
+    if (propertyLimit) {
+      const user = await getUserByCustomerId(customerId);
+      if (user) await setUserPropertyLimit(user.id, propertyLimit);
+    }
   }
 
   return Response.json({ received: true });

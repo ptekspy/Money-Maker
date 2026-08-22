@@ -52,7 +52,7 @@ export function hasActiveAccess(user: LetDueUser, now = new Date()) {
 }
 
 export function propertyLimitForUser(user: LetDueUser) {
-  return Math.max(1, Math.min(100, user.propertyLimit ?? 3));
+  return Math.max(1, Math.min(10_000, user.propertyLimit ?? 3));
 }
 
 export type LetDueProperty = {
@@ -425,6 +425,7 @@ export async function activateCustomer(input: {
   hasGas: boolean;
   isHmo: boolean;
   dates: Record<string, string>;
+  propertyLimit: number;
 }) {
   const existingSession = await getItem<{ userId: string; propertyId: string }>(
     `SESSION#${input.stripeSessionId}`,
@@ -455,6 +456,7 @@ export async function activateCustomer(input: {
     stripeCustomerId: input.stripeCustomerId,
     subscriptionStatus: "active",
     plan: "paid",
+    propertyLimit: input.propertyLimit,
   };
   const property: LetDueProperty = {
     id: crypto.randomUUID(),
@@ -634,12 +636,13 @@ export async function activatePilotSubscription(input: {
         TableName: tableName,
         Key: { pk: `USER#${input.userId}`, sk: "PROFILE" },
         UpdateExpression:
-          "set stripeCustomerId = :customer, subscriptionStatus = :status, #plan = :plan remove pilotEndsAt, gsi1pk, gsi1sk",
+          "set stripeCustomerId = :customer, subscriptionStatus = :status, #plan = :plan, propertyLimit = :limit remove pilotEndsAt, gsi1pk, gsi1sk",
         ExpressionAttributeNames: { "#plan": "plan" },
         ExpressionAttributeValues: {
           ":customer": input.stripeCustomerId,
           ":status": "active",
           ":plan": "paid",
+          ":limit": 3,
         },
       }),
     ),

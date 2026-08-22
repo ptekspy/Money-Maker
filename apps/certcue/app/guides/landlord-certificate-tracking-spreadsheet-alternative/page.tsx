@@ -73,7 +73,7 @@ export default function SpreadsheetAlternativePage() {
                 className="inline-flex min-h-13 items-center rounded-lg border border-[#aeb9a7] bg-white px-5 font-black text-[#18220d]"
                 href="/founding-plan?source=spreadsheet-alternative"
               >
-                See the £29 plan
+                See plans from £28/year
               </a>
             </div>
           </div>
@@ -149,7 +149,7 @@ export default function SpreadsheetAlternativePage() {
             <h2 className="text-3xl">Try it with one real property</h2>
             <p className="mt-3 max-w-3xl text-[#cbd4c5] leading-7">
               Run the free audit first. If it exposes a date worth putting on
-              watch, choose the 14-day pilot or pay £29/year for monitoring
+              watch, choose the 14-day pilot or pay £28/year for monitoring
               across up to three properties.
             </p>
             <a
