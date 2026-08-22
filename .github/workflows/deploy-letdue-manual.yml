@@ -54,12 +54,19 @@ jobs:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: eu-west-2
 
-      - name: Show infrastructure changes
+      - name: Show LetDue web changes
         # This repository's SST stage also contains unrelated products. Targeting
-        # only LetDue's web app and reminder worker prevents a LetDue release from
-        # reconciling or removing them.
-        run: npm exec sst diff -- --stage "${{ inputs.stage }}" --target LandlordSaas --target LandlordDailyReminders
+        # each LetDue component separately prevents a release from reconciling or
+        # removing those products. SST accepts one target per command.
+        run: npm exec sst diff -- --stage "${{ inputs.stage }}" --target LandlordSaas
 
-      - name: Deploy LetDue
+      - name: Show LetDue reminder changes
+        run: npm exec sst diff -- --stage "${{ inputs.stage }}" --target LandlordDailyReminders
+
+      - name: Deploy LetDue web
         if: ${{ inputs.mode == 'deploy' }}
-        run: npm run deploy:aws -- --stage "${{ inputs.stage }}" --target LandlordSaas --target LandlordDailyReminders
+        run: npm run deploy:aws -- --stage "${{ inputs.stage }}" --target LandlordSaas
+
+      - name: Deploy LetDue reminders
+        if: ${{ inputs.mode == 'deploy' }}
+        run: npm run deploy:aws -- --stage "${{ inputs.stage }}" --target LandlordDailyReminders
