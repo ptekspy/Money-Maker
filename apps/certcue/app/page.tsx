@@ -334,6 +334,19 @@ export default async function HomePage({
           <a href="/terms">Terms</a>
         </span>
         <a href="mailto:hello@letdue.com">hello@letdue.com</a>
+        <span className="basis-full font-medium leading-6">
+          LetDue is owned and operated by{" "}
+          <a
+            className="font-bold underline"
+            href="https://find-and-update.company-information.service.gov.uk/company/17381031"
+            rel="noreferrer"
+            target="_blank"
+          >
+            Paddy Systems Ltd
+          </a>
+          , registered in England and Wales. Company no. 17381031. Registered
+          office: 66 Paul Street, London, EC2A 4NA.
+        </span>
         <ProductHuntBadge />
       </footer>
     </>

@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Privacy notice — LetDue" };
 const sections = [
   {
     title: "Who controls your information",
-    text: "LetDue is operated by Patrick Kenneally in the United Kingdom. For privacy questions or requests, email hello@letdue.com.",
+    text: "LetDue is owned and operated by Paddy Systems Ltd, a company registered in England and Wales under company number 17381031. Its registered office is 66 Paul Street, London, EC2A 4NA. Paddy Systems Ltd is the controller of personal information handled through LetDue. For privacy questions or requests, email hello@letdue.com.",
   },
   {
     title: "Information we collect",
@@ -41,12 +41,24 @@ export default function PrivacyPage() {
         Let<span className="text-[#52720d]">Due</span>
       </Link>
       <p className="mt-10 font-black text-[#52720d] text-sm uppercase">
-        Last updated 15 July 2026
+        Last updated 22 August 2026
       </p>
       <h1 className="mt-3 text-5xl">Privacy notice</h1>
       <p className="mt-5 text-[#65715d] leading-7">
         This notice explains how LetDue handles personal information when you
         use the website, free pilot or paid monitoring service.
+      </p>
+      <p className="mt-3 text-[#65715d] leading-7">
+        You can verify Paddy Systems Ltd on the{" "}
+        <a
+          className="font-bold underline"
+          href="https://find-and-update.company-information.service.gov.uk/company/17381031"
+          rel="noreferrer"
+          target="_blank"
+        >
+          Companies House register
+        </a>
+        .
       </p>
       <div className="mt-10 grid gap-5">
         {sections.map((section) => (

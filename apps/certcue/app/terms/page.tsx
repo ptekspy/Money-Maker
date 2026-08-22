@@ -5,6 +5,10 @@ export const metadata: Metadata = { title: "Service terms — LetDue" };
 
 const sections = [
   {
+    title: "Who provides LetDue",
+    text: "LetDue is owned and operated by Paddy Systems Ltd, a company registered in England and Wales under company number 17381031. Its registered office is 66 Paul Street, London, EC2A 4NA. Your agreement to use the website, free pilot or paid monitoring service is with Paddy Systems Ltd.",
+  },
+  {
     title: "What LetDue provides",
     text: "LetDue stores property-certificate information, extracts dates from supported documents, displays a private calendar and sends reminders. Date extraction may be incomplete or wrong, so you must check every date against the original document.",
   },
@@ -41,12 +45,24 @@ export default function TermsPage() {
         Let<span className="text-[#52720d]">Due</span>
       </Link>
       <p className="mt-10 font-black text-[#52720d] text-sm uppercase">
-        Last updated 15 July 2026
+        Last updated 22 August 2026
       </p>
       <h1 className="mt-3 text-5xl">Service terms</h1>
       <p className="mt-5 text-[#65715d] leading-7">
         These terms apply to the LetDue website, free pilot and paid monitoring
         service.
+      </p>
+      <p className="mt-3 text-[#65715d] leading-7">
+        Paddy Systems Ltd is listed on the{" "}
+        <a
+          className="font-bold underline"
+          href="https://find-and-update.company-information.service.gov.uk/company/17381031"
+          rel="noreferrer"
+          target="_blank"
+        >
+          Companies House register
+        </a>
+        .
       </p>
       <div className="mt-10 grid gap-5">
         {sections.map((section) => (
