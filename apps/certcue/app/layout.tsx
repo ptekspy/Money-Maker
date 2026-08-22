@@ -11,6 +11,11 @@ export const metadata: Metadata = {
   title: "LetDue | Certificate reminders for small landlords",
   description:
     "LetDue reads rental-property certificates, builds a clear deadline calendar, and reminds small landlords in England before important dates expire.",
+  icons: {
+    icon: "/brand/letdue-icon.svg",
+    shortcut: "/brand/letdue-icon.svg",
+    apple: "/brand/letdue-icon.svg",
+  },
   alternates: { canonical: "/" },
   openGraph: {
     title: "LetDue | Know what expires next",
@@ -19,6 +24,14 @@ export const metadata: Metadata = {
     type: "website",
     url: "https://letdue.com",
     siteName: "LetDue",
+    images: ["/opengraph-image"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LetDue | Know what expires next",
+    description:
+      "Certificate storage and deadline reminders for self-managing landlords in England.",
+    images: ["/opengraph-image"],
   },
 };
 

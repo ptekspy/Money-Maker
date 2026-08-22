@@ -1,9 +1,13 @@
 import Link from "next/link";
+import { LetDueLogo } from "@/components/letdue-brand";
 
 export default function SetupRequiredPage() {
   return (
     <main className="grid min-h-screen place-items-center px-4">
       <section className="max-w-xl rounded-2xl border border-[#d5dbc9] bg-white p-8 text-center">
+        <Link aria-label="LetDue home" className="inline-flex" href="/">
+          <LetDueLogo />
+        </Link>
         <p className="font-black text-[#ad4f22] text-sm uppercase">
           Early access
         </p>

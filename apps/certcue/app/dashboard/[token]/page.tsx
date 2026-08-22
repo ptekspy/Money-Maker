@@ -1,6 +1,7 @@
 import { CheckCircle2, Clock3, CreditCard, ShieldAlert } from "lucide-react";
 import { notFound } from "next/navigation";
 import { startPilotCheckout } from "@/app/actions/checkout";
+import { LetDueLogo } from "@/components/letdue-brand";
 import { SupportForm } from "@/components/support-form";
 import { assessCertificate, recommendedCertificates } from "@/lib/compliance";
 import {
@@ -61,8 +62,8 @@ export default async function DashboardPage({
 
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-4 py-10 md:px-8">
-      <a className="font-black text-xl" href="/">
-        Let<span className="text-[#52720d]">Due</span>
+      <a aria-label="LetDue home" href="/">
+        <LetDueLogo />
       </a>
       <div className="mt-8 flex flex-wrap items-end justify-between gap-5">
         <div>

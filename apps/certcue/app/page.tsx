@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { ComplianceAudit } from "@/components/compliance-audit";
 import { ContactForm } from "@/components/contact-form";
+import { LetDueLogo, PaddySystemsEndorsement } from "@/components/letdue-brand";
 import { ProductHuntBadge } from "@/components/product-hunt-badge";
 
 const benefits = [
@@ -38,9 +39,12 @@ export default async function HomePage({
   return (
     <>
       <header className="flex min-h-18 items-center justify-between border-[#d5dbc9] border-b bg-[#f4f5ef]/95 px-4 backdrop-blur md:px-8">
-        <a className="font-black text-xl tracking-tight" href="#top">
-          Let<span className="text-[#52720d]">Due</span>
-        </a>
+        <div className="flex items-center gap-4">
+          <a aria-label="LetDue home" href="#top">
+            <LetDueLogo />
+          </a>
+          <PaddySystemsEndorsement className="hidden xl:inline" />
+        </div>
         <nav className="hidden gap-6 font-bold text-[#5e6b55] text-sm md:flex">
           <a href="#how">How it works</a>
           <a href="#tools">Free tools</a>
@@ -325,7 +329,9 @@ export default async function HomePage({
         <ContactForm sent={contact === "sent"} />
       </main>
       <footer className="flex flex-wrap justify-between gap-4 border-[#d5dbc9] border-t px-4 py-7 font-bold text-[#687260] text-sm md:px-8">
-        <span className="text-[#18220d]">LetDue</span>
+        <a aria-label="LetDue home" href="#top">
+          <LetDueLogo />
+        </a>
         <span>Compliance information, not legal advice · England beta</span>
         <span className="flex gap-4">
           <a href="/founding-plan">Founding plan</a>

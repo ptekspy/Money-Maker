@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { logoutAdmin } from "@/app/admin/actions";
+import { LetDueLogo } from "@/components/letdue-brand";
 import { requireAdmin } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
@@ -17,8 +18,15 @@ export default async function ProtectedAdminLayout({
       <header className="border-[#34412d] border-b bg-[#18220d] text-white">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 md:px-8">
           <div className="flex items-center gap-7">
-            <Link className="font-black text-xl" href="/admin">
-              Let<span className="text-[#d9ff73]">Due</span> Admin
+            <Link aria-label="LetDue Admin home" href="/admin">
+              <LetDueLogo
+                suffix={
+                  <span className="rounded-md bg-[#34412d] px-2 py-1 font-black text-[#d9ff73] text-xs uppercase tracking-[0.12em]">
+                    Admin
+                  </span>
+                }
+                theme="dark"
+              />
             </Link>
             <nav className="flex items-center gap-4 font-bold text-[#cbd4c5] text-sm">
               <Link href="/admin">Customers</Link>

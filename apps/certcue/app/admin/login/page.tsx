@@ -1,6 +1,7 @@
 import { KeyRound } from "lucide-react";
 import { redirect } from "next/navigation";
 import { requestAdminLink } from "@/app/admin/actions";
+import { LetDueLogo } from "@/components/letdue-brand";
 import { currentAdmin } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +17,10 @@ export default async function AdminLoginPage({
   return (
     <main className="grid min-h-screen place-items-center px-4 py-12">
       <section className="w-full max-w-md rounded-3xl border border-[#d5dbc9] bg-white p-7 shadow-sm">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#18220d] text-[#d9ff73]">
+        <a aria-label="LetDue home" href="/">
+          <LetDueLogo />
+        </a>
+        <div className="mt-6 flex h-12 w-12 items-center justify-center rounded-xl bg-[#18220d] text-[#d9ff73]">
           <KeyRound aria-hidden="true" size={21} />
         </div>
         <p className="mt-6 font-black text-[#52720d] text-xs uppercase tracking-[0.16em]">

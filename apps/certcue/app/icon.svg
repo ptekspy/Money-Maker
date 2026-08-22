@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title">
+  <title id="title">LetDue</title>
+  <rect width="48" height="48" rx="11" fill="#f4f5ef"/>
+  <rect x="4" y="4" width="40" height="17" rx="6" fill="#18220d"/>
+  <rect x="4" y="27" width="40" height="17" rx="6" fill="#d5dbc9"/>
+  <rect x="10" y="11" width="13" height="3" rx="1.5" fill="#f4f5ef"/>
+  <rect x="10" y="34" width="9" height="3" rx="1.5" fill="#f4f5ef"/>
+  <circle cx="36" cy="35.5" r="5.5" fill="#d9ff73"/>
+</svg>

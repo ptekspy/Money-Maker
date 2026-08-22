@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LetDueLogo } from "@/components/letdue-brand";
 
 export const metadata: Metadata = { title: "Privacy notice — LetDue" };
 
@@ -37,8 +38,8 @@ const sections = [
 export default function PrivacyPage() {
   return (
     <main className="mx-auto min-h-screen max-w-3xl px-4 py-10 md:px-8 md:py-16">
-      <Link className="font-black text-xl" href="/">
-        Let<span className="text-[#52720d]">Due</span>
+      <Link aria-label="LetDue home" href="/">
+        <LetDueLogo />
       </Link>
       <p className="mt-10 font-black text-[#52720d] text-sm uppercase">
         Last updated 22 August 2026

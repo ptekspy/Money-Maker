@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { sendDashboardLink } from "@/app/actions/dashboard-link";
+import { LetDueLogo } from "@/components/letdue-brand";
 
 export default async function WelcomePage({
   searchParams,
@@ -10,6 +11,9 @@ export default async function WelcomePage({
   return (
     <main className="grid min-h-screen place-items-center px-4">
       <section className="max-w-xl rounded-2xl border border-[#d5dbc9] bg-white p-8 text-center">
+        <Link aria-label="LetDue home" className="inline-flex" href="/">
+          <LetDueLogo />
+        </Link>
         <p className="font-black text-[#52720d] text-sm uppercase">
           Monitoring active
         </p>
