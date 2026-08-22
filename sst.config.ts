@@ -2,7 +2,8 @@
 
 export default $config({
   app(input) {
-    const production = input.stage === "production";
+    const production =
+      input.stage === "production" || input.stage === "dellpatri";
 
     return {
       name: "money-maker",
@@ -57,9 +58,7 @@ export default $config({
       },
     });
 
-    const landlordStripeSecretKey = new sst.Secret(
-      "LandlordStripeSecretKey",
-    );
+    const landlordStripeSecretKey = new sst.Secret("LandlordStripeSecretKey");
     const landlordStripeWebhookSecret = new sst.Secret(
       "LandlordStripeWebhookSecret",
     );
@@ -88,6 +87,7 @@ export default $config({
                 LETDUE_TABLE_NAME: landlordData.name,
                 LETDUE_DOCUMENTS_BUCKET: landlordDocuments.name,
                 NEXT_PUBLIC_CERTCUE_URL: "https://letdue.com",
+                LETDUE_ADMIN_EMAIL: "hello@letdue.com",
                 ...landlordStripeEnvironment,
                 EMAIL_FROM: "LetDue <reminders@letdue.com>",
               },
@@ -107,6 +107,7 @@ export default $config({
               LETDUE_TABLE_NAME: landlordData.name,
               LETDUE_DOCUMENTS_BUCKET: landlordDocuments.name,
               NEXT_PUBLIC_CERTCUE_URL: "https://letdue.com",
+              LETDUE_ADMIN_EMAIL: "hello@letdue.com",
               ...landlordStripeEnvironment,
               EMAIL_FROM: "LetDue <reminders@letdue.com>",
             },

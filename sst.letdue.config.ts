@@ -2,7 +2,8 @@
 
 export default $config({
   app(input) {
-    const production = input.stage === "production";
+    const production =
+      input.stage === "production" || input.stage === "dellpatri";
 
     return {
       name: "money-maker",
@@ -35,9 +36,7 @@ export default $config({
       versioning: true,
     });
 
-    const landlordStripeSecretKey = new sst.Secret(
-      "LandlordStripeSecretKey",
-    );
+    const landlordStripeSecretKey = new sst.Secret("LandlordStripeSecretKey");
     const landlordStripeWebhookSecret = new sst.Secret(
       "LandlordStripeWebhookSecret",
     );
@@ -48,9 +47,7 @@ export default $config({
     const landlordSaas = new sst.aws.Nextjs("LandlordSaas", {
       path: "apps/certcue",
       buildCommand:
-        process.env.SST_SKIP_OPEN_NEXT_BUILD === "1"
-          ? "true"
-          : undefined,
+        process.env.SST_SKIP_OPEN_NEXT_BUILD === "1" ? "true" : undefined,
       link: [landlordData, landlordDocuments],
       permissions: [
         {
@@ -62,6 +59,7 @@ export default $config({
         LETDUE_TABLE_NAME: landlordData.name,
         LETDUE_DOCUMENTS_BUCKET: landlordDocuments.name,
         NEXT_PUBLIC_CERTCUE_URL: "https://letdue.com",
+        LETDUE_ADMIN_EMAIL: "hello@letdue.com",
         STRIPE_SECRET_KEY: landlordStripeSecretKey.value,
         STRIPE_WEBHOOK_SECRET: landlordStripeWebhookSecret.value,
         STRIPE_CERTCUE_ANNUAL_PRICE_ID: landlordStripeAnnualPriceId.value,

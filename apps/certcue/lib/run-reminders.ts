@@ -2,6 +2,7 @@ import {
   claimReminder,
   getProperty,
   getUser,
+  hasActiveAccess,
   listCertificatesDue,
   listPilotsEnding,
   releaseReminder,
@@ -28,13 +29,7 @@ export async function runReminders(now = new Date()) {
       certificate.userId,
       certificate.propertyId,
     );
-    if (!user || !property || user.subscriptionStatus !== "active") continue;
-    if (
-      user.plan === "pilot" &&
-      user.pilotEndsAt &&
-      new Date(user.pilotEndsAt) <= now
-    )
-      continue;
+    if (!user || !property || !hasActiveAccess(user, now)) continue;
     const reminderDate = isoDate(now);
     if (!(await claimReminder(certificate.id, reminderDate))) continue;
     const timing =
@@ -62,8 +57,7 @@ export async function runReminders(now = new Date()) {
     const pilots = await listPilotsEnding(isoDate(endDate));
     pilotDue += pilots.length;
     for (const user of pilots) {
-      if (user.plan !== "pilot" || user.subscriptionStatus !== "active")
-        continue;
+      if (user.plan !== "pilot" || !hasActiveAccess(user, now)) continue;
       const reminderDate = isoDate(now);
       if (!(await claimReminder(`pilot:${user.id}`, reminderDate))) continue;
       const timing = daysLeft === 0 ? "ends today" : `ends in ${daysLeft} days`;

@@ -3,7 +3,12 @@ import { notFound } from "next/navigation";
 import { startPilotCheckout } from "@/app/actions/checkout";
 import { SupportForm } from "@/components/support-form";
 import { assessCertificate, recommendedCertificates } from "@/lib/compliance";
-import { getUserByToken, hasActiveAccess, listPortfolio } from "@/lib/data";
+import {
+  getUserByToken,
+  hasActiveAccess,
+  listPortfolio,
+  propertyLimitForUser,
+} from "@/lib/data";
 import {
   addPortfolioProperty,
   openBillingPortal,
@@ -47,6 +52,7 @@ export default async function DashboardPage({
     support,
   } = await searchParams;
   const accessActive = hasActiveAccess(user);
+  const propertyLimit = propertyLimitForUser(user);
   const pilotEnds = user.pilotEndsAt
     ? new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(
         new Date(user.pilotEndsAt),
@@ -135,8 +141,8 @@ export default async function DashboardPage({
               Keep every property deadline on watch.
             </h2>
             <p className="mt-2 max-w-2xl text-[#cbd4c5] leading-7">
-              Continue monitoring up to three properties, with secure PDF
-              storage and email reminders at 90, 30, 14, 7 and 0 days.
+              Continue monitoring up to {propertyLimit} properties, with secure
+              PDF storage and email reminders at 90, 30, 14, 7 and 0 days.
             </p>
           </div>
           <div className="min-w-52 rounded-xl bg-white p-5 text-[#18220d]">
@@ -193,11 +199,11 @@ export default async function DashboardPage({
         >
           {propertyResult === "added"
             ? "Property added. Add its dates or upload a certificate below."
-            : "This plan monitors up to three properties."}
+            : `This account monitors up to ${propertyLimit} properties.`}
         </p>
       ) : null}
 
-      {accessActive && properties.length < 3 ? (
+      {accessActive && properties.length < propertyLimit ? (
         <section className="mt-8 rounded-2xl border border-[#d5dbc9] bg-[#f7f8f3] p-5">
           <p className="font-black text-[#52720d] text-xs uppercase">
             Portfolio setup

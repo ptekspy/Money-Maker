@@ -2,7 +2,11 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { getUserByToken, listPortfolio } from "@/lib/data";
+import {
+  getUserByToken,
+  listPortfolio,
+  recordSupportRequest,
+} from "@/lib/data";
 import { sendEmail } from "@/lib/email";
 
 const contactSchema = z.object({
@@ -38,22 +42,38 @@ export async function sendPublicContact(formData: FormData) {
 
   const { name, email, role, intent, message } = parsed.data;
   const intentLabel = intent || "Not supplied";
-  await sendEmail({
-    to: supportInbox(),
-    replyTo: email,
-    subject: `LetDue public contact: ${intentLabel} — ${name}`,
-    text: [
-      "New public LetDue contact form submission.",
-      "",
-      `Name: ${name}`,
-      `Email: ${email}`,
-      `Role: ${role || "Not supplied"}`,
-      `Intent: ${intentLabel}`,
-      "",
-      "Message:",
+  const createdAt = new Date().toISOString();
+  await Promise.all([
+    recordSupportRequest({
+      id: crypto.randomUUID(),
+      createdAt,
+      source: "public",
+      name,
+      email,
+      subject: intentLabel,
       message,
-    ].join("\n"),
-  });
+      context: [
+        `Role: ${role || "Not supplied"}`,
+        `Intent: ${intentLabel}`,
+      ].join("\n"),
+    }),
+    sendEmail({
+      to: supportInbox(),
+      replyTo: email,
+      subject: `LetDue public contact: ${intentLabel} — ${name}`,
+      text: [
+        "New public LetDue contact form submission.",
+        "",
+        `Name: ${name}`,
+        `Email: ${email}`,
+        `Role: ${role || "Not supplied"}`,
+        `Intent: ${intentLabel}`,
+        "",
+        "Message:",
+        message,
+      ].join("\n"),
+    }),
+  ]);
 
   redirect("/?contact=sent#contact");
 }
@@ -80,38 +100,48 @@ export async function sendInAppSupport(formData: FormData) {
           .join("\n")
       : "- No properties yet";
 
-  await sendEmail({
-    to: supportInbox(),
-    replyTo: user.email,
-    subject: `LetDue support: ${parsed.data.subject}`,
-    text: [
-      "New in-app LetDue support request.",
-      "",
-      "Account context:",
-      `User ID: ${user.id}`,
-      `Email: ${user.email}`,
-      `Plan: ${user.plan ?? "unknown"}`,
-      `Subscription status: ${user.subscriptionStatus}`,
-      `Pilot ends: ${user.pilotEndsAt ?? "n/a"}`,
-      `Stripe customer: ${user.stripeCustomerId ?? "n/a"}`,
-      `Acquisition source: ${user.acquisitionSource ?? "n/a"}`,
-      `Properties: ${portfolio.length}`,
-      `Certificates: ${certificateCount}`,
-      "",
-      "Portfolio:",
-      propertySummary,
-      "",
-      "Install/browser context:",
-      `Page URL: ${parsed.data.pageUrl || "Not supplied"}`,
-      `Timezone: ${parsed.data.timezone || "Not supplied"}`,
-      `Language: ${parsed.data.language || "Not supplied"}`,
-      `Screen: ${parsed.data.screen || "Not supplied"}`,
-      `User agent: ${parsed.data.userAgent || "Not supplied"}`,
-      "",
-      "Customer message:",
-      parsed.data.message,
-    ].join("\n"),
-  });
+  const context = [
+    "New in-app LetDue support request.",
+    "",
+    "Account context:",
+    `User ID: ${user.id}`,
+    `Email: ${user.email}`,
+    `Plan: ${user.plan ?? "unknown"}`,
+    `Subscription status: ${user.subscriptionStatus}`,
+    `Pilot ends: ${user.pilotEndsAt ?? "n/a"}`,
+    `Stripe customer: ${user.stripeCustomerId ?? "n/a"}`,
+    `Acquisition source: ${user.acquisitionSource ?? "n/a"}`,
+    `Properties: ${portfolio.length}`,
+    `Certificates: ${certificateCount}`,
+    "",
+    "Portfolio:",
+    propertySummary,
+    "",
+    "Install/browser context:",
+    `Page URL: ${parsed.data.pageUrl || "Not supplied"}`,
+    `Timezone: ${parsed.data.timezone || "Not supplied"}`,
+    `Language: ${parsed.data.language || "Not supplied"}`,
+    `Screen: ${parsed.data.screen || "Not supplied"}`,
+    `User agent: ${parsed.data.userAgent || "Not supplied"}`,
+  ].join("\n");
+  await Promise.all([
+    recordSupportRequest({
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      source: "dashboard",
+      email: user.email,
+      subject: parsed.data.subject,
+      message: parsed.data.message,
+      userId: user.id,
+      context,
+    }),
+    sendEmail({
+      to: supportInbox(),
+      replyTo: user.email,
+      subject: `LetDue support: ${parsed.data.subject}`,
+      text: [context, "", "Customer message:", parsed.data.message].join("\n"),
+    }),
+  ]);
 
   redirect(`/dashboard/${parsed.data.token}?support=sent#support`);
 }

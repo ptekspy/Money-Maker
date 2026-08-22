@@ -5,6 +5,7 @@ import {
   GetCommand,
   PutCommand,
   QueryCommand,
+  ScanCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 
@@ -22,12 +23,19 @@ export type LetDueUser = {
   plan?: "pilot" | "paid";
   pilotEndsAt?: string;
   acquisitionSource?: string;
+  propertyLimit?: number;
+  adminSuspendedAt?: string;
 };
 
 export function hasActiveAccess(user: LetDueUser, now = new Date()) {
+  if (user.adminSuspendedAt) return false;
   if (user.subscriptionStatus !== "active") return false;
   if (user.plan !== "pilot") return true;
   return Boolean(user.pilotEndsAt && new Date(user.pilotEndsAt) > now);
+}
+
+export function propertyLimitForUser(user: LetDueUser) {
+  return Math.max(1, Math.min(100, user.propertyLimit ?? 3));
 }
 
 export type LetDueProperty = {
@@ -46,6 +54,18 @@ export type LetDueCertificate = {
   kind: string;
   expiryDate: string | null;
   documentKey?: string;
+};
+
+export type LetDueSupportRequest = {
+  id: string;
+  createdAt: string;
+  source: "public" | "dashboard";
+  name?: string;
+  email: string;
+  subject: string;
+  message: string;
+  userId?: string;
+  context?: string;
 };
 
 async function getItem<T>(pk: string, sk: string) {
@@ -329,8 +349,10 @@ export async function addProperty(input: {
   hasGas: boolean;
   isHmo: boolean;
 }) {
+  const user = await getUser(input.userId);
+  if (!user) return null;
   const existing = await listPortfolio(input.userId);
-  if (existing.length >= 3) return null;
+  if (existing.length >= propertyLimitForUser(user)) return null;
   const property: LetDueProperty = {
     id: crypto.randomUUID(),
     userId: input.userId,
@@ -350,6 +372,186 @@ export async function addProperty(input: {
     }),
   );
   return property;
+}
+
+export async function listAdminCustomers() {
+  const users: LetDueUser[] = [];
+  let exclusiveStartKey: Record<string, unknown> | undefined;
+
+  do {
+    const result = await client.send(
+      new ScanCommand({
+        TableName: tableName,
+        ExclusiveStartKey: exclusiveStartKey,
+        FilterExpression: "#sk = :profile",
+        ExpressionAttributeNames: { "#sk": "sk" },
+        ExpressionAttributeValues: { ":profile": "PROFILE" },
+      }),
+    );
+    users.push(...((result.Items ?? []) as LetDueUser[]));
+    exclusiveStartKey = result.LastEvaluatedKey;
+  } while (exclusiveStartKey && users.length < 5000);
+
+  return users.sort((a, b) => a.email.localeCompare(b.email));
+}
+
+export async function setUserPropertyLimit(userId: string, limit: number) {
+  await client.send(
+    new UpdateCommand({
+      TableName: tableName,
+      Key: { pk: `USER#${userId}`, sk: "PROFILE" },
+      UpdateExpression: "set propertyLimit = :limit",
+      ConditionExpression: "attribute_exists(pk)",
+      ExpressionAttributeValues: { ":limit": limit },
+    }),
+  );
+}
+
+export async function setUserAdminSuspended(
+  userId: string,
+  suspended: boolean,
+) {
+  await client.send(
+    new UpdateCommand({
+      TableName: tableName,
+      Key: { pk: `USER#${userId}`, sk: "PROFILE" },
+      UpdateExpression: suspended
+        ? "set adminSuspendedAt = :now"
+        : "remove adminSuspendedAt",
+      ConditionExpression: "attribute_exists(pk)",
+      ExpressionAttributeValues: suspended
+        ? { ":now": new Date().toISOString() }
+        : undefined,
+    }),
+  );
+}
+
+export async function recordSupportRequest(request: LetDueSupportRequest) {
+  await client.send(
+    new PutCommand({
+      TableName: tableName,
+      Item: {
+        pk: "SUPPORT",
+        sk: `REQUEST#${request.createdAt}#${request.id}`,
+        ...request,
+      },
+      ConditionExpression: "attribute_not_exists(pk)",
+    }),
+  );
+}
+
+export async function listSupportRequests(limit = 30) {
+  const result = await client.send(
+    new QueryCommand({
+      TableName: tableName,
+      KeyConditionExpression: "pk = :pk and begins_with(sk, :prefix)",
+      ExpressionAttributeValues: {
+        ":pk": "SUPPORT",
+        ":prefix": "REQUEST#",
+      },
+      ScanIndexForward: false,
+      Limit: limit,
+    }),
+  );
+  return (result.Items ?? []) as LetDueSupportRequest[];
+}
+
+export async function createAdminLoginToken(input: {
+  email: string;
+  tokenHash: string;
+  expiresAtEpoch: number;
+}) {
+  const now = Math.floor(Date.now() / 1000);
+  try {
+    await client.send(
+      new PutCommand({
+        TableName: tableName,
+        Item: {
+          pk: `ADMIN_RATE#${input.email}`,
+          sk: "WINDOW",
+          expiresAtEpoch: now + 600,
+        },
+        ConditionExpression:
+          "attribute_not_exists(pk) or expiresAtEpoch < :now",
+        ExpressionAttributeValues: { ":now": now },
+      }),
+    );
+  } catch (error) {
+    if ((error as { name?: string }).name === "ConditionalCheckFailedException")
+      return false;
+    throw error;
+  }
+
+  await client.send(
+    new PutCommand({
+      TableName: tableName,
+      Item: {
+        pk: `ADMIN_LOGIN#${input.tokenHash}`,
+        sk: "TOKEN",
+        email: input.email,
+        expiresAtEpoch: input.expiresAtEpoch,
+      },
+      ConditionExpression: "attribute_not_exists(pk)",
+    }),
+  );
+  return true;
+}
+
+export async function consumeAdminLoginToken(tokenHash: string) {
+  try {
+    const result = await client.send(
+      new DeleteCommand({
+        TableName: tableName,
+        Key: { pk: `ADMIN_LOGIN#${tokenHash}`, sk: "TOKEN" },
+        ConditionExpression: "expiresAtEpoch >= :now",
+        ExpressionAttributeValues: { ":now": Math.floor(Date.now() / 1000) },
+        ReturnValues: "ALL_OLD",
+      }),
+    );
+    return (result.Attributes as { email?: string } | undefined)?.email ?? null;
+  } catch (error) {
+    if ((error as { name?: string }).name === "ConditionalCheckFailedException")
+      return null;
+    throw error;
+  }
+}
+
+export async function createAdminSession(input: {
+  email: string;
+  tokenHash: string;
+  expiresAtEpoch: number;
+}) {
+  await client.send(
+    new PutCommand({
+      TableName: tableName,
+      Item: {
+        pk: `ADMIN_SESSION#${input.tokenHash}`,
+        sk: "SESSION",
+        email: input.email,
+        expiresAtEpoch: input.expiresAtEpoch,
+      },
+      ConditionExpression: "attribute_not_exists(pk)",
+    }),
+  );
+}
+
+export async function getAdminSession(tokenHash: string) {
+  const session = await getItem<{ email: string; expiresAtEpoch: number }>(
+    `ADMIN_SESSION#${tokenHash}`,
+    "SESSION",
+  );
+  if (!session || session.expiresAtEpoch < Math.floor(Date.now() / 1000))
+    return null;
+  return session;
+}
+
+export async function deleteAdminSession(tokenHash: string) {
+  await client.send(
+    new DeleteCommand({
+      TableName: tableName,
+      Key: { pk: `ADMIN_SESSION#${tokenHash}`, sk: "SESSION" },
+    }),
+  );
 }
 
 export async function setSubscriptionStatus(
