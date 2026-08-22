@@ -1,7 +1,9 @@
 import type Stripe from "stripe";
 import {
   activateCustomer,
+  activateOfferSubscription,
   activatePilotSubscription,
+  getOffer,
   getUserByToken,
   setSubscriptionStatus,
 } from "@/lib/data";
@@ -22,6 +24,48 @@ async function activateCheckout(session: Stripe.Checkout.Session) {
       ? session.customer
       : session.customer?.id;
   if (!customerId) return;
+
+  const offerId = session.metadata?.offerId;
+  const offerUserId = session.metadata?.userId;
+  const offerPropertyLimit = Number(session.metadata?.propertyLimit);
+  if (
+    offerId &&
+    offerUserId &&
+    Number.isInteger(offerPropertyLimit) &&
+    offerPropertyLimit >= 1 &&
+    offerPropertyLimit <= 100
+  ) {
+    const offer = await getOffer(offerId);
+    if (
+      !offer ||
+      offer.userId !== offerUserId ||
+      offer.propertyLimit !== offerPropertyLimit ||
+      session.currency !== "gbp" ||
+      session.amount_total !== offer.pricePence ||
+      offer.status === "paid"
+    )
+      return;
+    const user = await activateOfferSubscription({
+      offerId,
+      userId: offerUserId,
+      stripeCustomerId: customerId,
+      propertyLimit: offerPropertyLimit,
+    });
+    if (!user) return;
+    await sendEmail({
+      to: user.email,
+      subject: "Your LetDue package is active",
+      text: [
+        `Thank you. Your LetDue package for up to ${offerPropertyLimit} properties is now active.`,
+        "",
+        `Sign in: ${process.env.NEXT_PUBLIC_CERTCUE_URL}/login`,
+        "",
+        "Use the password you created before checkout.",
+        "LetDue organises records and reminders. It does not provide legal advice or guarantee compliance.",
+      ].join("\n"),
+    });
+    return;
+  }
 
   const upgradeToken = session.metadata?.upgradeToken;
   if (upgradeToken) {

@@ -30,6 +30,7 @@ export default async function ProtectedAdminLayout({
             </Link>
             <nav className="flex items-center gap-4 font-bold text-[#cbd4c5] text-sm">
               <Link href="/admin">Customers</Link>
+              <Link href="/admin/offers">Offers</Link>
               <Link href="/admin/support">Support</Link>
             </nav>
           </div>

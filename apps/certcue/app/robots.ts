@@ -5,7 +5,15 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin/", "/dashboard/", "/api/", "/welcome"],
+      disallow: [
+        "/admin/",
+        "/dashboard/",
+        "/account",
+        "/login",
+        "/offer/",
+        "/api/",
+        "/welcome",
+      ],
     },
     sitemap: "https://letdue.com/sitemap.xml",
   };

@@ -125,7 +125,7 @@ export default async function DashboardPage({
           <p className="font-black">
             {billing === "cancelled"
               ? "Checkout cancelled — nothing was charged."
-              : user.plan === "paid"
+              : user.subscriptionStatus === "active"
                 ? "Thank you — your monitoring is active."
                 : "Payment received. Your account is being activated."}
           </p>

@@ -11,12 +11,80 @@ import {
 } from "@/lib/admin-auth";
 import {
   createAdminLoginToken,
+  createOffer,
   getUser,
+  getUserByEmail,
   listPortfolio,
   setUserAdminSuspended,
   setUserPropertyLimit,
 } from "@/lib/data";
 import { sendEmail } from "@/lib/email";
+import { hashUserToken, newUserToken } from "@/lib/user-auth";
+
+const packageSchema = z.object({
+  email: z.email().trim().toLowerCase(),
+  propertyLimit: z.coerce.number().int().min(1).max(100),
+  price: z
+    .string()
+    .trim()
+    .regex(/^\d{1,5}(?:\.\d{1,2})?$/),
+});
+
+export async function sendCustomerPackage(formData: FormData) {
+  await requireAdmin();
+  const parsed = packageSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect("/admin/offers?error=invalid");
+
+  const pricePence = Math.round(Number(parsed.data.price) * 100);
+  if (pricePence < 100 || pricePence > 1_000_000)
+    redirect("/admin/offers?error=invalid");
+
+  const existing = await getUserByEmail(parsed.data.email);
+  if (existing?.plan === "paid" && existing.subscriptionStatus === "active") {
+    redirect("/admin/offers?error=active");
+  }
+
+  const token = newUserToken();
+  const offer = {
+    id: crypto.randomUUID(),
+    email: parsed.data.email,
+    propertyLimit: parsed.data.propertyLimit,
+    pricePence,
+    status: "sent" as const,
+    createdAt: new Date().toISOString(),
+    expiresAtEpoch: Math.floor(Date.now() / 1000) + 7 * 86_400,
+  };
+  await createOffer(offer, hashUserToken(token));
+
+  const appUrl = process.env.NEXT_PUBLIC_CERTCUE_URL ?? "https://letdue.com";
+  const price = new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: "GBP",
+  }).format(pricePence / 100);
+  await sendEmail({
+    to: offer.email,
+    replyTo: adminEmail(),
+    subject: `Your LetDue package for up to ${offer.propertyLimit} properties`,
+    text: [
+      "Hello,",
+      "",
+      "Here is the LetDue package prepared for you:",
+      `• Up to ${offer.propertyLimit} properties`,
+      `• ${price} per year`,
+      "• Certificate storage and deadline reminders",
+      "",
+      "Create your password and continue to secure Stripe Checkout:",
+      `${appUrl}/offer/${token}`,
+      "",
+      "This private link expires in 7 days. It is intended only for this email address.",
+      "If you have a question before paying, reply to this email.",
+      "",
+      "LetDue organises records and reminders. It does not provide legal advice or guarantee compliance.",
+    ].join("\n"),
+  });
+
+  redirect("/admin/offers?sent=1");
+}
 
 export async function requestAdminLink(formData: FormData) {
   const email = z.email().trim().toLowerCase().safeParse(formData.get("email"));

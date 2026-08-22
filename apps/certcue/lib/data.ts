@@ -6,6 +6,7 @@ import {
   PutCommand,
   QueryCommand,
   ScanCommand,
+  TransactWriteCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 
@@ -19,12 +20,28 @@ export type LetDueUser = {
   email: string;
   accessToken: string;
   stripeCustomerId?: string;
-  subscriptionStatus: "active" | "cancelled" | "past_due";
+  subscriptionStatus: "active" | "cancelled" | "past_due" | "pending";
   plan?: "pilot" | "paid";
   pilotEndsAt?: string;
   acquisitionSource?: string;
   propertyLimit?: number;
   adminSuspendedAt?: string;
+  passwordHash?: string;
+  passwordSalt?: string;
+};
+
+export type LetDueOffer = {
+  id: string;
+  email: string;
+  propertyLimit: number;
+  pricePence: number;
+  status: "sent" | "accepted" | "paid";
+  createdAt: string;
+  expiresAtEpoch: number;
+  acceptedAt?: string;
+  paidAt?: string;
+  userId?: string;
+  checkoutSessionId?: string;
 };
 
 export function hasActiveAccess(user: LetDueUser, now = new Date()) {
@@ -101,6 +118,303 @@ export async function getUserByCustomerId(customerId: string) {
   const userId = await lookupUserId("CUSTOMER", customerId);
   if (!userId) return null;
   return getItem<LetDueUser>(`USER#${userId}`, "PROFILE");
+}
+
+export async function createOffer(offer: LetDueOffer, tokenHash: string) {
+  await client.send(
+    new TransactWriteCommand({
+      TransactItems: [
+        {
+          Put: {
+            TableName: tableName,
+            Item: {
+              pk: `OFFER#${offer.id}`,
+              sk: "OFFER",
+              gsi1pk: "OFFERS",
+              gsi1sk: `${offer.createdAt}#${offer.id}`,
+              ...offer,
+            },
+            ConditionExpression: "attribute_not_exists(pk)",
+          },
+        },
+        {
+          Put: {
+            TableName: tableName,
+            Item: {
+              pk: `OFFER_TOKEN#${tokenHash}`,
+              sk: "LOOKUP",
+              offerId: offer.id,
+              expiresAtEpoch: offer.expiresAtEpoch,
+            },
+            ConditionExpression: "attribute_not_exists(pk)",
+          },
+        },
+      ],
+    }),
+  );
+}
+
+export async function getOffer(offerId: string) {
+  return getItem<LetDueOffer>(`OFFER#${offerId}`, "OFFER");
+}
+
+export async function getOfferByTokenHash(tokenHash: string) {
+  const lookup = await getItem<{ offerId: string; expiresAtEpoch: number }>(
+    `OFFER_TOKEN#${tokenHash}`,
+    "LOOKUP",
+  );
+  if (!lookup || lookup.expiresAtEpoch < Math.floor(Date.now() / 1000))
+    return null;
+  return getOffer(lookup.offerId);
+}
+
+export async function listOffers(limit = 30) {
+  const result = await client.send(
+    new QueryCommand({
+      TableName: tableName,
+      IndexName: "LookupIndex",
+      KeyConditionExpression: "gsi1pk = :pk",
+      ExpressionAttributeValues: { ":pk": "OFFERS" },
+      ScanIndexForward: false,
+      Limit: limit,
+    }),
+  );
+  return (result.Items ?? []) as LetDueOffer[];
+}
+
+export async function acceptOfferAndCreateCredentials(input: {
+  offer: LetDueOffer;
+  userId: string;
+  accessToken: string;
+  passwordHash: string;
+  passwordSalt: string;
+  checkoutSessionId: string;
+  existingUser: boolean;
+}) {
+  const now = new Date().toISOString();
+  const offerUpdate = {
+    TableName: tableName,
+    Key: { pk: `OFFER#${input.offer.id}`, sk: "OFFER" },
+    UpdateExpression:
+      "set #status = :accepted, acceptedAt = :now, userId = :userId, checkoutSessionId = :session",
+    ConditionExpression: "#status = :sent and expiresAtEpoch >= :nowEpoch",
+    ExpressionAttributeNames: { "#status": "status" },
+    ExpressionAttributeValues: {
+      ":accepted": "accepted",
+      ":sent": "sent",
+      ":now": now,
+      ":nowEpoch": Math.floor(Date.now() / 1000),
+      ":userId": input.userId,
+      ":session": input.checkoutSessionId,
+    },
+  };
+
+  const items = input.existingUser
+    ? [
+        { Update: offerUpdate },
+        {
+          Update: {
+            TableName: tableName,
+            Key: { pk: `USER#${input.userId}`, sk: "PROFILE" },
+            UpdateExpression: "set passwordHash = :hash, passwordSalt = :salt",
+            ConditionExpression: "attribute_exists(pk)",
+            ExpressionAttributeValues: {
+              ":hash": input.passwordHash,
+              ":salt": input.passwordSalt,
+            },
+          },
+        },
+      ]
+    : [
+        { Update: offerUpdate },
+        {
+          Put: {
+            TableName: tableName,
+            Item: {
+              pk: `USER#${input.userId}`,
+              sk: "PROFILE",
+              id: input.userId,
+              email: input.offer.email,
+              accessToken: input.accessToken,
+              subscriptionStatus: "pending",
+              plan: "paid",
+              passwordHash: input.passwordHash,
+              passwordSalt: input.passwordSalt,
+              acquisitionSource: "admin_offer",
+            },
+            ConditionExpression: "attribute_not_exists(pk)",
+          },
+        },
+        {
+          Put: {
+            TableName: tableName,
+            Item: {
+              pk: `EMAIL#${input.offer.email}`,
+              sk: "LOOKUP",
+              userId: input.userId,
+            },
+            ConditionExpression: "attribute_not_exists(pk)",
+          },
+        },
+        {
+          Put: {
+            TableName: tableName,
+            Item: {
+              pk: `TOKEN#${input.accessToken}`,
+              sk: "LOOKUP",
+              userId: input.userId,
+            },
+            ConditionExpression: "attribute_not_exists(pk)",
+          },
+        },
+      ];
+
+  await client.send(new TransactWriteCommand({ TransactItems: items }));
+}
+
+export async function activateOfferSubscription(input: {
+  offerId: string;
+  userId: string;
+  stripeCustomerId: string;
+  propertyLimit: number;
+}) {
+  const paidAt = new Date().toISOString();
+  await client.send(
+    new TransactWriteCommand({
+      TransactItems: [
+        {
+          Update: {
+            TableName: tableName,
+            Key: { pk: `USER#${input.userId}`, sk: "PROFILE" },
+            UpdateExpression:
+              "set stripeCustomerId = :customer, subscriptionStatus = :active, #plan = :paid, propertyLimit = :limit",
+            ConditionExpression: "attribute_exists(pk)",
+            ExpressionAttributeNames: { "#plan": "plan" },
+            ExpressionAttributeValues: {
+              ":customer": input.stripeCustomerId,
+              ":active": "active",
+              ":paid": "paid",
+              ":limit": input.propertyLimit,
+            },
+          },
+        },
+        {
+          Put: {
+            TableName: tableName,
+            Item: {
+              pk: `CUSTOMER#${input.stripeCustomerId}`,
+              sk: "LOOKUP",
+              userId: input.userId,
+            },
+          },
+        },
+        {
+          Update: {
+            TableName: tableName,
+            Key: { pk: `OFFER#${input.offerId}`, sk: "OFFER" },
+            UpdateExpression: "set #status = :paid, paidAt = :paidAt",
+            ConditionExpression:
+              "attribute_exists(pk) and (#status = :accepted or #status = :paid)",
+            ExpressionAttributeNames: { "#status": "status" },
+            ExpressionAttributeValues: {
+              ":accepted": "accepted",
+              ":paid": "paid",
+              ":paidAt": paidAt,
+            },
+          },
+        },
+      ],
+    }),
+  );
+  return getUser(input.userId);
+}
+
+export async function createUserSession(input: {
+  userId: string;
+  tokenHash: string;
+  expiresAtEpoch: number;
+}) {
+  await client.send(
+    new PutCommand({
+      TableName: tableName,
+      Item: {
+        pk: `USER_SESSION#${input.tokenHash}`,
+        sk: "SESSION",
+        userId: input.userId,
+        expiresAtEpoch: input.expiresAtEpoch,
+      },
+      ConditionExpression: "attribute_not_exists(pk)",
+    }),
+  );
+}
+
+export async function getUserSession(tokenHash: string) {
+  const session = await getItem<{ userId: string; expiresAtEpoch: number }>(
+    `USER_SESSION#${tokenHash}`,
+    "SESSION",
+  );
+  if (!session || session.expiresAtEpoch < Math.floor(Date.now() / 1000))
+    return null;
+  return session;
+}
+
+export async function deleteUserSession(tokenHash: string) {
+  await client.send(
+    new DeleteCommand({
+      TableName: tableName,
+      Key: { pk: `USER_SESSION#${tokenHash}`, sk: "SESSION" },
+    }),
+  );
+}
+
+export async function claimUserLoginAttempt(email: string) {
+  const normalizedEmail = email.trim().toLowerCase();
+  const now = Math.floor(Date.now() / 1000);
+  const key = { pk: `USER_LOGIN_RATE#${normalizedEmail}`, sk: "WINDOW" };
+  try {
+    await client.send(
+      new PutCommand({
+        TableName: tableName,
+        Item: { ...key, attempts: 1, expiresAtEpoch: now + 15 * 60 },
+        ConditionExpression:
+          "attribute_not_exists(pk) or expiresAtEpoch < :now",
+        ExpressionAttributeValues: { ":now": now },
+      }),
+    );
+    return true;
+  } catch (error) {
+    if ((error as { name?: string }).name !== "ConditionalCheckFailedException")
+      throw error;
+  }
+
+  try {
+    await client.send(
+      new UpdateCommand({
+        TableName: tableName,
+        Key: key,
+        UpdateExpression: "add attempts :one",
+        ConditionExpression: "expiresAtEpoch >= :now and attempts < :limit",
+        ExpressionAttributeValues: { ":one": 1, ":now": now, ":limit": 10 },
+      }),
+    );
+    return true;
+  } catch (error) {
+    if ((error as { name?: string }).name === "ConditionalCheckFailedException")
+      return false;
+    throw error;
+  }
+}
+
+export async function clearUserLoginAttempts(email: string) {
+  await client.send(
+    new DeleteCommand({
+      TableName: tableName,
+      Key: {
+        pk: `USER_LOGIN_RATE#${email.trim().toLowerCase()}`,
+        sk: "WINDOW",
+      },
+    }),
+  );
 }
 
 export async function activateCustomer(input: {
