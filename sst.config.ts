@@ -2,8 +2,9 @@
 
 export default $config({
   app(input) {
-    const production =
-      input.stage === "production" || input.stage === "dellpatri";
+    const production = ["production", "preview", "dellpatri"].includes(
+      input.stage,
+    );
 
     return {
       name: "money-maker",

@@ -6,7 +6,7 @@ on:
       stage:
         description: SST stage to deploy
         required: true
-        default: dellpatri
+        default: preview
       confirm_domain:
         description: Type letdue.com to confirm this deploy targets LetDue
         required: true
