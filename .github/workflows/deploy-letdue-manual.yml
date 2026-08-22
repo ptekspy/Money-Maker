@@ -55,8 +55,10 @@ jobs:
           aws-region: eu-west-2
 
       - name: Show infrastructure changes
-        run: npm exec sst diff -- --stage "${{ inputs.stage }}"
+        # This repository's SST stage also contains unrelated products. Targeting
+        # LandlordSaas prevents a LetDue release from reconciling or removing them.
+        run: npm exec sst diff -- --stage "${{ inputs.stage }}" --target LandlordSaas
 
       - name: Deploy LetDue
         if: ${{ inputs.mode == 'deploy' }}
-        run: npm run deploy:aws -- --stage "${{ inputs.stage }}"
+        run: npm run deploy:aws -- --stage "${{ inputs.stage }}" --target LandlordSaas
