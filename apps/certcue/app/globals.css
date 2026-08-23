@@ -4,3 +4,22 @@
   background: #d9ff73;
   color: #18220d;
 }
+
+@media print {
+  @page {
+    margin: 12mm;
+  }
+
+  body {
+    background: white;
+  }
+
+  .passport-hide {
+    display: none;
+  }
+
+  .passport-page {
+    max-width: none;
+    padding: 0;
+  }
+}

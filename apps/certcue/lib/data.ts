@@ -71,6 +71,33 @@ export type LetDueCertificate = {
   kind: string;
   expiryDate: string | null;
   documentKey?: string;
+  originalFileName?: string;
+  uploadedAt?: string;
+  extractionConfidence?: "high" | "review" | "low";
+};
+
+export type LetDueInboxItem = {
+  id: string;
+  propertyId: string;
+  userId: string;
+  fileName: string;
+  documentKey: string;
+  kind: string | null;
+  expiryDate: string | null;
+  candidates: string[];
+  confidence: "high" | "review" | "low";
+  status: "filed" | "needs_review";
+  uploadedAt: string;
+  filedAt?: string;
+};
+
+export type LetDueAuditEvent = {
+  id: string;
+  propertyId: string;
+  userId: string;
+  type: "certificate_saved" | "document_uploaded" | "document_reviewed";
+  summary: string;
+  createdAt: string;
 };
 
 export type LetDueSupportRequest = {
@@ -904,19 +931,30 @@ export async function listPortfolio(userId: string) {
   const properties = (propertyResult.Items ?? []) as LetDueProperty[];
   return Promise.all(
     properties.map(async (property) => {
-      const certificateResult = await client.send(
+      const propertyRecords = await client.send(
         new QueryCommand({
           TableName: tableName,
-          KeyConditionExpression: "pk = :pk and begins_with(sk, :prefix)",
+          KeyConditionExpression: "pk = :pk",
           ExpressionAttributeValues: {
             ":pk": `PROPERTY#${property.id}`,
-            ":prefix": "CERT#",
           },
         }),
       );
+      const records = propertyRecords.Items ?? [];
       return {
         ...property,
-        certificates: (certificateResult.Items ?? []) as LetDueCertificate[],
+        certificates: records.filter((item) =>
+          String(item.sk).startsWith("CERT#"),
+        ) as LetDueCertificate[],
+        inboxItems: records.filter((item) =>
+          String(item.sk).startsWith("INBOX#"),
+        ) as LetDueInboxItem[],
+        auditEvents: records
+          .filter((item) => String(item.sk).startsWith("AUDIT#"))
+          .sort((a, b) =>
+            String(b.createdAt).localeCompare(String(a.createdAt)),
+          )
+          .slice(0, 12) as LetDueAuditEvent[],
       };
     }),
   );
@@ -928,8 +966,15 @@ export async function saveCertificate(input: {
   kind: string;
   expiryDate: string | null;
   documentKey?: string;
+  originalFileName?: string;
+  uploadedAt?: string;
+  extractionConfidence?: "high" | "review" | "low";
+  auditType?: LetDueAuditEvent["type"];
 }) {
   const id = `${input.propertyId}:${input.kind}`;
+  const createdAt = new Date().toISOString();
+  const auditId = crypto.randomUUID();
+  const existing = await getCertificate(input.propertyId, input.kind);
   const item: LetDueCertificate & Record<string, unknown> = {
     pk: `PROPERTY#${input.propertyId}`,
     sk: `CERT#${input.kind}`,
@@ -938,13 +983,91 @@ export async function saveCertificate(input: {
     userId: input.userId,
     kind: input.kind,
     expiryDate: input.expiryDate,
-    documentKey: input.documentKey,
+    documentKey: input.documentKey ?? existing?.documentKey,
+    originalFileName: input.originalFileName ?? existing?.originalFileName,
+    uploadedAt: input.uploadedAt ?? existing?.uploadedAt,
+    extractionConfidence:
+      input.extractionConfidence ?? existing?.extractionConfidence,
   };
   if (input.expiryDate) {
     item.gsi1pk = `DUE#${input.expiryDate}`;
     item.gsi1sk = `CERT#${id}`;
   }
-  await client.send(new PutCommand({ TableName: tableName, Item: item }));
+  await client.send(
+    new TransactWriteCommand({
+      TransactItems: [
+        { Put: { TableName: tableName, Item: item } },
+        {
+          Put: {
+            TableName: tableName,
+            Item: {
+              pk: `PROPERTY#${input.propertyId}`,
+              sk: `AUDIT#${createdAt}#${auditId}`,
+              id: auditId,
+              propertyId: input.propertyId,
+              userId: input.userId,
+              type: input.auditType ?? "certificate_saved",
+              summary: `${input.kind} ${input.documentKey ? "document and deadline saved" : "deadline saved"}`,
+              createdAt,
+            } satisfies LetDueAuditEvent & Record<string, unknown>,
+          },
+        },
+      ],
+    }),
+  );
+}
+
+export async function saveInboxItem(item: LetDueInboxItem) {
+  await client.send(
+    new PutCommand({
+      TableName: tableName,
+      Item: {
+        pk: `PROPERTY#${item.propertyId}`,
+        sk: `INBOX#${item.uploadedAt}#${item.id}`,
+        ...item,
+      },
+      ConditionExpression:
+        "attribute_not_exists(pk) and attribute_not_exists(sk)",
+    }),
+  );
+}
+
+export async function getInboxItem(
+  propertyId: string,
+  itemId: string,
+  uploadedAt: string,
+) {
+  return getItem<LetDueInboxItem>(
+    `PROPERTY#${propertyId}`,
+    `INBOX#${uploadedAt}#${itemId}`,
+  );
+}
+
+export async function markInboxItemFiled(
+  propertyId: string,
+  item: LetDueInboxItem,
+) {
+  await client.send(
+    new UpdateCommand({
+      TableName: tableName,
+      Key: {
+        pk: `PROPERTY#${propertyId}`,
+        sk: `INBOX#${item.uploadedAt}#${item.id}`,
+      },
+      UpdateExpression: "set #status = :status, filedAt = :filedAt",
+      ConditionExpression: "attribute_exists(pk) and #status = :review",
+      ExpressionAttributeNames: { "#status": "status" },
+      ExpressionAttributeValues: {
+        ":status": "filed",
+        ":review": "needs_review",
+        ":filedAt": new Date().toISOString(),
+      },
+    }),
+  );
+}
+
+export async function getCertificate(propertyId: string, kind: string) {
+  return getItem<LetDueCertificate>(`PROPERTY#${propertyId}`, `CERT#${kind}`);
 }
 
 export async function removeCertificate(propertyId: string, kind: string) {

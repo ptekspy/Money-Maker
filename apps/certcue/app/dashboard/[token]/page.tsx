@@ -1,4 +1,11 @@
-import { CheckCircle2, Clock3, CreditCard, ShieldAlert } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock3,
+  CreditCard,
+  FileCheck2,
+  Inbox,
+  ShieldAlert,
+} from "lucide-react";
 import { notFound } from "next/navigation";
 import { startPilotCheckout } from "@/app/actions/checkout";
 import { LetDueLogo } from "@/components/letdue-brand";
@@ -13,6 +20,7 @@ import {
 } from "@/lib/data";
 import {
   addPortfolioProperty,
+  confirmInboxItem,
   openBillingPortal,
   updateCertificate,
   uploadCertificate,
@@ -39,6 +47,8 @@ export default async function DashboardPage({
     billing?: string;
     support?: string;
     upgrade?: string;
+    filed?: string;
+    review?: string;
   }>;
 }) {
   const { token } = await params;
@@ -54,6 +64,8 @@ export default async function DashboardPage({
     billing,
     support,
     upgrade,
+    filed,
+    review,
   } = await searchParams;
   const accessActive = hasActiveAccess(user);
   const propertyLimit = propertyLimitForUser(user);
@@ -62,6 +74,32 @@ export default async function DashboardPage({
         new Date(user.pilotEndsAt),
       )
     : null;
+  const reviewItems = properties.flatMap((property) =>
+    property.inboxItems
+      .filter((item) => item.status === "needs_review")
+      .map((item) => ({ ...item, propertyAddress: property.address })),
+  );
+  const portfolioAssessments = properties.flatMap((property) => {
+    const byKind = new Map(
+      property.certificates.map((certificate) => [
+        certificate.kind,
+        certificate,
+      ]),
+    );
+    return recommendedCertificates(property.hasGas, property.isHmo).map(
+      (kind) => ({
+        property,
+        kind,
+        assessment: assessCertificate({
+          kind,
+          expiry: byKind.get(kind)?.expiryDate ?? "",
+        }),
+      }),
+    );
+  });
+  const urgentCount = portfolioAssessments.filter(({ assessment }) =>
+    ["Missing", "Overdue", "Due soon"].includes(assessment.status),
+  ).length;
 
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-4 py-10 md:px-8">
@@ -74,10 +112,10 @@ export default async function DashboardPage({
             Private portfolio
           </p>
           <h1 className="mt-2 text-4xl md:text-6xl">
-            Your compliance calendar
+            Portfolio control centre
           </h1>
           <p className="mt-3 text-[#65715d]">
-            Reminders go to {user.email}. Keep this dashboard link private.
+            See what needs action, file evidence and keep every property ready.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -186,11 +224,166 @@ export default async function DashboardPage({
           }`}
         >
           {upload === "success"
-            ? "Certificate stored securely and its deadline added."
-            : upload === "review"
-              ? "We could not confidently read that PDF. Add its date manually below."
-              : "Please upload a PDF smaller than 10 MB."}
+            ? `${filed ?? "Your"} document${filed === "1" ? " was" : "s were"} securely filed and added to the relevant passport.`
+            : upload === "confirmed"
+              ? "Document confirmed and added to the property passport."
+              : upload === "review"
+                ? `${filed ?? "0"} filed automatically. ${review ?? "Some"} need${review === "1" ? "s" : ""} a quick check below — no document was discarded.`
+                : "Please upload a PDF smaller than 10 MB."}
         </p>
+      ) : null}
+
+      <section className="mt-8 grid gap-4 md:grid-cols-3">
+        <div className="rounded-2xl bg-[#18220d] p-5 text-white md:col-span-2">
+          <p className="font-black text-[#d9ff73] text-xs uppercase">
+            What needs action
+          </p>
+          <div className="mt-3 flex items-end gap-3">
+            <strong className="text-5xl">{urgentCount}</strong>
+            <span className="pb-1 text-[#cbd4c5]">
+              missing, overdue or due-soon item{urgentCount === 1 ? "" : "s"}
+            </span>
+          </div>
+          <p className="mt-4 text-[#cbd4c5] text-sm leading-6">
+            LetDue uses the dates and evidence you provide to highlight the next
+            actions. It does not guarantee legal compliance.
+          </p>
+        </div>
+        <div className="rounded-2xl border border-[#d5dbc9] bg-white p-5">
+          <p className="font-black text-[#52720d] text-xs uppercase">
+            Inbox review
+          </p>
+          <strong className="mt-3 block text-5xl">{reviewItems.length}</strong>
+          <p className="mt-2 text-[#65715d] text-sm">
+            document{reviewItems.length === 1 ? "" : "s"} waiting for
+            confirmation
+          </p>
+        </div>
+      </section>
+
+      {accessActive && properties.length > 0 ? (
+        <section className="mt-8 overflow-hidden rounded-2xl border border-[#d5dbc9] bg-white">
+          <div className="grid gap-6 bg-[#f7f8f3] p-5 md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              <p className="flex items-center gap-2 font-black text-[#52720d] text-xs uppercase">
+                <Inbox size={16} /> Compliance inbox
+              </p>
+              <h2 className="mt-2 text-3xl">Drop in a batch of certificates</h2>
+              <p className="mt-2 max-w-2xl text-[#65715d] leading-6">
+                Choose the property once. LetDue reads up to 20 PDFs (10 MB per
+                batch), securely files confident matches and holds uncertain
+                details for review.
+              </p>
+            </div>
+            <form action={uploadCertificate} className="grid min-w-72 gap-3">
+              <input name="token" type="hidden" value={token} />
+              <label className="grid gap-1 font-bold text-sm">
+                Property
+                <select
+                  className="min-h-11 rounded-lg border border-[#bcc7ae] bg-white px-3"
+                  name="propertyId"
+                  required
+                >
+                  {properties.map((property) => (
+                    <option key={property.id} value={property.id}>
+                      {property.address}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <input
+                accept="application/pdf,.pdf"
+                className="min-w-0 rounded-lg border border-[#bcc7ae] bg-white p-2"
+                multiple
+                name="certificates"
+                required
+                type="file"
+              />
+              <button
+                className="min-h-12 rounded-lg bg-[#d9ff73] px-4 font-black text-[#18220d]"
+                type="submit"
+              >
+                Read and file PDFs
+              </button>
+            </form>
+          </div>
+
+          {reviewItems.length > 0 ? (
+            <div className="border-[#d5dbc9] border-t p-5">
+              <h3 className="text-xl">Quick review</h3>
+              <div className="mt-4 grid gap-3">
+                {reviewItems.map((item) => (
+                  <form
+                    action={confirmInboxItem}
+                    className="grid gap-3 rounded-xl border border-[#e2e7db] p-4 lg:grid-cols-[1fr_180px_170px_auto] lg:items-end"
+                    key={item.id}
+                  >
+                    <input name="token" type="hidden" value={token} />
+                    <input
+                      name="propertyId"
+                      type="hidden"
+                      value={item.propertyId}
+                    />
+                    <input name="itemId" type="hidden" value={item.id} />
+                    <input
+                      name="uploadedAt"
+                      type="hidden"
+                      value={item.uploadedAt}
+                    />
+                    <div className="min-w-0">
+                      <strong className="block truncate">
+                        {item.fileName}
+                      </strong>
+                      <span className="text-[#65715d] text-sm">
+                        {item.propertyAddress}
+                      </span>
+                    </div>
+                    <label className="grid gap-1 font-bold text-xs">
+                      Document type
+                      <select
+                        className="min-h-11 rounded-lg border border-[#bcc7ae] bg-white px-2 font-normal text-sm"
+                        defaultValue={item.kind ?? ""}
+                        name="kind"
+                        required
+                      >
+                        <option disabled value="">
+                          Choose type
+                        </option>
+                        {[
+                          "Gas safety",
+                          "EICR",
+                          "EPC",
+                          "Landlord insurance",
+                          "Property licence",
+                        ].map((kind) => (
+                          <option key={kind}>{kind}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="grid gap-1 font-bold text-xs">
+                      Expiry date
+                      <input
+                        className="min-h-11 rounded-lg border border-[#bcc7ae] px-2 font-normal text-sm"
+                        defaultValue={
+                          item.expiryDate ?? item.candidates[0] ?? ""
+                        }
+                        name="expiryDate"
+                        required
+                        type="date"
+                      />
+                    </label>
+                    <button
+                      className="min-h-11 rounded-lg bg-[#18220d] px-4 font-black text-white"
+                      type="submit"
+                    >
+                      Confirm
+                    </button>
+                  </form>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </section>
       ) : null}
 
       {propertyResult ? (
@@ -291,32 +484,13 @@ export default async function DashboardPage({
                   </p>
                   <h2 className="mt-1 text-2xl">{property.address}</h2>
                 </div>
-                <span className="text-[#cbd4c5] text-sm">
-                  {required.length} checks tracked
-                </span>
-              </div>
-              {accessActive ? (
-                <form
-                  action={uploadCertificate}
-                  className="flex flex-wrap items-center gap-3 border-[#d5dbc9] border-b bg-[#f7f8f3] p-4"
+                <a
+                  className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#d9ff73] px-4 font-black text-[#18220d]"
+                  href={`/dashboard/${token}/passport/${property.id}`}
                 >
-                  <input name="token" type="hidden" value={token} />
-                  <input name="propertyId" type="hidden" value={property.id} />
-                  <input
-                    accept="application/pdf,.pdf"
-                    className="min-w-0 flex-1 rounded-lg border border-[#bcc7ae] bg-white p-2"
-                    name="certificate"
-                    required
-                    type="file"
-                  />
-                  <button
-                    className="min-h-11 rounded-lg bg-[#18220d] px-4 font-black text-white"
-                    type="submit"
-                  >
-                    Read and store PDF
-                  </button>
-                </form>
-              ) : null}
+                  <FileCheck2 size={18} /> Open passport
+                </a>
+              </div>
               <div className="divide-y divide-[#e2e7db]">
                 {required.map((kind) => {
                   const certificate = byKind.get(kind);

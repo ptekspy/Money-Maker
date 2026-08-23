@@ -5,11 +5,14 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import {
   addProperty,
+  getInboxItem,
   getProperty,
   getUserByToken,
   hasActiveAccess,
+  markInboxItemFiled,
   propertyLimitForUser,
   saveCertificate,
+  saveInboxItem,
   setUserPropertyLimit,
 } from "@/lib/data";
 import { extractCertificateDetails } from "@/lib/extract-certificate";
@@ -170,8 +173,11 @@ export async function addPortfolioProperty(formData: FormData) {
 export async function uploadCertificate(formData: FormData) {
   const token = z.uuid().safeParse(formData.get("token"));
   const propertyId = z.uuid().safeParse(formData.get("propertyId"));
-  const file = formData.get("certificate");
-  if (!token.success || !propertyId.success || !(file instanceof File)) return;
+  const files = [
+    ...formData.getAll("certificates"),
+    ...formData.getAll("certificate"),
+  ].filter((entry): entry is File => entry instanceof File && entry.size > 0);
+  if (!token.success || !propertyId.success || files.length === 0) return;
   const user = await getUserByToken(token.data);
   if (
     !user ||
@@ -180,45 +186,129 @@ export async function uploadCertificate(formData: FormData) {
   )
     return;
   if (
-    file.size > 10_000_000 ||
-    (file.type !== "application/pdf" &&
-      !file.name.toLowerCase().endsWith(".pdf"))
+    files.length > 20 ||
+    files.reduce((total, file) => total + file.size, 0) > 10_000_000 ||
+    files.some(
+      (file) =>
+        file.size > 10_000_000 ||
+        (file.type !== "application/pdf" &&
+          !file.name.toLowerCase().endsWith(".pdf")),
+    )
   ) {
     redirect(`/dashboard/${token.data}?upload=invalid`);
   }
 
-  const bytes = new Uint8Array(await file.arrayBuffer());
   const { PDFParse } = await import("pdf-parse");
-  const parser = new PDFParse({ data: bytes });
-  let details: ReturnType<typeof extractCertificateDetails>;
-  try {
-    const result = await parser.getText();
-    details = extractCertificateDetails(result.text);
-  } finally {
-    await parser.destroy();
-  }
-  if (!details.kind || !details.expiry) {
-    redirect(`/dashboard/${token.data}?upload=review`);
-  }
+  const s3 = new S3Client({});
+  let filed = 0;
+  let review = 0;
 
-  const safeName = file.name.replace(/[^a-z0-9_.-]/gi, "-").toLowerCase();
-  const documentKey = `users/${user.id}/properties/${propertyId.data}/${Date.now()}-${safeName}`;
-  await new S3Client({}).send(
-    new PutObjectCommand({
-      Bucket: process.env.LETDUE_DOCUMENTS_BUCKET,
-      Key: documentKey,
-      Body: bytes,
-      ContentType: "application/pdf",
-      ServerSideEncryption: "AES256",
-      Metadata: { certificateKind: details.kind },
-    }),
+  for (const file of files) {
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const parser = new PDFParse({ data: bytes });
+    let details: ReturnType<typeof extractCertificateDetails>;
+    try {
+      const result = await parser.getText();
+      details = extractCertificateDetails(result.text);
+    } finally {
+      await parser.destroy();
+    }
+
+    const uploadedAt = new Date().toISOString();
+    const itemId = crypto.randomUUID();
+    const safeName = file.name.replace(/[^a-z0-9_.-]/gi, "-").toLowerCase();
+    const documentKey = `users/${user.id}/properties/${propertyId.data}/${uploadedAt.slice(0, 10)}/${itemId}-${safeName}`;
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: process.env.LETDUE_DOCUMENTS_BUCKET,
+        Key: documentKey,
+        Body: bytes,
+        ContentType: "application/pdf",
+        ServerSideEncryption: "AES256",
+        Metadata: { certificateKind: details.kind ?? "unclassified" },
+      }),
+    );
+
+    const canFile =
+      details.kind !== null &&
+      details.expiry !== null &&
+      details.confidence === "high";
+    await saveInboxItem({
+      id: itemId,
+      propertyId: propertyId.data,
+      userId: user.id,
+      fileName: file.name,
+      documentKey,
+      kind: details.kind,
+      expiryDate: details.expiry,
+      candidates: [...details.candidates],
+      confidence: details.confidence,
+      status: canFile ? "filed" : "needs_review",
+      uploadedAt,
+      filedAt: canFile ? uploadedAt : undefined,
+    });
+
+    if (canFile) {
+      await saveCertificate({
+        userId: user.id,
+        propertyId: propertyId.data,
+        kind: details.kind as string,
+        expiryDate: details.expiry,
+        documentKey,
+        originalFileName: file.name,
+        uploadedAt,
+        extractionConfidence: details.confidence,
+        auditType: "document_uploaded",
+      });
+      filed += 1;
+    } else {
+      review += 1;
+    }
+  }
+  redirect(
+    `/dashboard/${token.data}?upload=${review > 0 ? "review" : "success"}&filed=${filed}&review=${review}`,
   );
+}
+
+export async function confirmInboxItem(formData: FormData) {
+  const parsed = z
+    .object({
+      token: z.uuid(),
+      propertyId: z.uuid(),
+      itemId: z.uuid(),
+      uploadedAt: z.iso.datetime(),
+      kind: certificateSchema.shape.kind,
+      expiryDate: z.iso.date(),
+    })
+    .safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return;
+  const user = await getUserByToken(parsed.data.token);
+  if (!user || !hasActiveAccess(user)) return;
+  const property = await getProperty(user.id, parsed.data.propertyId);
+  const item = await getInboxItem(
+    parsed.data.propertyId,
+    parsed.data.itemId,
+    parsed.data.uploadedAt,
+  );
+  if (
+    !property ||
+    !item ||
+    item.userId !== user.id ||
+    item.status !== "needs_review"
+  )
+    return;
+
   await saveCertificate({
     userId: user.id,
-    propertyId: propertyId.data,
-    kind: details.kind,
-    expiryDate: details.expiry,
-    documentKey,
+    propertyId: property.id,
+    kind: parsed.data.kind,
+    expiryDate: parsed.data.expiryDate,
+    documentKey: item.documentKey,
+    originalFileName: item.fileName,
+    uploadedAt: item.uploadedAt,
+    extractionConfidence: item.confidence,
+    auditType: "document_reviewed",
   });
-  redirect(`/dashboard/${token.data}?upload=success`);
+  await markInboxItemFiled(property.id, item);
+  redirect(`/dashboard/${parsed.data.token}?upload=confirmed`);
 }
