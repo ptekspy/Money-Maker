@@ -1,5 +1,5 @@
-import { PDFParse } from "pdf-parse";
 import { extractCertificateDetails } from "@/lib/extract-certificate";
+import { extractPdfText } from "@/lib/pdf-text";
 
 export const runtime = "nodejs";
 
@@ -28,22 +28,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const parser = new PDFParse({
-    data: new Uint8Array(await file.arrayBuffer()),
-  });
-  try {
-    const result = await parser.getText();
-    if (!result.text.trim()) {
-      return Response.json(
-        {
-          error:
-            "This looks like a scanned PDF without readable text. Enter the date manually.",
-        },
-        { status: 422 },
-      );
-    }
-    return Response.json(extractCertificateDetails(result.text));
-  } finally {
-    await parser.destroy();
+  const text = await extractPdfText(new Uint8Array(await file.arrayBuffer()));
+  if (!text.trim()) {
+    return Response.json(
+      {
+        error:
+          "This looks like a scanned PDF without readable text. Enter the date manually.",
+      },
+      { status: 422 },
+    );
   }
+  return Response.json(extractCertificateDetails(text));
 }

@@ -16,10 +16,10 @@
     "@aws-sdk/lib-dynamodb": "^3.1087.0",
     "lucide-react": "0.562.0",
     "next": "16.2.10",
-    "pdf-parse": "^2.4.5",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "stripe": "^22.3.1",
+    "unpdf": "^1.8.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {

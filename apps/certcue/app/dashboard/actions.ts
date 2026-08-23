@@ -2,7 +2,6 @@
 
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { redirect } from "next/navigation";
-import { PDFParse } from "pdf-parse";
 import { z } from "zod";
 import { createS3Client } from "@/lib/aws";
 import {
@@ -18,6 +17,7 @@ import {
   setUserPropertyLimit,
 } from "@/lib/data";
 import { extractCertificateDetails } from "@/lib/extract-certificate";
+import { extractPdfText } from "@/lib/pdf-text";
 import { annualPricePenceForLimit } from "@/lib/pricing";
 import { getStripe } from "@/lib/stripe";
 
@@ -207,14 +207,7 @@ export async function uploadCertificate(formData: FormData) {
   for (const file of files) {
     const bytes = new Uint8Array(await file.arrayBuffer());
     const documentBytes = bytes.slice();
-    const parser = new PDFParse({ data: bytes });
-    let details: ReturnType<typeof extractCertificateDetails>;
-    try {
-      const result = await parser.getText();
-      details = extractCertificateDetails(result.text);
-    } finally {
-      await parser.destroy();
-    }
+    const details = extractCertificateDetails(await extractPdfText(bytes));
 
     const uploadedAt = new Date().toISOString();
     const itemId = crypto.randomUUID();
