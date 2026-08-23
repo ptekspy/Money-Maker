@@ -26,6 +26,10 @@ const portfolioHealthCheckSchema = z.object({
   biggestProblem: z.string().trim().min(2).max(160),
   certificateTypes: z.array(z.string().trim().min(2).max(80)).max(10),
   message: z.string().trim().max(1500).optional(),
+  acquisitionSource: z
+    .string()
+    .trim()
+    .regex(/^[a-z0-9-]{1,64}$/),
   website: z.string().max(0).optional(),
 });
 
@@ -106,6 +110,7 @@ export async function sendPortfolioHealthCheck(formData: FormData) {
     biggestProblem,
     certificateTypes,
     message,
+    acquisitionSource,
   } = parsed.data;
   const recommendedPack =
     propertyCount <= 3
@@ -125,6 +130,7 @@ export async function sendPortfolioHealthCheck(formData: FormData) {
     `Main problem: ${biggestProblem}`,
     `Certificate types: ${certificateTypes.join(", ") || "Not supplied"}`,
     `Suggested next step: ${recommendedPack}`,
+    `Acquisition source: ${acquisitionSource}`,
   ].join("\n");
   const createdAt = new Date().toISOString();
 

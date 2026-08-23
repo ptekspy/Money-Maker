@@ -9,8 +9,10 @@ const certificateTypes = [
 ] as const;
 
 export function PortfolioHealthCheckForm({
+  acquisitionSource,
   status,
 }: {
+  acquisitionSource?: string;
   status?: "sent" | "error";
 }) {
   return (
@@ -44,6 +46,11 @@ export function PortfolioHealthCheckForm({
           action={sendPortfolioHealthCheck}
           className="rounded-3xl border border-[#d5dbc9] bg-[#f7f8f3] p-5 shadow-sm md:p-7"
         >
+          <input
+            name="acquisitionSource"
+            type="hidden"
+            value={acquisitionSource ?? "portfolio-health-check"}
+          />
           {status === "sent" ? (
             <div className="rounded-2xl bg-[#dff5d8] p-5 text-[#26531b]">
               <h3 className="text-2xl">Your review request is in.</h3>

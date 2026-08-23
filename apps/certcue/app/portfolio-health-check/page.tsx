@@ -33,11 +33,15 @@ const outcomes = [
 export default async function PortfolioHealthCheckPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ source?: string; status?: string }>;
 }) {
-  const { status } = await searchParams;
+  const { source, status } = await searchParams;
   const formStatus =
     status === "sent" || status === "error" ? status : undefined;
+  const acquisitionSource =
+    source && /^[a-z0-9-]{1,64}$/.test(source)
+      ? source
+      : "portfolio-health-check";
 
   return (
     <MarketingFrame>
@@ -77,7 +81,10 @@ export default async function PortfolioHealthCheckPage({
         </div>
       </section>
 
-      <PortfolioHealthCheckForm status={formStatus} />
+      <PortfolioHealthCheckForm
+        acquisitionSource={acquisitionSource}
+        status={formStatus}
+      />
 
       <section className="px-4 py-14 md:px-8 md:py-20">
         <div className="mx-auto max-w-5xl rounded-3xl border border-[#d5dbc9] bg-[#f7f8f3] p-7 md:p-10">
