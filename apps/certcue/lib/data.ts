@@ -1,4 +1,3 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DeleteCommand,
   DynamoDBDocumentClient,
@@ -9,8 +8,9 @@ import {
   TransactWriteCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
+import { createDynamoClient } from "@/lib/aws";
 
-const client = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
+const client = DynamoDBDocumentClient.from(createDynamoClient(), {
   marshallOptions: { removeUndefinedValues: true },
 });
 const tableName = process.env.LETDUE_TABLE_NAME ?? "letdue-local";

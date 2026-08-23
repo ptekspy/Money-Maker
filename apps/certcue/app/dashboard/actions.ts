@@ -1,8 +1,10 @@
 "use server";
 
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { redirect } from "next/navigation";
+import { PDFParse } from "pdf-parse";
 import { z } from "zod";
+import { createS3Client } from "@/lib/aws";
 import {
   addProperty,
   getInboxItem,
@@ -198,13 +200,13 @@ export async function uploadCertificate(formData: FormData) {
     redirect(`/dashboard/${token.data}?upload=invalid`);
   }
 
-  const { PDFParse } = await import("pdf-parse");
-  const s3 = new S3Client({});
+  const s3 = createS3Client();
   let filed = 0;
   let review = 0;
 
   for (const file of files) {
     const bytes = new Uint8Array(await file.arrayBuffer());
+    const documentBytes = bytes.slice();
     const parser = new PDFParse({ data: bytes });
     let details: ReturnType<typeof extractCertificateDetails>;
     try {
@@ -222,9 +224,11 @@ export async function uploadCertificate(formData: FormData) {
       new PutObjectCommand({
         Bucket: process.env.LETDUE_DOCUMENTS_BUCKET,
         Key: documentKey,
-        Body: bytes,
+        Body: documentBytes,
         ContentType: "application/pdf",
-        ServerSideEncryption: "AES256",
+        ...(process.env.LETDUE_LOCAL_SANDBOX === "1"
+          ? {}
+          : { ServerSideEncryption: "AES256" as const }),
         Metadata: { certificateKind: details.kind ?? "unclassified" },
       }),
     );

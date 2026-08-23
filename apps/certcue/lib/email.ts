@@ -13,6 +13,10 @@ export async function sendEmail(options: {
   text: string;
   replyTo?: string;
 }) {
+  if (process.env.LETDUE_LOCAL_SANDBOX === "1") {
+    console.info(`[LetDue sandbox email] ${options.subject} -> ${options.to}`);
+    return;
+  }
   const from = process.env.EMAIL_FROM ?? "LetDue <reminders@letdue.com>";
   await getSesClient().send(
     new SendEmailCommand({

@@ -1,4 +1,5 @@
-import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { createS3Client } from "@/lib/aws";
 import { getCertificate, getProperty, getUserByToken } from "@/lib/data";
 
 export const runtime = "nodejs";
@@ -18,7 +19,7 @@ export async function GET(
   if (!certificate?.documentKey || certificate.userId !== user.id)
     return new Response("Document not found", { status: 404 });
 
-  const object = await new S3Client({}).send(
+  const object = await createS3Client().send(
     new GetObjectCommand({
       Bucket: process.env.LETDUE_DOCUMENTS_BUCKET,
       Key: certificate.documentKey,

@@ -340,6 +340,51 @@ async function probeWebhook(url: string, webhookSecret: string) {
   };
 }
 
+async function replayCheckout(
+  sessionId: string,
+  url: string,
+  webhookSecret: string,
+) {
+  const session = await stripe.checkout.sessions.retrieve(sessionId, {
+    expand: ["subscription", "customer"],
+  });
+  assert.equal(session.livemode, false);
+  assert.equal(session.status, "complete");
+  assert.equal(session.payment_status, "paid");
+
+  const payload = JSON.stringify({
+    id: `evt_letdue_e2e_checkout_${Date.now()}`,
+    object: "event",
+    api_version: null,
+    created: Math.floor(Date.now() / 1000),
+    data: { object: session },
+    livemode: false,
+    pending_webhooks: 1,
+    request: { id: null, idempotency_key: null },
+    type: "checkout.session.completed",
+  });
+  const signature = stripe.webhooks.generateTestHeaderString({
+    payload,
+    secret: webhookSecret,
+  });
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "stripe-signature": signature,
+    },
+    body: payload,
+  });
+  const body = await response.text();
+  assert.equal(response.status, 200, body);
+  return {
+    eventType: "checkout.session.completed",
+    sessionId: session.id,
+    status: response.status,
+    response: body,
+  };
+}
+
 async function cleanup(productId: string, sessionIds: string[]) {
   const customerIds = new Set<string>();
   for (const sessionId of sessionIds) {
@@ -382,11 +427,17 @@ else if (command === "exercise-billing")
   result = await exerciseBilling(process.argv[3]);
 else if (command === "probe-webhook")
   result = await probeWebhook(process.argv[3], process.argv[4]);
+else if (command === "replay-checkout")
+  result = await replayCheckout(
+    process.argv[3],
+    process.argv[4],
+    process.argv[5],
+  );
 else if (command === "cleanup")
   result = await cleanup(process.argv[3], process.argv.slice(4));
 else
   throw new Error(
-    "Use prepare, checkout-url, verify-checkout, upgrade, exercise-billing, probe-webhook, or cleanup.",
+    "Use prepare, checkout-url, verify-checkout, upgrade, exercise-billing, probe-webhook, replay-checkout, or cleanup.",
   );
 
 process.stdout.write(`${JSON.stringify(result)}\n`);
