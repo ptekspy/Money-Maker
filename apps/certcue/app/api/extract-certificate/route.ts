@@ -28,7 +28,19 @@ export async function POST(request: Request) {
     );
   }
 
-  const text = await extractPdfText(new Uint8Array(await file.arrayBuffer()));
+  let text: string;
+  try {
+    text = await extractPdfText(new Uint8Array(await file.arrayBuffer()));
+  } catch (error) {
+    console.error("Certificate PDF extraction failed", error);
+    return Response.json(
+      {
+        error:
+          "We could not read this PDF automatically. Enter the certificate date manually.",
+      },
+      { status: 422 },
+    );
+  }
   if (!text.trim()) {
     return Response.json(
       {
