@@ -51,7 +51,7 @@ export default async function AdminSupportPage() {
             {request.context ? (
               <details className="mt-4 text-sm">
                 <summary className="cursor-pointer font-black">
-                  Account and install context
+                  Request context
                 </summary>
                 <pre className="mt-3 overflow-x-auto whitespace-pre-wrap rounded-xl bg-[#18220d] p-4 font-mono text-[#e9eee3] text-xs leading-6">
                   {request.context}

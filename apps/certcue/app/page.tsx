@@ -49,7 +49,7 @@ export default async function HomePage({
           <a href="#how">How it works</a>
           <a href="#tools">Free tools</a>
           <a href="#audit">Free audit</a>
-          <a href="/founding-plan">Founding plan</a>
+          <a href="/portfolio-certificate-tracking">Portfolio landlords</a>
           <a href="#pricing">Pricing</a>
         </nav>
         <a
@@ -88,9 +88,9 @@ export default async function HomePage({
                 </a>
                 <a
                   className="inline-flex min-h-13 items-center rounded-lg border border-[#aeb9a7] bg-white/70 px-5 font-black text-[#18220d]"
-                  href="#pricing"
+                  href="/portfolio-health-check?source=homepage-hero"
                 >
-                  See plans from £28/year
+                  Managing 4+ properties? Get a free review
                 </a>
               </div>
               <p className="mt-3 text-[#6e7967] text-sm">
@@ -158,7 +158,7 @@ export default async function HomePage({
           <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
             <div>
               <p className="font-black text-[#52720d] text-sm uppercase">
-                Small-landlord focus
+                Focused landlord software
               </p>
               <h2 className="mt-3 text-4xl leading-tight md:text-6xl">
                 The useful part of compliance software. Nothing else.
@@ -255,8 +255,14 @@ export default async function HomePage({
               {
                 icon: ClipboardCheck,
                 title: "Spreadsheet alternative",
-                text: "Replace a manual certificate tracker with reminders built for one to three rental properties.",
+                text: "Replace a manual certificate tracker with reminders that can grow from 3 to 100 properties.",
                 href: "/guides/landlord-certificate-tracking-spreadsheet-alternative",
+              },
+              {
+                icon: ClipboardCheck,
+                title: "Portfolio health check",
+                text: "Tell us how you track dates today and get a practical pack recommendation from the founder.",
+                href: "/portfolio-health-check?source=homepage-tools",
               },
             ].map(({ icon: Icon, title, text, href }) => (
               <a
@@ -287,6 +293,7 @@ export default async function HomePage({
         <span>Compliance information, not legal advice · England beta</span>
         <span className="flex gap-4">
           <a href="/founding-plan">Founding plan</a>
+          <a href="/portfolio-health-check">Portfolio review</a>
           <a href="/partners/certificate-aftercare">Partners</a>
           <a href="/privacy">Privacy</a>
           <a href="/terms">Terms</a>

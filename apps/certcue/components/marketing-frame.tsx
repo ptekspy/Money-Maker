@@ -21,6 +21,12 @@ export function MarketingFrame({ children }: MarketingFrameProps) {
             Free tools
           </a>
           <a
+            className="hidden text-[#5e6b55] md:inline"
+            href="/portfolio-certificate-tracking"
+          >
+            Portfolio landlords
+          </a>
+          <a
             className="rounded-lg bg-[#18220d] px-4 py-3 text-white"
             href="/#audit"
           >
@@ -36,6 +42,7 @@ export function MarketingFrame({ children }: MarketingFrameProps) {
         <span>Compliance information, not legal advice · England beta</span>
         <span className="flex gap-4">
           <a href="/founding-plan">Founding plan</a>
+          <a href="/portfolio-health-check">Portfolio review</a>
           <a href="/partners/certificate-aftercare">Partners</a>
           <a href="/privacy">Privacy</a>
           <a href="/terms">Terms</a>

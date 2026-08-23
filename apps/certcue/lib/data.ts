@@ -103,7 +103,7 @@ export type LetDueAuditEvent = {
 export type LetDueSupportRequest = {
   id: string;
   createdAt: string;
-  source: "public" | "dashboard";
+  source: "public" | "dashboard" | "portfolio-health-check";
   name?: string;
   email: string;
   subject: string;

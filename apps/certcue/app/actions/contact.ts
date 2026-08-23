@@ -18,6 +18,17 @@ const contactSchema = z.object({
   website: z.string().max(0).optional(),
 });
 
+const portfolioHealthCheckSchema = z.object({
+  name: z.string().trim().min(2).max(120),
+  email: z.email().trim().toLowerCase(),
+  propertyCount: z.coerce.number().int().min(1).max(10_000),
+  trackingMethod: z.string().trim().min(2).max(120),
+  biggestProblem: z.string().trim().min(2).max(160),
+  certificateTypes: z.array(z.string().trim().min(2).max(80)).max(10),
+  message: z.string().trim().max(1500).optional(),
+  website: z.string().max(0).optional(),
+});
+
 const supportSchema = z.object({
   token: z.uuid(),
   subject: z.string().trim().min(3).max(160),
@@ -76,6 +87,76 @@ export async function sendPublicContact(formData: FormData) {
   ]);
 
   redirect("/?contact=sent#contact");
+}
+
+export async function sendPortfolioHealthCheck(formData: FormData) {
+  const parsed = portfolioHealthCheckSchema.safeParse({
+    ...Object.fromEntries(formData),
+    certificateTypes: formData.getAll("certificateTypes"),
+  });
+  if (!parsed.success || parsed.data.website) {
+    redirect("/portfolio-health-check?status=error#portfolio-review");
+  }
+
+  const {
+    name,
+    email,
+    propertyCount,
+    trackingMethod,
+    biggestProblem,
+    certificateTypes,
+    message,
+  } = parsed.data;
+  const recommendedPack =
+    propertyCount <= 3
+      ? "3-property Starter pack"
+      : propertyCount <= 10
+        ? "10-property Growing pack"
+        : propertyCount <= 50
+          ? "50-property Portfolio pack"
+          : propertyCount <= 100
+            ? "100-property Professional pack"
+            : propertyCount < 250
+              ? `Custom ${propertyCount}-property package`
+              : "250+ property sales conversation";
+  const context = [
+    `Properties: ${propertyCount}`,
+    `Current tracking: ${trackingMethod}`,
+    `Main problem: ${biggestProblem}`,
+    `Certificate types: ${certificateTypes.join(", ") || "Not supplied"}`,
+    `Suggested next step: ${recommendedPack}`,
+  ].join("\n");
+  const createdAt = new Date().toISOString();
+
+  await Promise.all([
+    recordSupportRequest({
+      id: crypto.randomUUID(),
+      createdAt,
+      source: "portfolio-health-check",
+      name,
+      email,
+      subject: `${propertyCount}-property portfolio health check`,
+      message: message || "No additional note supplied.",
+      context,
+    }),
+    sendEmail({
+      to: supportInbox(),
+      replyTo: email,
+      subject: `LetDue portfolio lead: ${propertyCount} properties — ${name}`,
+      text: [
+        "New LetDue portfolio health-check request.",
+        "",
+        `Name: ${name}`,
+        `Email: ${email}`,
+        context,
+        "",
+        "Additional note:",
+        message || "None",
+      ].join("\n"),
+    }),
+  ]);
+
+  redirect("/portfolio-health-check?status=sent#portfolio-review");
 }
 
 export async function sendInAppSupport(formData: FormData) {

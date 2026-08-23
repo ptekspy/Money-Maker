@@ -37,7 +37,7 @@ const steps = [
   {
     title: "Useful customers can continue",
     detail:
-      "If the calendar helps, they can start a no-card pilot or pay £28/year for monitoring across up to three properties.",
+      "If the calendar helps, they can choose annual capacity for 3, 10, 50 or 100 properties and grow later.",
   },
 ] as const;
 
@@ -55,14 +55,13 @@ export default function CertificateAftercarePartnerPage() {
             </h1>
             <p className="mt-6 max-w-3xl text-[#526047] text-xl leading-8">
               LetDue starts after your inspection, assessment or report. It
-              gives small landlords a free way to check the renewal dates they
-              now need to remember, then offers lightweight paid monitoring if
-              it helps.
+              gives landlords a free way to check the renewal dates they now
+              need to remember, then offers focused paid monitoring if it helps.
             </p>
             <p className="mt-4 max-w-3xl font-bold text-[#394430] leading-7">
               This is not a booking platform, agency system or replacement for
               your compliance advice. It is a simple reminder handoff for
-              self-managing landlords with one to three properties.
+              self-managing landlords and growing portfolios.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a
@@ -87,8 +86,8 @@ export default function CertificateAftercarePartnerPage() {
               renewal date somewhere that will remind you.”
             </p>
             <p className="mt-5 rounded-xl bg-[#26351a] p-4 font-bold text-[#d9ff73]">
-              No customer list required. One link is enough to test whether the
-              handoff is useful.
+              No customer list required. We can give you one trackable handover
+              link and copy that fits naturally into your completion email.
             </p>
           </aside>
         </div>
@@ -129,6 +128,11 @@ export default function CertificateAftercarePartnerPage() {
               If you want help remembering when this certificate needs action
               again, LetDue has a free landlord deadline audit:
               letdue.com/?source=certificate-aftercare
+            </p>
+            <p className="mt-4 text-[#65715d] text-sm leading-6">
+              For an individual partner link using your trading name, email
+              hello@letdue.com. You keep the inspection and renewal
+              relationship; LetDue supplies the document-and-reminder handoff.
             </p>
           </div>
           <div>

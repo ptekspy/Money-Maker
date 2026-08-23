@@ -46,9 +46,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: "https://letdue.com/partners/certificate-aftercare",
-      lastModified: new Date("2026-07-29"),
+      lastModified: new Date("2026-08-23"),
       changeFrequency: "monthly",
       priority: 0.7,
+    },
+    {
+      url: "https://letdue.com/portfolio-certificate-tracking",
+      lastModified: new Date("2026-08-23"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: "https://letdue.com/portfolio-health-check",
+      lastModified: new Date("2026-08-23"),
+      changeFrequency: "monthly",
+      priority: 0.85,
     },
     {
       url: "https://letdue.com/founding-plan",

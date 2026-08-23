@@ -60,7 +60,8 @@ export default function SpreadsheetAlternativePage() {
             <p className="mt-4 max-w-3xl font-bold text-[#394430] leading-7">
               LetDue is deliberately smaller than property-management software:
               it tracks certificate and renewal dates for self-managing
-              landlords with one to three properties in England.
+              landlords and focused property teams with growing portfolios in
+              England.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a
@@ -71,9 +72,9 @@ export default function SpreadsheetAlternativePage() {
               </a>
               <a
                 className="inline-flex min-h-13 items-center rounded-lg border border-[#aeb9a7] bg-white px-5 font-black text-[#18220d]"
-                href="/founding-plan?source=spreadsheet-alternative"
+                href="/portfolio-health-check?source=spreadsheet-alternative"
               >
-                See plans from £28/year
+                Get a portfolio recommendation
               </a>
             </div>
           </div>
@@ -149,8 +150,7 @@ export default function SpreadsheetAlternativePage() {
             <h2 className="text-3xl">Try it with one real property</h2>
             <p className="mt-3 max-w-3xl text-[#cbd4c5] leading-7">
               Run the free audit first. If it exposes a date worth putting on
-              watch, choose the 14-day pilot or pay £28/year for monitoring
-              across up to three properties.
+              watch, choose annual capacity for 3, 10, 50 or 100 properties.
             </p>
             <a
               className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-lg bg-[#d9ff73] px-5 font-black text-[#18220d]"
