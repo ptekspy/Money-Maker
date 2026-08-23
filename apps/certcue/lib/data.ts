@@ -190,6 +190,7 @@ export async function acceptOfferAndCreateCredentials(input: {
   passwordSalt: string;
   checkoutSessionId: string;
   existingUser: boolean;
+  acquisitionSource?: string;
 }) {
   const now = new Date().toISOString();
   const offerUpdate = {
@@ -216,11 +217,13 @@ export async function acceptOfferAndCreateCredentials(input: {
           Update: {
             TableName: tableName,
             Key: { pk: `USER#${input.userId}`, sk: "PROFILE" },
-            UpdateExpression: "set passwordHash = :hash, passwordSalt = :salt",
+            UpdateExpression:
+              "set passwordHash = :hash, passwordSalt = :salt, acquisitionSource = :source",
             ConditionExpression: "attribute_exists(pk)",
             ExpressionAttributeValues: {
               ":hash": input.passwordHash,
               ":salt": input.passwordSalt,
+              ":source": input.acquisitionSource ?? "admin_offer",
             },
           },
         },
@@ -240,7 +243,7 @@ export async function acceptOfferAndCreateCredentials(input: {
               plan: "paid",
               passwordHash: input.passwordHash,
               passwordSalt: input.passwordSalt,
-              acquisitionSource: "admin_offer",
+              acquisitionSource: input.acquisitionSource ?? "admin_offer",
             },
             ConditionExpression: "attribute_not_exists(pk)",
           },

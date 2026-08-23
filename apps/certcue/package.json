@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack --port 3002",
     "build": "next build --webpack",
     "start": "next start --port 3002",
-    "check": "biome check ."
+    "check": "biome check .",
+    "test:payments": "node --experimental-strip-types --test lib/pricing.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1087.0",

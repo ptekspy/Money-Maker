@@ -126,9 +126,10 @@ export function PortfolioPlans({
                   ) : (
                     <a
                       className={`inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg px-4 font-black ${plan.popular ? "bg-[#d9ff73] text-[#18220d]" : "border border-current/30"}`}
-                      href={`/?pack=${plan.propertyLimit}&source=pricing-${plan.propertyLimit}#audit`}
+                      href={`/signup?pack=${plan.propertyLimit}&source=pricing-${plan.propertyLimit}`}
                     >
-                      Choose {plan.propertyLimit} <ArrowRight size={17} />
+                      Choose {plan.propertyLimit} and pay{" "}
+                      <ArrowRight size={17} />
                     </a>
                   )}
                 </div>
